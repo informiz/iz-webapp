@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Add Fact-Checker</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">New Fact Checker</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form action="#" th:action="@{/factchecker/add}" th:object="${checker}" method="post">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="name" class="col-form-label">Name</label>
+                                    <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Chuck Fecter">
+                                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="email" class="col-form-label">Email</label>
+                                    <input type="text" th:field="*{email}" class="form-control" id="email" placeholder="chuck@university.ac">
+                                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="link" class="col-form-label">Profile link</label>
+                                    <input type="text" th:field="*{link}" class="form-control" id="link" placeholder="https://www.linkedin.com/in/chuckfecter/">
+                                    <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mt-5">
+                                    <input type="submit" class="btn btn-primary" value="Add">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

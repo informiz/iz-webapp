@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Error Occurred</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <div class="text-danger" role="alert">
+                    <h2>The following error has occurred:</h2>
+                    <b>
+                        [<span th:text="${status}">status</span>]
+                        <span th:text="${error}">error</span>
+                    </b>
+                    <p th:text="${message}">message</p>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>
