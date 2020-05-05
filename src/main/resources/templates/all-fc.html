@@ -24,7 +24,7 @@
                                 <tbody>
                                 <tr th:each="checker : ${checkers}">
                                     <td th:text="${checker.name}"></td>
-                                    <td th:text="${checker.link}"></td>
+                                    <td><a th:href="${checker.link}" target="_blank" class="btn btn-primary"><i class="fas fa-user-check ml-2"></i></a></td>
                                     <td><a th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}" class="btn btn-primary"><i class="fas fa-user-edit ml-2"></i></a></td>
                                     <td><a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}" class="btn btn-primary"><i class="fas fa-user-times ml-2"></i></a></td>
                                 </tr>

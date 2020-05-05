@@ -1,17 +1,23 @@
 package org.informiz.model;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 
 @Embeddable
 public class Score {
 
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
     private Float reliability;
 
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
     private Float confidence;
 
     public Score() {
-        setReliability(0.5f);
-        setConfidence(0.0f);
+        setReliability(0.9f);
+        setConfidence(0.5f);
     }
 
     public Score(float reliability, float confidence) {
@@ -33,6 +39,11 @@ public class Score {
 
     public void setConfidence(Float confidence) {
         this.confidence = confidence;
+    }
+
+    public void edit(Score other) {
+        this.setReliability(other.getReliability());
+        this.setConfidence(other.getConfidence());
     }
 
     @Override

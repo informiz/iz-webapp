@@ -1,13 +1,13 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -32,33 +32,39 @@ public class FactCheckerBase {
     @AttributeOverrides({
             @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
     })
+    @Valid
     private Score score;
 
     @NotBlank(message = "Name is mandatory")
     private String name;
 
     @Email(message = "Please provide a valid email address")
-    @JsonIgnore
     private String email;
 
     @URL(message = "Please provide a valid profile-link")
-    @JsonIgnore
-    private String link; // TODO: add to ledger entity?
+    private String link;
+
+    private Boolean active;
 
     public FactCheckerBase() {}
 
     public FactCheckerBase(String name, String email, String link) {
-        // TODO: validate?
+        this(name, email, link, true);
+    }
+
+    public FactCheckerBase(String name, String email, String link, Boolean active) {
         this.name = name;
         this.email = email;
         this.link = link;
+        this.active = active;
+        this.score = new Score();
     }
 
     public Long getId() {
         return id;
     }
 
-    private void setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -102,6 +108,22 @@ public class FactCheckerBase {
         this.link = link;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public void edit(FactCheckerBase other) {
+        this.setEmail(other.getEmail());
+        this.setLink(other.getLink());
+        this.setName(other.getName());
+        // TODO: allow direct score edit? Calculate new score?
+        this.getScore().edit(other.getScore());
+    }
+
     // TODO: is this how I want to compare fact-checkers?
     @Override
     public int hashCode() {
@@ -129,6 +151,14 @@ public class FactCheckerBase {
             return mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize fact-checker", e);
+        }
+    }
+
+    public static FactCheckerBase fromEntityString(@NotBlank String jsonStr) {
+        try {
+            return mapper.readValue(jsonStr, FactCheckerBase.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to deserialize fact-checker", e);
         }
     }
 }
