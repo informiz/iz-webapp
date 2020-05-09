@@ -7,54 +7,46 @@ import org.informiz.model.FactCheckerBase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
+@AutoConfigureMockMvc
+//@WebMvcTest(FactCheckerController.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FactCheckerControllerTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
     private MockMvc mockMvc;
 
-
-/*
-    // TODO: can I access the db from the test?
-    @Autowired
-    private TestEntityManager entityManager;
-*/
 
     FactCheckerBase chuck;
     FactCheckerBase cary;
 
     @BeforeAll
     public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         chuck = new FactCheckerBase("chuck", "chuck@informiz.org", "https://some.link");
         chuck.setEntityId("testEntityID");
         cary = new FactCheckerBase("cary", "cary@informiz.org", "https://other.link");
         cary.setEntityId("anotherTestEntityID");
-/*
-        entityManager.persist(chuck);
-        entityManager.flush();
-*/
     }
 
 
     @Test
-    void whenAddChecker_thenReturnsUserResource() throws Exception {
+    @WithMockUser(roles="ADMIN")
+    void whenAddChecker_thenReturnsAll() throws Exception {
+        // Mock the chaincode DAO
         new MockUp<CheckerCCDao>() {
             @Mock
             public FactCheckerBase addFactChecker(HttpSession session, FactCheckerBase checker) {
@@ -62,7 +54,13 @@ class FactCheckerControllerTest {
             }
         };
 
-        MvcResult mvcResult = mockMvc.perform(post("/factchecker/add")
+        // No fact-checkers yet
+        mockMvc.perform(get("/factchecker/all"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("checkers", new ArrayList<FactCheckerBase>()));
+
+        // Add Cary
+        mockMvc.perform(post("/factchecker/add")
                 .param("name", cary.getName())
                 .param("email", cary.getEmail())
                 .param("link", cary.getLink())
@@ -70,10 +68,13 @@ class FactCheckerControllerTest {
                 .param("score.reliability", cary.getScore().getReliability().toString())
                 .param("score.confidence", cary.getScore().getConfidence().toString())
                 .contentType("application/json"))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/factchecker/all"))
                 .andReturn();
 
-        String result = mvcResult.getResponse().getContentAsString();
-
-
+        // Verify that all fact checkers are { cary }
+        mockMvc.perform(get("/factchecker/all"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("checkers", Arrays.asList(cary)));
     }
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
-      html xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Update Fact-Checker</title>
     </head>
@@ -13,13 +13,6 @@
                         <form action="#" th:action="@{/factchecker/details/{id}(id=${checker.id.toString()})}" th:object="${checker}" method="post">
                             <!-- TODO: hidden ID field is not submitted with the form -->
                             <input type="hidden" class="form-control" id="id" name="id" th:value="${checker.id}"/>
-                            <!--div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="id" class="col-form-label">ID</label>
-                                    <input type="number" th:field="*{id}" class="form-control" id="id"/>
-                                    <span th:if="${#fields.hasErrors('id')}" th:errors="*{id}" class="text-danger"></span>
-                                </div>
-                            </div-->
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label for="name" class="col-form-label">Name</label>
