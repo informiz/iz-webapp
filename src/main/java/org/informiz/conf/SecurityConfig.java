@@ -30,24 +30,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/public/**", "/style*", "/home.html", "/login*", "/error*").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin() // TODO: auth with Google - oauth2Login()
-                .loginPage("/login.html")
+                .oauth2Login()
+                //.loginPage("/login.html")
                 .defaultSuccessUrl("/factchecker/", true)
-                .failureUrl("/login-error.html")
-                .permitAll()
+                //.failureUrl("/login-error.html")
+                //.permitAll()
                 .and()
                 .logout()
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login.html")
+                .logoutSuccessUrl("/home.html")
                 .permitAll()
                 .and().csrf().disable();
     }
 
+/*
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // TODO: auth with Google
 
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
@@ -56,6 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .password(encoder.encode("password"))
                 .roles("USER");
     }
+*/
 
     @Bean
     public HttpSessionListener httpSessionListener() {
