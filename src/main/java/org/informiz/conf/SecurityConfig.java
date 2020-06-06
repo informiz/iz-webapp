@@ -1,27 +1,78 @@
 package org.informiz.conf;
 
+import org.informiz.auth.AuthManager;
 import org.informiz.repo.CryptoUtils;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.List;
 
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    String googleAuthClientId;
+
+    @Autowired
+    ObjectFactory<HttpSession> httpSessionFactory;
+
+    /*
+        @Autowired
+        AuthManager authManager;
+
+
+        @Autowired
+        private IzOAuth2AuthProvider authProvider;
+
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.authenticationProvider(authProvider);
+        }
+
+        @Override
+        public void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+            auth.parentAuthenticationManager(authManager);
+        }
+
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return authManager;
+        }
+
+    */
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
@@ -31,6 +82,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
+/*
+                .successHandler(new AuthenticationSuccessHandler() {
+                    @Override
+                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                                        Authentication authentication) {
+                        authentication.setAuthenticated(false);
+
+                    }
+                })
+*/
                 //.loginPage("/login.html")
                 .defaultSuccessUrl("/factchecker/", true)
                 //.failureUrl("/login-error.html")
@@ -45,40 +106,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().csrf().disable();
     }
 
-/*
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
-        auth.inMemoryAuthentication()
-                .withUser("user")
-                .password(encoder.encode("password"))
-                .roles("USER");
+    @Bean(name = "googleOAuthService")
+    public ClientIdService googleOAuthService() {
+        return () -> googleAuthClientId;
     }
-*/
 
-    @Bean
-    public HttpSessionListener httpSessionListener() {
-        return new HttpSessionListener() {
-            @Override
-            public void sessionCreated(HttpSessionEvent se) {
-                SecurityContext securityContext = SecurityContextHolder.getContext();
-                Authentication auth = securityContext.getAuthentication();
-                if (auth != null) {
-                    String loggedUsername = auth.getName();
+    public interface ClientIdService {
+        String getClientId();
+    }
 
-                    // TODO: create in-memory wallet for user with private-key and certificate from encrypted storage
-                    try {
-                        se.getSession().setAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR,
-                                // TODO: load network and chaincode names from properties
-                                CryptoUtils.createChaincodeProxy("mynetwork", "informiz"));
-                        // CryptoUtils.createChaincodeProxy(WALLET, "mynetwork", "informiz"));
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Failed to create chaincode proxy for user", e);
-                    }
-                }
+
+    @EventListener
+    public void authSuccessEventListener(AuthenticationSuccessEvent event){
+
+        String email = ((DefaultOAuth2User)event.getAuthentication().getPrincipal()).getAttribute("email");
+        Collection<? extends GrantedAuthority> authorities = event.getAuthentication().getAuthorities();
+
+        try {
+            HttpSession userSession = httpSessionFactory.getObject(); // Should always have a session
+            if (userSession.getAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR) == null) {
+                // TODO: get wallet from encrypted storage based on user email address
+
+                userSession.setAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR,
+                        // TODO: how to get current network and chaincode ids?
+                        CryptoUtils.createChaincodeProxy("mynetwork", "informiz"));
             }
-        };
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to create chaincode proxy for user", e);
+        }
     }
+
 }

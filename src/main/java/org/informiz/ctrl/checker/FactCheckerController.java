@@ -44,7 +44,8 @@ public class FactCheckerController {
         if (result.hasErrors()) {
             return "add-fc.html";
         }
-        checker = CheckerCCDao.addFactChecker(getSession(), checker);
+        // TODO: TESTING, REVERT THIS!!!
+        // checker = CheckerCCDao.addFactChecker(getSession(), checker);
         factCheckerRepo.save(checker);
         return String.format("redirect:%s/all", PREFIX);
     }

@@ -1,29 +1,27 @@
 <header th:fragment="header" xmlns:th="http://www.w3.org/1999/xhtml">
-    <!-- Static navbar -->
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                        aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">informiz.org</a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#">About</a></li>
-                </ul>
 
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="active"><a href="./">Default <span class="sr-only">(current)</span></a></li>
-                    <li><a href="../navbar-static-top/">Static menu</a></li>
-                    <li><a href="../navbar-fixed-top/">Fixed menu</a></li>
-                </ul>
-            </div><!--/.nav-collapse -->
-        </div><!--/.container-fluid -->
+    <nav class="navbar navbar-expand-sm bg-light navbar-light">
+
+        <a class="navbar-brand" href="#">informiz.org</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav ml-auto">
+                <li th:if="${authorization == null or #authorization.expression('!isAuthenticated()')}">
+                    <a href="/login/oauth2/code/google" th:href="@{/login/oauth2/code/google}" class="nav-item">
+                        <span class="g-signin2" data-accesstype="postmessage" aria-hidden="true" data-redirecturi="/factchecker/"></span>
+                        <!-- <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>&nbsp;Sign in  data-onsuccess="onSignIn"-->
+                    </a>
+                </li>
+                <li th:if="${#authorization?.expression('isAuthenticated()')}">
+                    <a href="/logout" th:href="@{/logout}" data-accesstype="postmessage" aria-hidden="true" class="nav-item glyphicon glyphicon-log-out">
+                        <!-- span class="glyphicon glyphicon-log-out" aria-hidden="true"></span -->&nbsp;Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
     </nav>
 </header>

@@ -2,10 +2,13 @@ package org.informiz.repo;
 
 import org.hyperledger.fabric.gateway.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.xml.ws.WebServiceException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,28 +66,65 @@ public class CryptoUtils {
      */
     public static final String ORG_1_MSP = "Org1MSP";
 
+    // TODO: ***************************************** END TESTING ******************************************
+
     /**
      * Utility method for initializing a "wallet" for a user, based on the provided crypto-material.
      * Note that the certificate MUST be a X.509 pem file.
      *
-     * @param idLabel
-     * @param mspLabel
-     * @param userCert
-     * @param userKey
+     * @param idLabel label associated with the identity of the user
+     *                TODO: different ids for different organizations, e.g me@org1.edu.nl, me@org2.ac.uk
+     * @param mspLabel the Membership Service Provider label
+     *                 TODO: use one MSP per organization
+     * @param userCert user's certificate
+     *                 TODO: produce user certificates with organizational-units for possible fine-grained access
+     * @param userKey user's private key
      * @return
      * @throws IOException
      */
-    public static Wallet setUpWallet(String idLabel, String mspLabel, X509Certificate userCert, PrivateKey userKey)
+    public static Wallet setUpWallet(@NotBlank String idLabel, @NotBlank String mspLabel,
+                                     @NotNull X509Certificate userCert, @NotNull PrivateKey userKey)
             throws IOException {
 
-        // A wallet stores identities for testing. Must be in a secure location for real users
-        Wallet wallet = Wallets.newFileSystemWallet(WALLET_PATH);
+        Wallet wallet = Wallets.newInMemoryWallet();
 
         // Load credentials into wallet
         Identity identity = Identities.newX509Identity(mspLabel, userCert, userKey);
 
         wallet.put(idLabel, identity);
         return wallet;
+    }
+
+    public static boolean isInformizMember(@NotBlank String userEmail) {
+        // TODO: Check if the user has a wallet
+        return true;
+    }
+
+
+    public static boolean isChannelMember(@NotNull Wallet userWallet, @NotBlank String channelId) {
+        // TODO: Check if the user has an identity associated with the specific channel
+        return true;
+    }
+
+
+    /**
+     * Retrieve a user's wallet from encrypted storage
+     * @param userEmail the email used for the user-login
+     * @return a wallet associated with the user, or null if the user doesn't have a wallet
+     */
+    public static Wallet getUserWallet(@NotBlank String userEmail) {
+        // TODO: load wallet from encrypted storage, path based on email used for login.
+        return setupWallet();
+    }
+
+    /**
+     * Save a user's wallet to encrypted storage
+     * @param userEmail the email used for the user-login
+     * @param wallet the user's wallet
+     * @return a wallet associated with the user, or null if the user doesn't have a wallet
+     */
+    public static void saveUserWallet(@NotBlank String userEmail, @NotNull Wallet wallet) {
+        // TODO: save wallet to encrypted storage, path based on email used for login.
     }
 
     private static X509Certificate getCertificate(Path userCertPath) throws IOException, CertificateException {
@@ -136,15 +176,22 @@ public class CryptoUtils {
             Wallet wallet = Wallets.newFileSystemWallet(WALLET_PATH);
 
             // Location of credentials to be stored in the wallet.
-            Path certificatePem = CREDENTIAL_PATH.resolve(Paths.get("signcerts", IDENTITY_LABEL + "-cert.pem"));
+            //Path certificatePem = CREDENTIAL_PATH.resolve(Paths.get("signcerts", IDENTITY_LABEL + "-cert.pem"));
+            Path certificatePem = Paths.get(
+                    CryptoUtils.class.getClassLoader().getResource("test-crypto/test-cert.pem").toURI());
+
             X509Certificate cert = getCertificate(certificatePem);
-            PrivateKey privKey = getPKCS8Key(PK_PATH, ALGORITHM);
+            //PrivateKey privKey = getPKCS8Key(PK_PATH, ALGORITHM);
+            PrivateKey privKey = getPKCS8Key(Paths.get(
+                    CryptoUtils.class.getClassLoader().getResource("test-crypto/test_pk").toURI()),
+                    ALGORITHM);
 
             // Load credentials into wallet
             Identity identity = Identities.newX509Identity(ORG_1_MSP, cert, privKey);
             wallet.put(IDENTITY_LABEL, identity);
             return wallet;
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (IOException | CertificateException | NoSuchAlgorithmException |
+                InvalidKeySpecException | URISyntaxException e) {
             throw new WebServiceException("Failed to create test-wallet", e);
         }
     }
@@ -169,7 +216,7 @@ public class CryptoUtils {
         // Configure the gateway connection used to access the network.
         Gateway.Builder builder = Gateway.createBuilder()
                 .identity(wallet, idLabel)
-                .networkConfig(NETWORK_CONF_PATH);
+                .networkConfig(NETWORK_CONF_PATH); // TODO: get network config for specific channel
 
         return new ChaincodeProxy(builder, channelName, ccId);
     }
