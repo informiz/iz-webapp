@@ -1,0 +1,49 @@
+{
+    "name": "first-network-org1",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org1",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org.nasa.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org.nasa.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.org.nasa.com": {
+            "url": "grpcs://localhost:7051",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICRzCCAe6gAwIBAgIRANSwUaJNBBCrpjjcwp8jP+0wCgYIKoZIzj0EAwIwbjEL\nMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG\ncmFuY2lzY28xFTATBgNVBAoTDG9yZy5uYXNhLmNvbTEbMBkGA1UEAxMSdGxzY2Eu\nb3JnLm5hc2EuY29tMB4XDTIwMDYwODExNTcwMFoXDTMwMDYwNjExNTcwMFowbjEL\nMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG\ncmFuY2lzY28xFTATBgNVBAoTDG9yZy5uYXNhLmNvbTEbMBkGA1UEAxMSdGxzY2Eu\nb3JnLm5hc2EuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnVd9viFRAZvO\naJehVAp3wjK+0bgvop++JWhfeLovm5v+GRQy5JmFBZ+wAd9jajnDCtu8rv9OCIND\n5UOfVqcxRaNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMC\nBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCAzsRLgKXP8TdNE\n4pR4nzNmscQhaz9WyI2+/YwshYqDOjAKBggqhkjOPQQDAgNHADBEAiAn7AvabqPO\nJ4TLJPL9nEbIj8jT1pMod0jVTH+TH1nB1AIgLXhncrGgaz7R6kqdpmfV13bAZuA6\nq4UrTF3jd7JbUwo=\n-----END CERTIFICATE-----\n"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org.nasa.com",
+                "hostnameOverride": "peer0.org.nasa.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org.nasa.com": {
+            "url": "https://localhost:7054",
+            "caName": "ca-org1",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICQTCCAeegAwIBAgIQUsaFeR793uyS6xZVEvFqgjAKBggqhkjOPQQDAjBrMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnLm5hc2EuY29tMRgwFgYDVQQDEw9jYS5vcmcu\nbmFzYS5jb20wHhcNMjAwNjA4MTE1NzAwWhcNMzAwNjA2MTE1NzAwWjBrMQswCQYD\nVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5j\naXNjbzEVMBMGA1UEChMMb3JnLm5hc2EuY29tMRgwFgYDVQQDEw9jYS5vcmcubmFz\nYS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQKF7nUsqTmVEkcql8e45He\np52/YXKytC1OnkYWp/9PmF1Fq0/e0edQl76vHd9Q6HBH96AMCJ8SfWsxQEuctxt0\no20wazAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUF\nBwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIOhrW06CGHfmtH1P33uMFLUT\na5dRmVjlaTwvUPR6YJkKMAoGCCqGSM49BAMCA0gAMEUCIQD858DJm5mQsISIHKaS\nEhN3cUCzob59u66TU9XxlpnztQIgLlJPGYVQnmYQho7WQMXs9z7l2zrAn08CPZab\nGqi+F0k=\n-----END CERTIFICATE-----\n"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

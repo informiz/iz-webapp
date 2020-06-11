@@ -138,9 +138,9 @@ public class CryptoUtils {
 
     /**
      *
-     * @param pkPath
+     * @param pkPath Path to a private-key file
      * @param algo The algorithm used to generate the private-key, e.g 'EC' for ECDSA
-     * @return
+     * @return A {@link PrivateKey} object
      * @throws IOException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
@@ -173,7 +173,7 @@ public class CryptoUtils {
     public static Wallet setupWallet() {
         try {
             // A wallet with identities for testing. Must be in a secure location for real users
-            Wallet wallet = Wallets.newFileSystemWallet(WALLET_PATH);
+            Wallet wallet = Wallets.newInMemoryWallet();
 
             // Location of credentials to be stored in the wallet.
             //Path certificatePem = CREDENTIAL_PATH.resolve(Paths.get("signcerts", IDENTITY_LABEL + "-cert.pem"));
@@ -206,19 +206,34 @@ public class CryptoUtils {
         // Load an existing wallet holding identities used to access the network.
         //Wallet wallet = Wallets.newFileSystemWallet(WALLET_PATH);
         Wallet wallet = setupWallet();
-        return createChaincodeProxy(wallet, IDENTITY_LABEL, channelName, ccId);
+        return createChaincodeProxy(wallet, IDENTITY_LABEL, channelName, ccId, "config/connection.json");
     }
 
     // TODO: ***************************************** END TESTING ******************************************
 
-    public static ChaincodeProxy createChaincodeProxy(Wallet wallet, String idLabel, String channelName, String ccId)
+    /**
+     * Create a proxy to the chaincode for the given identity. The wallet should contain crypto-material authorizing
+     * the given identity to interact with the given chaincode
+     * @param wallet A wallet containing identities
+     * @param idLabel The label associated with the identity accessing the chaincode
+     * @param channelName The name of the channel to connect to
+     * @param ccId The chaincode's id
+     * @param networkConfig A name of a file containing the network configuration TODO: where are network configs stored?
+     * @return A proxy that can be used to communicate with the chaincode on the user's behalf
+     * @throws IOException
+     */
+    public static ChaincodeProxy createChaincodeProxy(Wallet wallet, String idLabel, String channelName, String ccId, String networkConfig)
             throws IOException {
         // Configure the gateway connection used to access the network.
         Gateway.Builder builder = Gateway.createBuilder()
                 .identity(wallet, idLabel)
-                .networkConfig(NETWORK_CONF_PATH); // TODO: get network config for specific channel
+                .networkConfig(getNetworkConfig(networkConfig));
 
         return new ChaincodeProxy(builder, channelName, ccId);
+    }
+
+    private static InputStream getNetworkConfig(String config) throws IOException {
+        return CryptoUtils.class.getClassLoader().getResource(config).openStream();
     }
 
 

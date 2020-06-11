@@ -1,27 +1,48 @@
-<header th:fragment="header" xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="header">
 
-    <nav class="navbar navbar-expand-sm bg-light navbar-light">
+        <script>
 
-        <a class="navbar-brand" href="#">informiz.org</a>
+            function onSignIn(googleUser) {
+                if (authResult.status.signed_in) {
+                    $('#signinButton').css('visibility', 'hidden');
+                }
+            }
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            function signOut() {
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.signOut();
+            }
 
-        <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav ml-auto">
-                <li th:if="${authorization == null or #authorization.expression('!isAuthenticated()')}">
-                    <a href="/login/oauth2/code/google" th:href="@{/login/oauth2/code/google}" class="nav-item">
-                        <span class="g-signin2" data-accesstype="postmessage" aria-hidden="true" data-redirecturi="/factchecker/"></span>
-                        <!-- <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>&nbsp;Sign in  data-onsuccess="onSignIn"-->
-                    </a>
-                </li>
-                <li th:if="${#authorization?.expression('isAuthenticated()')}">
-                    <a href="/logout" th:href="@{/logout}" data-accesstype="postmessage" aria-hidden="true" class="nav-item glyphicon glyphicon-log-out">
-                        <!-- span class="glyphicon glyphicon-log-out" aria-hidden="true"></span -->&nbsp;Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-</header>
+        </script>
+
+        <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #e3f2fd;">
+
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Informiz</a>
+            </div>
+
+
+            <div class="collapse navbar-collapse" id="informiz-toggle-nav">
+                <ul class="nav navbar-nav ml-auto">
+
+                    <!-- TODO: Unable to show/hide buttons based on authentication state.
+                         Tried th:if=${#authorization.expression('isAuthenticated()')}
+                         Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
+
+                    <li id="signinButton">
+                        <a href="/login/oauth2/code/google" class="nav-item">
+                                <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage"
+                                      data-onsuccess="onSignIn" data-redirecturi="/factchecker/"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout" class="btn btn-default btn-sm" onclick="signOut();">
+                            <span class="glyphicon glyphicon-log-out"></span> Sign out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</html>
