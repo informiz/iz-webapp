@@ -1,21 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
     <div th:fragment="header">
 
-        <script>
-
-            function onSignIn(googleUser) {
-                if (authResult.status.signed_in) {
-                    $('#signinButton').css('visibility', 'hidden');
-                }
-            }
-
-            function signOut() {
-                var auth2 = gapi.auth2.getAuthInstance();
-                auth2.signOut();
-            }
-
-        </script>
-
         <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #e3f2fd;">
 
             <div class="navbar-header">
@@ -30,19 +15,60 @@
                          Tried th:if=${#authorization.expression('isAuthenticated()')}
                          Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
 
-                    <li id="signinButton">
+                    <li id="signinButton" style="visibility: hidden;">
                         <a href="/login/oauth2/code/google" class="nav-item">
                                 <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage"
-                                      data-onsuccess="onSignIn" data-redirecturi="/factchecker/"></span>
+                                      data-onsuccess="onSignIn"></span>
                         </a>
                     </li>
-                    <li>
-                        <a href="/logout" class="btn btn-default btn-sm" onclick="signOut();">
-                            <span class="glyphicon glyphicon-log-out"></span> Sign out
+                    <li id="signoutButton" style="visibility: hidden;">
+                        <a class="btn btn-default btn-sm" onclick="signOut();">
+                            <span class="glyphicon glyphicon-log-out">Sign out</span>
                         </a>
                     </li>
                 </ul>
             </div>
         </nav>
+
+        <script>
+
+            gapi.load('auth2', function() {
+                gapi.auth2.init().then(function (googleAuth) {
+                    if (googleAuth.isSignedIn.get()) {
+                        showLogout();
+                    } else {
+                        showLogin();
+                    }
+                },
+                function () {
+                    showLogin();
+                });
+            });
+
+
+            function onSignIn(googleUser) {
+                showLogout();
+            }
+
+            function signOut() {
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.signOut();
+                showLogin();
+                window.location.href = '/home.html';
+            }
+
+
+            function showLogin() {
+                $('#signinButton').css('visibility', 'visible');
+                $('#signoutButton').css('visibility', 'hidden');
+            }
+
+            function showLogout() {
+                $('#signoutButton').css('visibility', 'visible');
+                $('#signinButton').css('visibility', 'hidden');
+            }
+
+        </script>
+
     </div>
 </html>
