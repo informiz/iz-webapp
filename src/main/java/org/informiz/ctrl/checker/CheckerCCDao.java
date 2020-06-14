@@ -1,5 +1,6 @@
 package org.informiz.ctrl.checker;
 
+import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.CryptoUtils.ChaincodeProxy;
 
@@ -13,7 +14,7 @@ public class CheckerCCDao {
         String result = getCCProxy(session).submitTransaction("FactCheckerContract", "createFactChecker",
                 new String[]{checker.getName(), checker.getScore().getReliability().toString(),
                         checker.getScore().getConfidence().toString(), checker.getEmail(), checker.getLink()});
-        return FactCheckerBase.fromEntityString(result);
+        return ChainCodeEntity.fromEntityString(result, FactCheckerBase.class);
     }
 
     public static ChaincodeProxy getCCProxy(HttpSession session) {

@@ -1,4 +1,4 @@
-package org.informiz.repo;
+package org.informiz.repo.checker;
 
 import org.informiz.model.FactCheckerBase;
 import org.springframework.data.repository.CrudRepository;

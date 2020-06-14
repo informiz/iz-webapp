@@ -1,7 +1,7 @@
 package org.informiz.ctrl.checker;
 
 import org.informiz.model.FactCheckerBase;
-import org.informiz.repo.FactCheckerRepository;
+import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

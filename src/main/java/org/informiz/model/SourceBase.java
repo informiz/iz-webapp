@@ -1,7 +1,10 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.hibernate.validator.constraints.URL;
 
+import javax.persistence.*;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,25 +17,29 @@ import java.util.Map;
  * Any additional metadata should be saved on a separate CMS
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class SourceBase {
-
-    // Source's id on the ledger
-    private String sid;
+@Table(name="source")
+@Entity
+public final class SourceBase extends ChainCodeEntity {
 
     private String name;
 
+    @URL(message = "Please provide a valid link")
+    private String link;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
+    })
+    @Valid
     private Score score;
 
-    private HashMap<String, Float> reviews = new HashMap<>();
+    @ElementCollection
+    @CollectionTable(name = "review")
+    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "reviewed")
+    @MapKeyColumn(name = "checker")
+    @Column(name = "rating")
+    private Map<String, Float> reviews = new HashMap<>();
 
-
-    public String getSid() {
-        return sid;
-    }
-
-    private void setSid(String sid) {
-        this.sid = sid;
-    }
 
     public String getName() {
         return name;
@@ -40,6 +47,14 @@ public final class SourceBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 
     public Score getScore() {
@@ -75,28 +90,15 @@ public final class SourceBase {
         return reviews;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if ((obj == null) || (getClass() != obj.getClass())) {
-            return false;
-        }
-
-        SourceBase other = (SourceBase) obj;
-
-        return this.sid.equals(other.sid);
+    public void setReviews(HashMap<String, Float> reviews) {
+        this.reviews = reviews;
     }
 
-    @Override
-    public int hashCode() {
-        return this.sid.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{ \"name\": \"%s\", \"score\": %s }", name, score.toString());
+    public void edit(SourceBase other) {
+        this.setName(other.getName());
+        this.setLink(other.getLink());
+        this.setReviews(new HashMap<>(other.getReviews()));
+        // TODO: allow direct score edit? Calculate new score?
+        this.getScore().edit(other.getScore());
     }
 }

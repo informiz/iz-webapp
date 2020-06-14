@@ -1,6 +1,7 @@
 package org.informiz.repo;
 
 import org.informiz.model.FactCheckerBase;
+import org.informiz.repo.checker.FactCheckerRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,0 +1,48 @@
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Add Fact-Checker</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">New Source</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form action="#" th:action="@{/source/add}" th:object="${source}" method="post">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="name" class="col-form-label">Name</label>
+                                    <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Nasa"/>
+                                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="link" class="col-form-label">Link</label>
+                                    <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"/>
+                                    <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="reliability" class="col-form-label">Reliability</label>
+                                    <input type="number" min="0" max="1" step="0.1" th:value="0.9" th:field="*{score.reliability}" class="form-control" id="reliability"/>
+                                    <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
+                                    <label for="confidence" class="col-form-label">Confidence</label>
+                                    <input type="number" min="0" max="2" step="0.1" th:value="0.5" th:field="*{score.confidence}" class="form-control" id="confidence"/>
+                                    <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mt-5">
+                                    <input type="submit" class="btn btn-primary" value="Add"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
