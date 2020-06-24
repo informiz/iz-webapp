@@ -37,4 +37,4 @@ build/
 
 ### Local dev config ###
 application-dev.properties
-application.properties.*
+application.properties*
