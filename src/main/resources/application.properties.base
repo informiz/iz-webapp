@@ -1,0 +1,47 @@
+server.port=8083
+server.servlet.session.timeout=60m
+server.error.path=/error
+server.error.whitelabel.enabled=false
+spring.application.name = Informiz Web Application
+
+# jdbc.driverClassName=org.h2.Driver
+# jdbc.url=jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1
+
+# hibernate.dialect=org.hibernate.dialect.H2Dialect
+# hibernate.hbm2ddl.auto=create
+
+spring.datasource.url=jdbc:mysql://localhost:3306/test?serverTimezone=UTC
+# TODO: load credentials from vault
+spring.datasource.username=root
+spring.datasource.password=springpassword
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.database-platform = org.hibernate.dialect.MySQL5Dialect
+spring.jpa.generate-ddl=true
+# TODO: change to 'none', use upgrade scripts
+spring.jpa.hibernate.ddl-auto=update
+
+
+spring.thymeleaf.cache=false
+spring.thymeleaf.enabled=true
+spring.thymeleaf.prefix=classpath:/templates/
+# spring.thymeleaf.suffix=.html
+
+security.require-ssl=true
+
+# Dev configuration for SSL
+server.ssl.key-store-type=PKCS12
+server.ssl.key-store=classpath:izLocalDev.p12
+server.ssl.key-store-password=izlocaldev
+server.ssl.key-alias=izLocalDev
+
+# security.oauth2.client.scope=user:name
+# security.oauth2.client.accessTokenUri=https://www.googleapis.com/oauth2/v3/token
+# security.oauth2.client.userAuthorizationUri=https://accounts.google.com/o/oauth2/auth
+# security.oauth2.client.tokenName=oauth_token
+# security.oauth2.client.authenticationScheme=query
+# security.oauth2.client.clientAuthenticationScheme=form
+
+security.oauth2.resource.token-type=oauth_token
+spring.security.oauth2.client.registration.google.client-id=118655574862-krc7vcgi9qmsh8qe18pu1v5dlfl7kik3.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=2rpjYP6Q8GEA8HAZfqnDrHdL
+spring.security.oauth2.client.registration.google.scope=email

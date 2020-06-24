@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
-    <div th:fragment="header">
 
+    <div th:fragment="header">
         <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #e3f2fd;">
 
             <div class="navbar-header">
@@ -32,6 +32,7 @@
 
         <script>
 
+            // TODO: Fix configuration - without init buttons don't show in home page, with init 'show' is called twice
             gapi.load('auth2', function() {
                 gapi.auth2.init().then(function (googleAuth) {
                     if (googleAuth.isSignedIn.get()) {
@@ -48,24 +49,28 @@
 
             function onSignIn(googleUser) {
                 showLogout();
+                // TODO: need to redirect to protected page to trigger authentication. Is there a better way?
+                if (window.location.href.endsWith('/home.html')) {
+                    window.location.replace('/factchecker/');
+                }
             }
 
             function signOut() {
                 var auth2 = gapi.auth2.getAuthInstance();
                 auth2.signOut();
-                showLogin();
+                auth2.disconnect(); // TODO: This logs the user out of gmail. Necessary?
                 window.location.href = '/home.html';
             }
 
 
             function showLogin() {
-                $('#signinButton').css('visibility', 'visible');
                 $('#signoutButton').css('visibility', 'hidden');
+                $('#signinButton').css('visibility', 'visible');
             }
 
             function showLogout() {
-                $('#signoutButton').css('visibility', 'visible');
                 $('#signinButton').css('visibility', 'hidden');
+                $('#signoutButton').css('visibility', 'visible');
             }
 
         </script>

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -60,7 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers("/", "/public/**", "/style*", "/home.html", "/login*", "/error*").permitAll()
+                .antMatchers("/", "/public/**", "/style*", "/home.html", "/error*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
@@ -74,15 +75,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
 */
-                //.loginPage("/login.html")
                 .defaultSuccessUrl("/factchecker/", true)
-                //.failureUrl("/login-error.html")
-                //.permitAll()
                 .and()
                 .logout()
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessUrl("/home.html")
                 .permitAll()
                 .and().csrf().disable();
@@ -97,7 +94,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String getClientId();
     }
 
+    @Bean
+    public DefaultAuthenticationEventPublisher authenticationEventPublisher() {
+        return new DefaultAuthenticationEventPublisher();
+    }
 
+    // TODO: log-out followed by re-login does not re-trigger this event!! Check this
     @EventListener
     public void authSuccessEventListener(AuthenticationSuccessEvent event){
 
