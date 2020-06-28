@@ -1,36 +1,41 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <div th:fragment="header">
-        <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #e3f2fd;">
+<div th:fragment="header">
 
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">Informiz</a>
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
 
+        <a class="navbar-brand" href="#">Informiz</a>
 
-            <div class="collapse navbar-collapse" id="informiz-toggle-nav">
-                <ul class="nav navbar-nav ml-auto">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                    <!-- TODO: Unable to show/hide buttons based on authentication state.
-                         Tried th:if=${#authorization.expression('isAuthenticated()')}
-                         Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="/source/">Sources</a></li>
+                <li class="nav-item"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
+                <li class="nav-item"><a class="nav-link" href="/claim/">Claims</a></li>
+                <li class="nav-item"><a class="nav-link" href="/reference/">References</a></li>
+                <li class="nav-item"><a class="nav-link" href="/informi/">Informiz</a></li>
+            </ul>
+            <!-- TODO: Unable to show/hide buttons based on authentication state.
+                 Tried th:if=${#authorization.expression('isAuthenticated()')}
+                 Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
 
-                    <li id="signinButton" style="visibility: hidden;">
-                        <a href="/login/oauth2/code/google" class="nav-item">
-                                <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage"
-                                      data-onsuccess="onSignIn"></span>
-                        </a>
-                    </li>
-                    <li id="signoutButton" style="visibility: hidden;">
-                        <a class="btn btn-default btn-sm" onclick="signOut();">
-                            <span class="glyphicon glyphicon-log-out">Sign out</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+            <li id="signinButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
+                <a href="/login/oauth2/code/google">
+                    <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage" data-onsuccess="onSignIn"></span>
+                </a>
+            </li>
+            <li id="signoutButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
+                <a class="btn btn-outline-success" onclick="signOut();">Sign out</a>
+            </li>
 
-        <script>
+        </div>
+    </nav>
+
+    <script>
 
             // TODO: Fix configuration - without init buttons don't show in home page, with init 'show' is called twice
             gapi.load('auth2', function() {
@@ -75,5 +80,7 @@
 
         </script>
 
-    </div>
+</div>
+
 </html>
+
