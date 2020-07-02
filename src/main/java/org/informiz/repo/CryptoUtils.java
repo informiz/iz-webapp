@@ -214,7 +214,8 @@ public class CryptoUtils {
     /**
      * Create a proxy to the chaincode for the given identity. The wallet should contain crypto-material authorizing
      * the given identity to interact with the given chaincode
-     * @param wallet A wallet containing identities
+     * @param wallet A wallet containing identities. The identity holds the user-certificate, which specifies
+     *               Organization Units. TODO: use Organization Units for fine-grained authorization
      * @param idLabel The label associated with the identity accessing the chaincode
      * @param channelName The name of the channel to connect to
      * @param ccId The chaincode's id
