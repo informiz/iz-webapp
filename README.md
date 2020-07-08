@@ -18,7 +18,7 @@ authorityKeyIdentifier = keyid,issuer
 * Create a Certificate Signing Request. E.g, for the Admin user of the nasa.org channel:
 
 `openssl req -new -sha256 -nodes -newkey ec:PATH/TO/ca.pem 
--subj "/CN=Admin@org.nasa.com/C=US/ST=California/L=San Francisco/OU=admin/OU=Economics" 
+-subj "/CN=admin:jane@org.nasa.com:channel-id/C=US/ST=California/L=San Francisco/OU=admin/OU=Economics" 
 -keyout admin.nasa.key -out admin.nasa.csr`
 
 * Sign with with the organization's (e.g nasa) certificate-authority:

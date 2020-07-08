@@ -13,37 +13,7 @@
                         <form action="#" th:action="@{/factchecker/details/{id}(id=${checker.id.toString()})}" th:object="${checker}" method="post">
                             <!-- TODO: hidden ID field is not submitted with the form -->
                             <input type="hidden" class="form-control" id="id" name="id" th:value="${checker.id}"/>
-                            <div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="name" class="col-form-label">Name</label>
-                                    <input type="text" th:field="*{name}" class="form-control" id="name"/>
-                                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="email" class="col-form-label">Email</label>
-                                    <input type="text" th:field="*{email}" class="form-control" id="email"/>
-                                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="link" class="col-form-label">Profile link</label>
-                                    <input type="text" th:field="*{link}" class="form-control" id="link"/>
-                                    <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="reliability" class="col-form-label">Reliability</label>
-                                    <input type="number" min="0" max="1" step="0.1" th:field="*{score.reliability}" class="form-control" id="reliability"/>
-                                    <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
-                                    <label for="confidence" class="col-form-label">Confidence</label>
-                                    <input type="number" min="0" max="1" step="0.1" th:field="*{score.confidence}" class="form-control" id="confidence"/>
-                                    <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
-                                </div>
-                            </div>
+                            <div th:replace="fragments/checker :: checker('write')"></div>
                             <div class="row">
                                 <div class="col-md-6 mt-5">
                                     <input type="submit" class="btn btn-primary" value="Update"/>

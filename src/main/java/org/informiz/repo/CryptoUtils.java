@@ -31,7 +31,7 @@ public class CryptoUtils {
     /**
      * The identity-label to use for testing
      */
-    public static final String IDENTITY_LABEL = "Admin@org.nasa.com";
+    public static final String IDENTITY_LABEL = "admin:jane@org.nasa.com:channel-id";
     /**
      * Relative path to the network-configuration directory
      */
@@ -100,12 +100,15 @@ public class CryptoUtils {
         return true;
     }
 
-
-    public static boolean isChannelMember(@NotNull Wallet userWallet, @NotBlank String channelId) {
+    public static boolean isChannelMember(@NotBlank String userEmail, @NotNull Wallet userWallet, @NotBlank String channelId) {
         // TODO: Check if the user has an identity associated with the specific channel
         return true;
     }
 
+    public static boolean isChannelAdmin(@NotBlank String userEmail, @NotNull Wallet userWallet, @NotBlank String channelId) {
+        // TODO: Check if the user has an admin identity associated with the specific channel
+        return true;
+    }
 
     /**
      * Retrieve a user's wallet from encrypted storage

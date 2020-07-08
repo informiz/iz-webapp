@@ -3,14 +3,12 @@ package org.informiz.ctrl.checker;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 //@RestController
@@ -33,12 +31,14 @@ public class FactCheckerController {
     }
 
     @GetMapping("/add")
+    @Secured("ROLE_ADMIN")
     public String addFactCheckerForm(Model model) {
         model.addAttribute(CHECKER_ATTR, new FactCheckerBase());
         return "add-fc.html";
     }
 
     @PostMapping("/add")
+    @Secured("ROLE_ADMIN")
     public String addFactChecker(@Valid @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                  BindingResult result) {
         if (result.hasErrors()) {
@@ -51,6 +51,7 @@ public class FactCheckerController {
     }
 
     @GetMapping("/delete/{id}")
+    @Secured("ROLE_ADMIN")
     public String deleteUser(@PathVariable("id") long id) {
         FactCheckerBase checker = factCheckerRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid fact-checker id"));
@@ -59,7 +60,16 @@ public class FactCheckerController {
         return String.format("redirect:%s/all", PREFIX);
     }
 
+    @GetMapping("/view/{id}")
+    public String viewFactchecker(@PathVariable("id")  Long id, Model model) {
+        FactCheckerBase checker = factCheckerRepo.findById(id)
+                .orElseThrow(() ->new IllegalArgumentException("Invalid fact-checker id"));
+        model.addAttribute(CHECKER_ATTR, checker);
+        return "view-fc.html";
+    }
+
     @GetMapping("/details/{id}")
+    @Secured("ROLE_ADMIN")
     public String getFactchecker(@PathVariable("id")  Long id, Model model) {
         FactCheckerBase checker = factCheckerRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid fact-checker id"));
@@ -68,6 +78,7 @@ public class FactCheckerController {
     }
 
     @PostMapping("/details/{id}")
+    @Secured("ROLE_ADMIN")
     public String updateFactChecker(@PathVariable("id")  Long id,
                                     @Valid @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                     BindingResult result, Model model) {
@@ -79,10 +90,5 @@ public class FactCheckerController {
             model.addAttribute(CHECKER_ATTR, current);
         }
         return "update-fc.html";
-    }
-
-    private HttpSession getSession() {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        return attr.getRequest().getSession(true); // true == allow create
     }
 }

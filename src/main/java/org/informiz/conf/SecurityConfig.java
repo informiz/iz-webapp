@@ -1,23 +1,21 @@
 package org.informiz.conf;
 
-import org.informiz.repo.CryptoUtils;
+import org.informiz.auth.AuthUtils;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
 import javax.servlet.http.HttpSession;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Configuration
@@ -30,32 +28,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     ObjectFactory<HttpSession> httpSessionFactory;
 
-    /*
-        @Autowired
-        AuthManager authManager;
-
-
-        @Autowired
-        private IzOAuth2AuthProvider authProvider;
-
-
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(authProvider);
-        }
-
-        @Override
-        public void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-            auth.parentAuthenticationManager(authManager);
-        }
-
-        @Override
-        public AuthenticationManager authenticationManagerBean() throws Exception {
-            return authManager;
-        }
-
-    */
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
@@ -65,16 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
-/*
-                .successHandler(new AuthenticationSuccessHandler() {
-                    @Override
-                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                                        Authentication authentication) {
-                        authentication.setAuthenticated(false);
-
-                    }
-                })
-*/
+                .userInfoEndpoint()
+                .userAuthoritiesMapper(this.userAuthoritiesMapper())
+                .and()
                 .defaultSuccessUrl("/factchecker/", true)
                 .and()
                 .logout()
@@ -94,30 +59,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String getClientId();
     }
 
-    @Bean
-    public DefaultAuthenticationEventPublisher authenticationEventPublisher() {
-        return new DefaultAuthenticationEventPublisher();
+
+    private GrantedAuthoritiesMapper userAuthoritiesMapper() {
+        return (authorities) -> {
+            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+            authorities.forEach(authority -> {
+                if (OAuth2UserAuthority.class.isInstance(authority)) {
+                    OAuth2UserAuthority oidcUserAuthority = (OAuth2UserAuthority) authority;
+                    String email = oidcUserAuthority.getAttributes().get("email").toString();
+                    AuthUtils.getUserAuthorities(email).forEach(auth -> mappedAuthorities.add(auth));
+                }
+                mappedAuthorities.add(authority);
+            });
+
+            return mappedAuthorities;
+        };
     }
-
-    // TODO: log-out followed by re-login does not re-trigger this event!! Check this
-    @EventListener
-    public void authSuccessEventListener(AuthenticationSuccessEvent event){
-
-        String email = ((DefaultOAuth2User)event.getAuthentication().getPrincipal()).getAttribute("email");
-        Collection<? extends GrantedAuthority> authorities = event.getAuthentication().getAuthorities();
-
-        try {
-            HttpSession userSession = httpSessionFactory.getObject(); // Should always have a session
-            if (userSession.getAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR) == null) {
-                // TODO: get wallet from encrypted storage based on user email address
-
-                userSession.setAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR,
-                        // TODO: how to get current network and chaincode ids?
-                        CryptoUtils.createChaincodeProxy("mynetwork", "informiz"));
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to create chaincode proxy for user", e);
-        }
-    }
-
 }
