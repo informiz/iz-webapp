@@ -5,7 +5,10 @@ import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -19,8 +22,11 @@ import java.util.Map;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="source")
 @Entity
-public final class SourceBase extends ChainCodeEntity {
+public final class SourceBase extends ChainCodeEntity implements Serializable {
 
+    static final long serialVersionUID = 1L;
+
+    @NotBlank(message = "Name is mandatory")
     private String name;
 
     @URL(message = "Please provide a valid link")
@@ -32,14 +38,6 @@ public final class SourceBase extends ChainCodeEntity {
     })
     @Valid
     private Score score;
-
-    @ElementCollection
-    @CollectionTable(name = "review")
-    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "reviewed")
-    @MapKeyColumn(name = "checker")
-    @Column(name = "rating")
-    private Map<String, Float> reviews = new HashMap<>();
-
 
     public String getName() {
         return name;
@@ -65,39 +63,10 @@ public final class SourceBase extends ChainCodeEntity {
         this.score = score;
     }
 
-    /**
-     * Add a review by a fact-checker to this source
-     * @param fcid the fact-checker's id
-     * @param reliability the score given by the fact-checker
-     * @return the previous score given by this fact-checker, if she reviewed this source before
-     * @see Map#put(Object, Object)
-     */
-    public Float addReview(String fcid, float reliability) {
-        return reviews.put(fcid, reliability);
-    }
-
-    /**
-     * Remove a review by a fact-checker from this source
-     * @param fcid the fact-checker's id
-     * @return the score given by this fact-checker, if one was found
-     * @see Map#remove(Object)
-     */
-    public Float removeReview(String fcid) {
-        return reviews.remove(fcid);
-    }
-
-    public Map<String, Float> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(HashMap<String, Float> reviews) {
-        this.reviews = reviews;
-    }
-
     public void edit(SourceBase other) {
         this.setName(other.getName());
         this.setLink(other.getLink());
-        this.setReviews(new HashMap<>(other.getReviews()));
+        this.setReviews(other.getReviews()); // TODO: move to parent edit method, proper copy
         // TODO: allow direct score edit? Calculate new score?
         this.getScore().edit(other.getScore());
     }

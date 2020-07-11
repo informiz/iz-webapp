@@ -25,20 +25,20 @@ public class SourceController {
     @GetMapping(path = {"/", "/all"})
     public String getAllSources(Model model) {
         model.addAttribute(SOURCES_ATTR, sourceRepo.findAll());
-        return "all-src.html";
+        return String.format("%s/all-src.html", PREFIX);
     }
 
     @GetMapping("/add")
     public String addSourceForm(Model model) {
         model.addAttribute(SOURCE_ATTR, new SourceBase());
-        return "add-src.html";
+        return String.format("%s/add-src.html", PREFIX);
     }
 
     @PostMapping("/add")
     public String addSource(@Valid @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                  BindingResult result) {
         if (result.hasErrors()) {
-            return "add-src.html";
+            return String.format("%s/add-src.html", PREFIX);
         }
         // TODO: Add to ledger
         sourceRepo.save(source);
@@ -54,12 +54,20 @@ public class SourceController {
         return String.format("redirect:%s/all", PREFIX);
     }
 
+    @GetMapping("/view/{id}")
+    public String viewSource(@PathVariable("id")  Long id, Model model) {
+        SourceBase source = sourceRepo.findById(id)
+                .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
+        model.addAttribute(SOURCE_ATTR, source);
+        return String.format("%s/view-src.html", PREFIX);
+    }
+
     @GetMapping("/details/{id}")
     public String getSource(@PathVariable("id")  Long id, Model model) {
         SourceBase source = sourceRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
         model.addAttribute(SOURCE_ATTR, source);
-        return "update-src.html";
+        return String.format("%s/update-src.html", PREFIX);
     }
 
     @PostMapping("/details/{id}")
@@ -73,6 +81,6 @@ public class SourceController {
             sourceRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
         }
-        return "update-src.html";
+        return String.format("%s/update-src.html", PREFIX);
     }
 }

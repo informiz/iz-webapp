@@ -1,13 +1,16 @@
 package org.informiz.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Table(name="review")
 @Entity
-public class Review {
+public class Review implements Serializable {
+
+    static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     // The fact-checker's id on the ledger (may be from a different channel, so not necessarily in the local db)
@@ -15,9 +18,19 @@ public class Review {
 
     private Float rating;
 
+/*
     @ManyToOne
     @JoinColumn(name = "entity_id")
-    private ChainCodeEntity reviewed;
+*/
+    private String reviewed;
+
+    public Review() {}
+
+    public Review(String fcid, String entityId, Float rating) {
+        this.checker = fcid;
+        this.reviewed = entityId;
+        this.rating = rating;
+    }
 
     public Long getId() {
         return id;
@@ -41,5 +54,13 @@ public class Review {
 
     public void setRating(Float rating) {
         this.rating = rating;
+    }
+
+    public String getReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(String reviewed) {
+        this.reviewed = reviewed;
     }
 }

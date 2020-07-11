@@ -3,9 +3,12 @@ package org.informiz.model;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import java.io.Serializable;
 
 @Embeddable
-public class Score {
+public class Score implements Serializable {
+
+    static final long serialVersionUID = 1L;
 
     @DecimalMin("0.0")
     @DecimalMax("1.0")

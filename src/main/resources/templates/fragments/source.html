@@ -1,0 +1,22 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <div th:fragment="source(mode)">
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="name" class="col-form-label">Name</label>
+                <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Nasa"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="link" class="col-form-label">Link</label>
+                <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+            </div>
+        </div>
+        <div th:replace="fragments/score :: score(${mode})"></div>
+    </div>
+</html>

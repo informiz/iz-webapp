@@ -16,6 +16,7 @@
                                 <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Score</th>
                                     <th>Link</th>
                                     <th>Edit</th>
                                     <th>Delete</th>
@@ -24,9 +25,10 @@
                                 <tbody>
                                 <tr th:each="source : ${sources}">
                                     <td th:text="${source.name}"></td>
-                                    <td><a th:href="${source.link}" target="_blank" class="btn btn-primary"><i class="fas fa-external-link ml-2"></i></a></td>
-                                    <td><a th:href="@{/source/details/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt ml-2"></i></a></td>
-                                    <td><a th:href="@{/source/delete/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-times ml-2"></i></a></td>
+                                    <td th:text="${source.score.reliability}"></td>
+                                    <td><a th:href="${source.link}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
+                                    <td><a th:href="@{/source/details/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
+                                    <td><a th:href="@{/source/delete/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
                                 </tr>
                                 </tbody>
                             </table>

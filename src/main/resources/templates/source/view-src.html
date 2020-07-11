@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Source Details</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">Source Details</h2>
+                <div class="row" th:object="${source}">
+                    <div class="col-md-6">
+                        <div th:replace="fragments/source :: source('read')"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -16,6 +16,7 @@
                                 <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Score</th>
                                     <th>Profile</th>
                                     <th>Edit</th>
                                     <th>Delete</th>
@@ -24,6 +25,7 @@
                                 <tbody>
                                 <tr th:each="checker : ${checkers}">
                                     <td th:text="${checker.name}"></td>
+                                    <td th:text="${checker.score.reliability}"></td>
                                     <td><a th:href="${checker.link}" target="_blank" class="btn btn-primary">
                                         <i class="fas fa-user-check ml-2"></i>
                                     </a></td>

@@ -6,11 +6,14 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 
 @Table(name="fact_checker")
 @Entity
-public class FactCheckerBase extends ChainCodeEntity {
+public class FactCheckerBase extends ChainCodeEntity implements Serializable {
+
+    static final long serialVersionUID = 1L;
 
     @Embedded
     @AttributeOverrides({

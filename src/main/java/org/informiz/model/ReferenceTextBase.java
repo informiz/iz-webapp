@@ -7,9 +7,12 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-import java.util.HashMap;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A data-type managed by the reference-text contract. A reference text consists of:
@@ -22,10 +25,11 @@ import java.util.Map;
  * Any additional metadata should be saved on a separate CMS
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class ReferenceTextBase {
+@Table(name="reference")
+@Entity
+public final class ReferenceTextBase extends ChainCodeEntity implements Serializable {
 
-    // Reference-Text's id on the ledger
-    private String tid;
+    static final long serialVersionUID = 1L;
 
     private String text;
 
@@ -35,18 +39,11 @@ public final class ReferenceTextBase {
 
     private String link;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
+    })
     private Score score;
-
-    private HashMap<String, Float> reviews = new HashMap<>();
-
-
-    public String getTid() {
-        return tid;
-    }
-
-    private void setTid(String tid) {
-        this.tid = tid;
-    }
 
     public String getText() {
         return text;
@@ -88,53 +85,4 @@ public final class ReferenceTextBase {
         this.score = score;
     }
 
-    /**
-     * Add a review by a fact-checker to this reference-text
-     * @param fcid the fact-checker's id
-     * @param reliability the score given by the fact-checker
-     * @return the previous score given by this fact-checker, if she reviewed this text before
-     * @see Map#put(Object, Object)
-     */
-    public Float addReview(String fcid, float reliability) {
-        return reviews.put(fcid, reliability);
-    }
-
-    /**
-     * Remove a review by a fact-checker from this reference-text
-     * @param fcid the fact-checker's id
-     * @return the score given by this fact-checker, if one was found
-     * @see Map#remove(Object)
-     */
-    public Float removeReview(String fcid) {
-        return reviews.remove(fcid);
-    }
-
-    public Map<String, Float> getReviews() {
-        return reviews;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if ((obj == null) || (getClass() != obj.getClass())) {
-            return false;
-        }
-
-        ReferenceTextBase other = (ReferenceTextBase) obj;
-
-        return this.tid.equals(other.tid);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.tid.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("{ \"text\": \"%s\", \"score\": %s }", text, score.toString());
-    }
 }

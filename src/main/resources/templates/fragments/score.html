@@ -1,0 +1,18 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <div th:fragment="score(mode)">
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="reliability" class="col-form-label">Reliability</label>
+                <input type="number" min="0" max="1" step="0.05" th:value="0.9" th:field="*{score.reliability}" class="form-control" id="reliability"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}" />
+                <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
+                <label for="confidence" class="col-form-label">Confidence</label>
+                <input type="number" min="0" max="2" step="0.05" th:value="0.5" th:field="*{score.confidence}" class="form-control" id="confidence"
+                       readonly="readonly" />
+                <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+</html>

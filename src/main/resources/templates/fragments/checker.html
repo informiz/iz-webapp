@@ -33,7 +33,7 @@
                 <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
                 <label for="confidence" class="col-form-label">Confidence</label>
                 <input type="number" min="0" max="2" step="0.1" th:value="0.5" th:field="*{score.confidence}" class="form-control" id="confidence"
-                       disabled />
+                       readonly="readonly" />
                 <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
             </div>
         </div>

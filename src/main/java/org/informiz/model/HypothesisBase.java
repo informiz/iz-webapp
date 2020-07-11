@@ -6,6 +6,11 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -20,35 +25,46 @@ import java.util.Map;
  * Any additional metadata should be saved on a separate CMS
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class HypothesisBase {
+@Table(name="hypothesis")
+@Entity
+public final class HypothesisBase extends ChainCodeEntity implements Serializable {
 
-    // Hypothesis's id on the ledger
-    private String hid;
+    static final long serialVersionUID = 1L;
 
+    @NotBlank(message = "Claim is mandatory")
     private String claim;
 
+    @NotNull(message = "Locale is mandatory")
     private Locale locale;
 
+    // TODO: need source for the claim?
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
+    })
+    @Valid
     private Score score;
 
-    private Map<String, Float> reviews = new HashMap<>();
+    @ElementCollection
+    @CollectionTable(name = "claim_reference")
+    @MapKeyJoinColumn(name="entity_id")
+    @MapKeyColumn(name = "reference")
+    @Column(name = "entailment")
+    private Map<String, ClaimReference.Entailment> references = new HashMap<>();
 
-    private Map<String, String> references = new HashMap<>();
+    // TODO: can other claims be references as well?
 
-
-    public String getHid() {
-        return hid;
+    public HypothesisBase() {
+        score = new Score();
     }
 
-    private void setHid(String hid) {
-        this.hid = hid;
-    }
 
     public String getClaim() {
         return claim;
     }
 
-    private void setClaim(String claim) {
+    public void setClaim(String claim) {
         this.claim = claim;
     }
 
@@ -68,77 +84,43 @@ public final class HypothesisBase {
         this.score = score;
     }
 
-    /**
-     * Add a review by a fact-checker to this hypothesis
-     * @param fcid the fact-checker's id
-     * @param reliability the score given by the fact-checker
-     * @return the previous score given by this fact-checker, if she reviewed this hypothesis before
-     * @see Map#put(Object, Object)
-     */
-    public Float addReview(String fcid, float reliability) {
-        return reviews.put(fcid, reliability);
-    }
-
-    /**
-     * Remove a review by a fact-checker from this hypothesis
-     * @param fcid the fact-checker's id
-     * @return the score given by this fact-checker, if one was found
-     * @see Map#remove(Object)
-     */
-    public Float removeReview(String fcid) {
-        return reviews.remove(fcid);
-    }
-
-    public Map<String, Float> getReviews() {
-        return reviews;
+    public void setReferences(Map<String, ClaimReference.Entailment> references) {
+        this.references = references;
     }
 
     /**
      * Add a reference to this hypothesis
      * @param tid the reference-text's id on the ledger
-     * @return the reference-text's id, if it was already assigned to the hypothesis
+     * @return the previous entailment value, if the reference was already assigned to the hypothesis
      * @see Map#put(Object, Object)
      */
-    public String addReference(String tid) {
-        return references.put(tid, tid);
+    public ClaimReference.Entailment addReference(String tid, ClaimReference.Entailment entailment) {
+
+        return references.put(tid, entailment);
     }
 
     /**
      * Remove a reference from this hypothesis
      * @param tid the reference-text's id
-     * @return the reference-text's id, if it was assigned to the hypothesis
+     * @return the entailment value, if the reference was assigned to the hypothesis
      * @see Map#remove(Object)
      */
-    public Float removeReference(String tid) {
-        return reviews.remove(tid);
+    public ClaimReference.Entailment removeReference(String tid) {
+        return references.remove(tid);
     }
 
-    public Map<String, String> getReferences() {
+    public Map<String, ClaimReference.Entailment> getReferences() {
         return references;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
 
-        if ((obj == null) || (getClass() != obj.getClass())) {
-            return false;
-        }
-
-        HypothesisBase other = (HypothesisBase) obj;
-
-        return this.hid.equals(other.hid);
+    public void edit(HypothesisBase other) {
+        this.setClaim(other.getClaim());
+        this.setLocale(other.getLocale());
+        this.setReferences(new HashMap<>(other.getReferences()));
+        // TODO: allow direct score edit? Calculate new score?
+        this.getScore().edit(other.getScore());
     }
 
-    @Override
-    public int hashCode() {
-        return this.hid.hashCode();
-    }
 
-    @Override
-    public String toString() {
-        return String.format("{ \"claim\": \"%s\", \"score\": %s }", claim, score.toString());
-    }
 }

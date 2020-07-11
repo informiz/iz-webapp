@@ -27,14 +27,14 @@ public class FactCheckerController {
     @GetMapping(path = {"/", "/all"})
     public String getAllFactCheckers(Model model) {
         model.addAttribute(CHECKERS_ATTR, factCheckerRepo.findAll());
-        return "all-fc.html";
+        return String.format("%s/all-fc.html", PREFIX);
     }
 
     @GetMapping("/add")
     @Secured("ROLE_ADMIN")
     public String addFactCheckerForm(Model model) {
         model.addAttribute(CHECKER_ATTR, new FactCheckerBase());
-        return "add-fc.html";
+        return String.format("%s/add-fc.html", PREFIX);
     }
 
     @PostMapping("/add")
@@ -42,7 +42,7 @@ public class FactCheckerController {
     public String addFactChecker(@Valid @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                  BindingResult result) {
         if (result.hasErrors()) {
-            return "add-fc.html";
+            return String.format("%s/add-fc.html", PREFIX);
         }
         // TODO: TESTING, REVERT THIS!!!
         // checker = CheckerCCDao.addFactChecker(getSession(), checker);
@@ -65,7 +65,7 @@ public class FactCheckerController {
         FactCheckerBase checker = factCheckerRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid fact-checker id"));
         model.addAttribute(CHECKER_ATTR, checker);
-        return "view-fc.html";
+        return String.format("%s/view-fc.html", PREFIX);
     }
 
     @GetMapping("/details/{id}")
@@ -74,7 +74,7 @@ public class FactCheckerController {
         FactCheckerBase checker = factCheckerRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid fact-checker id"));
         model.addAttribute(CHECKER_ATTR, checker);
-        return "update-fc.html";
+        return String.format("%s/update-fc.html", PREFIX);
     }
 
     @PostMapping("/details/{id}")
@@ -89,6 +89,6 @@ public class FactCheckerController {
             factCheckerRepo.save(current);
             model.addAttribute(CHECKER_ATTR, current);
         }
-        return "update-fc.html";
+        return String.format("%s/update-fc.html", PREFIX);
     }
 }
