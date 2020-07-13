@@ -1,0 +1,25 @@
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Add a Reference</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">New Reference</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form action="#" th:action="@{/reference/add}" th:object="${reference}" method="post">
+                            <div th:replace="fragments/reference :: reference('write')"></div>
+                            <div class="row">
+                                <div class="col-md-6 mt-5">
+                                    <input type="submit" class="btn btn-primary" value="Add" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -80,6 +80,7 @@ public class SourceController {
             current.edit(source);
             sourceRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
+            return String.format("redirect:%s/all", PREFIX);
         }
         return String.format("%s/update-src.html", PREFIX);
     }

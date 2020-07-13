@@ -9,10 +9,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A data-type managed by the reference-text contract. A reference text consists of:
@@ -49,7 +47,7 @@ public final class ReferenceTextBase extends ChainCodeEntity implements Serializ
         return text;
     }
 
-    private void setText(String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -83,6 +81,15 @@ public final class ReferenceTextBase extends ChainCodeEntity implements Serializ
 
     public void setScore(Score score) {
         this.score = score;
+    }
+
+    public void edit(ReferenceTextBase other) {
+        this.setText(other.getText());
+        this.setSid(other.getSid());
+        this.setLink(other.getLink());
+        this.setLocale(other.getLocale());
+        // TODO: allow direct score edit? Calculate new score?
+        this.getScore().edit(other.getScore());
     }
 
 }

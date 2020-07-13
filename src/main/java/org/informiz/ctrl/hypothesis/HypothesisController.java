@@ -85,6 +85,7 @@ public class HypothesisController {
             current.edit(hypothesis);
             hypothesisRepo.save(current);
             model.addAttribute(HYPOTHESIS_ATTR, current);
+            return String.format("redirect:%s/all", PREFIX);
         }
         return String.format("%s/update-hypothesis.html", PREFIX);
     }

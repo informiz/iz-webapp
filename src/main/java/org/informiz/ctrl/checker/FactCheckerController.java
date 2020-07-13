@@ -100,6 +100,7 @@ public class FactCheckerController {
             current.edit(checker);
             factCheckerRepo.save(current);
             model.addAttribute(CHECKER_ATTR, current);
+            return String.format("redirect:%s/all", PREFIX);
         }
         return String.format("%s/update-fc.html", PREFIX);
     }
