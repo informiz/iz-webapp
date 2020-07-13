@@ -5,6 +5,7 @@ import org.hyperledger.fabric.gateway.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.xml.ws.WebServiceException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,31 +96,6 @@ public class CryptoUtils {
         return wallet;
     }
 
-    public static boolean isInformizMember(@NotBlank String userEmail) {
-        // TODO: Check if the user has a wallet
-        return true;
-    }
-
-    public static boolean isChannelMember(@NotBlank String userEmail, @NotNull Wallet userWallet, @NotBlank String channelId) {
-        // TODO: Check if the user has an identity associated with the specific channel
-        return true;
-    }
-
-    public static boolean isChannelAdmin(@NotBlank String userEmail, @NotNull Wallet userWallet, @NotBlank String channelId) {
-        // TODO: Check if the user has an admin identity associated with the specific channel
-        return true;
-    }
-
-    /**
-     * Retrieve a user's wallet from encrypted storage
-     * @param userEmail the email used for the user-login
-     * @return a wallet associated with the user, or null if the user doesn't have a wallet
-     */
-    public static Wallet getUserWallet(@NotBlank String userEmail) {
-        // TODO: load wallet from encrypted storage, path based on email used for login.
-        return setupWallet();
-    }
-
     /**
      * Save a user's wallet to encrypted storage
      * @param userEmail the email used for the user-login
@@ -130,14 +106,20 @@ public class CryptoUtils {
         // TODO: save wallet to encrypted storage, path based on email used for login.
     }
 
-    private static X509Certificate getCertificate(Path userCertPath) throws IOException, CertificateException {
+    public static X509Certificate getCertificate(Path userCertPath) throws IOException, CertificateException {
+        File certFile = userCertPath.toFile();
         X509Certificate cert;
-        try (InputStream inStream = new FileInputStream(userCertPath.toFile())) {
-            CertificateFactory cf = CertificateFactory.getInstance(CERT_PKI);
-            cert = (X509Certificate)cf.generateCertificate(inStream);
+        try (InputStream inStream = new FileInputStream(certFile)) {
+            cert = getCertificate(inStream);
         }
         return cert;
     }
+
+    public static X509Certificate getCertificate(InputStream certStream) throws IOException, CertificateException {
+        CertificateFactory cf = CertificateFactory.getInstance(CERT_PKI);
+        return (X509Certificate)cf.generateCertificate(certStream);
+    }
+
 
     /**
      *
@@ -148,8 +130,14 @@ public class CryptoUtils {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
-    private static PrivateKey getPKCS8Key(Path pkPath, String algo) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String privateKeyContent = new String(Files.readAllBytes(pkPath))
+    public static PrivateKey getPKCS8Key(Path pkPath, String algo) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = Files.readAllBytes(pkPath);
+        return getPKCS8Key(new String(keyBytes), algo);
+    }
+
+
+    public static PrivateKey getPKCS8Key(String keyContent, String algo) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String privateKeyContent = keyContent
                 .replaceAll("\\n", "")
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "");
@@ -159,7 +147,6 @@ public class CryptoUtils {
         PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
         return kf.generatePrivate(keySpecPKCS8);
     }
-
 
     // TODO: ********************************** FOR TESTING, REMOVE THIS!! **********************************
     /**

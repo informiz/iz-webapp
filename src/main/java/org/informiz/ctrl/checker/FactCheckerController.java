@@ -23,10 +23,22 @@ public class FactCheckerController {
     private FactCheckerRepository factCheckerRepo;
     // TODO: chaincode DAO
 
-
     @GetMapping(path = {"/", "/all"})
     public String getAllFactCheckers(Model model) {
-        model.addAttribute(CHECKERS_ATTR, factCheckerRepo.findAll());
+        Iterable<FactCheckerBase> checkers = factCheckerRepo.findAll();
+
+        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
+        if (! checkers.iterator().hasNext()) {
+            factCheckerRepo.save(new FactCheckerBase("Albert", "ashiagborayi@gmail.com", "https://www.linkedin.com/in/niraamit/"));
+            factCheckerRepo.save(new FactCheckerBase("Daniel", "danosaf291@gmail.com", "https://www.linkedin.com/in/niraamit/"));
+            factCheckerRepo.save(new FactCheckerBase("Richard", "richardtm905@gmail.com", "https://www.linkedin.com/in/niraamit/"));
+            factCheckerRepo.save(new FactCheckerBase("Kim", "kimberly@informiz.org", "https://www.linkedin.com/in/kimberly-caesar-bb204340/"));
+            factCheckerRepo.save(new FactCheckerBase("Nira", "nira@informiz.org", "https://www.linkedin.com/in/niraamit/"));
+
+            checkers = factCheckerRepo.findAll();
+        }
+
+        model.addAttribute(CHECKERS_ATTR, checkers);
         return String.format("%s/all-fc.html", PREFIX);
     }
 

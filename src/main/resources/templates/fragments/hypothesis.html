@@ -5,7 +5,7 @@
             <div class="form-group col-md-6">
                 <label for="claim" class="col-form-label">Claim</label>
                 <input type="text" th:field="*{claim}" class="form-control" id="claim" placeholder="The sky is blue"
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')') or mode == 'read'}"/>
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
                 <span th:if="${#fields.hasErrors('claim')}" th:errors="*{claim}" class="text-danger"></span>
             </div>
         </div>

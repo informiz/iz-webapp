@@ -1,6 +1,7 @@
 package org.informiz.model;
 
 import org.hibernate.validator.constraints.URL;
+import org.informiz.auth.AuthUtils;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -93,5 +94,11 @@ public class FactCheckerBase extends ChainCodeEntity implements Serializable {
         this.setName(other.getName());
         // TODO: allow direct score edit? Calculate new score?
         this.getScore().edit(other.getScore());
+    }
+
+    @PrePersist
+    private void generateCryptoMaterial() {
+        // TODO: use entity-id instead
+        AuthUtils.generateCryptoMaterial(this.getEmail());
     }
 }
