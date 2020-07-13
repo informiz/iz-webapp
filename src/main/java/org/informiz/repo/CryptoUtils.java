@@ -4,7 +4,6 @@ import org.hyperledger.fabric.gateway.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.xml.ws.WebServiceException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -182,7 +181,7 @@ public class CryptoUtils {
             return wallet;
         } catch (IOException | CertificateException | NoSuchAlgorithmException |
                 InvalidKeySpecException | URISyntaxException e) {
-            throw new WebServiceException("Failed to create test-wallet", e);
+            throw new IllegalStateException("Failed to create test-wallet", e);
         }
     }
 
@@ -270,7 +269,7 @@ public class CryptoUtils {
                 return new String(submitResult, StandardCharsets.UTF_8);
 
             } catch (ContractException | TimeoutException | InterruptedException e) {
-                throw new WebServiceException("Failed to submit transaction", e);
+                throw new IllegalStateException("Failed to submit transaction", e);
             }
         }
         /**
@@ -291,7 +290,7 @@ public class CryptoUtils {
                 return new String(queryResult, StandardCharsets.UTF_8);
 
             } catch (ContractException e) {
-                throw new WebServiceException("Failed to submit query", e);
+                throw new IllegalStateException("Failed to submit query", e);
             }
         }
 
