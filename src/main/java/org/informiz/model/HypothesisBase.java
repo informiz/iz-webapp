@@ -34,6 +34,9 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
     @NotBlank(message = "Claim is mandatory")
     private String claim;
 
+    @NotBlank(message = "Source is mandatory")
+    private String sid;
+
     @NotNull(message = "Locale is mandatory")
     private Locale locale;
 
@@ -66,6 +69,14 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     public void setClaim(String claim) {
         this.claim = claim;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
     }
 
     public Locale getLocale() {
@@ -116,6 +127,7 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     public void edit(HypothesisBase other) {
         this.setClaim(other.getClaim());
+        this.setSid(other.getSid());
         this.setLocale(other.getLocale());
         this.setReferences(new HashMap<>(other.getReferences()));
         // TODO: allow direct score edit? Calculate new score?

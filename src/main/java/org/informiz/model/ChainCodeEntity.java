@@ -1,12 +1,14 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.informiz.auth.InformizGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +22,7 @@ public abstract class ChainCodeEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    @JsonIgnore
+    //@JsonIgnore
     protected Long id;
 
     // The entity's id on the ledger
@@ -33,6 +35,25 @@ public abstract class ChainCodeEntity implements Serializable {
             @JoinColumn(name="reviewed", referencedColumnName="entity_id")
     )
     protected Set<Review> reviews = new HashSet<>();
+
+    @Column(name = "creator_entity_id")
+    protected String creatorId;
+
+    @Column(name = "owner_entity_id")
+    protected String ownerId;
+
+    // Creation time, as UTC timestamp in milliseconds
+    @Column(name = "created", nullable = false)
+    protected Long createdTs;
+
+    // Last-updated time, as UTC timestamp in milliseconds
+    @Column(name = "last_updated", nullable = false)
+    protected Long updatedTs;
+
+    // Removal time, as UTC timestamp in milliseconds
+    @Column(name = "removed")
+    protected Long removedTs;
+
 
 
     public Long getId() {
@@ -49,6 +70,33 @@ public abstract class ChainCodeEntity implements Serializable {
 
     public void setEntityId(String entityId) {
         this.entityId = entityId;
+    }
+
+
+    @PrePersist
+    protected void onCreate() {
+        // TODO: REMOVE THIS ONCE ENTITY ID IS AVAILABLE
+        entityId = String.valueOf(System.currentTimeMillis());
+
+        createdTs = updatedTs = new Date().getTime();
+        creatorId = ownerId = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .filter(auth -> (auth instanceof InformizGrantedAuthority))
+                .findFirst()
+                .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedTs = new Date().getTime();
+    }
+
+    public void remove() {
+        removedTs = updatedTs = new Date().getTime();
+    }
+
+    public void revive() {
+        removedTs = null;
+        updatedTs = new Date().getTime();
     }
 
     /**
@@ -80,6 +128,46 @@ public abstract class ChainCodeEntity implements Serializable {
         this.reviews = reviews;
     }
 
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getCreatedTs() {
+        return createdTs;
+    }
+
+    public void setCreatedTs(Long createdTs) {
+        this.createdTs = createdTs;
+    }
+
+    public Long getUpdatedTs() {
+        return updatedTs;
+    }
+
+    public void setUpdatedTs(Long updatedTs) {
+        this.updatedTs = updatedTs;
+    }
+
+    public Long getRemovedTs() {
+        return removedTs;
+    }
+
+    public void setRemovedTs(Long removedTs) {
+        this.removedTs = removedTs;
+    }
+
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
 
     // TODO: is this how we want to compare entities?
     @Override

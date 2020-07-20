@@ -9,12 +9,12 @@
                 <span th:if="${#fields.hasErrors('claim')}" th:errors="*{claim}" class="text-danger"></span>
             </div>
         </div>
+        <div th:replace="fragments/src-select :: srcSelect(${mode})"></div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="locale" class="col-form-label">Locale</label>
                 <select th:field="*{locale}" class="form-control custom-select" id="locale"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
-                    <!-- TODO: if edit - select the current locale -->
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>

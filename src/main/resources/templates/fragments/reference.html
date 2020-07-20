@@ -9,14 +9,7 @@
                 <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="text-danger"></span>
             </div>
         </div>
-        <div class="row">
-            <div class="form-group col-md-6">
-                <label for="sid" class="col-form-label">Source (This will be replaced by a select-button to choose existing Source)</label>
-                <input type="text" th:field="*{sid}" class="form-control" id="sid" placeholder="Select source..."
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
-                <span th:if="${#fields.hasErrors('sid')}" th:errors="*{sid}" class="text-danger"></span>
-            </div>
-        </div>
+        <div th:replace="fragments/src-select :: srcSelect(${mode})"></div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="link" class="col-form-label">Reference link</label>

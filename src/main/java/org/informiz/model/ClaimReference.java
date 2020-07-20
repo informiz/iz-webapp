@@ -10,7 +10,7 @@ public class ClaimReference implements Serializable {
     static final long serialVersionUID = 1L;
 
     public enum Entailment {
-        ENTAILS, CONTRADICTS, NONE;
+        SUPPORTS, CONTRADICTS, IRRELEVANT;
     }
 
     @Id

@@ -11,6 +11,18 @@
         </div>
         <div class="row">
             <div class="form-group col-md-6">
+                <label for="srcType" class="col-form-label">Type</label>
+                <select th:field="*{srcType}" id="srcType"
+                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                    <option value=""> -- </option>
+                    <option th:each="typeOpt : ${T(org.informiz.model.SourceBase.SourceType).values()}"
+                            th:value="${typeOpt}" th:text="${typeOpt.displayValue}"></option>
+                </select>
+                <span th:if="${#fields.hasErrors('srcType')}" th:errors="*{srcType}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
                 <label for="link" class="col-form-label">Link</label>
                 <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>

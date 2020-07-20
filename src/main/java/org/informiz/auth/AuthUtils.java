@@ -81,15 +81,15 @@ public class AuthUtils {
         }
 
         // All users have fact-checker permissions
-        authorities.add(new SimpleGrantedAuthority("ROLE_CHECKER"));
+        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", email));
 
         // TODO: get current channel name
         if (isChannelMember(email, userWallet, channelId)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", email));
         }
 
         if (isChannelAdmin(email, userWallet, channelId)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", email));
         }
 
         return authorities;
@@ -198,11 +198,12 @@ public class AuthUtils {
                 CryptoUtils.ORG_1_MSP, cert, key);
     }
 
-/* // TODO: REMOVE THIS
+ // TODO: REMOVE THIS
+/*
     public static void main(String[] args) {
         try {
-            saveCertificates("kimberly@informiz.org");
-            //Wallet wallet = getUserWallet("nira@informiz.org");
+            //saveCertificates("email@domain.com");
+            //Wallet wallet = getUserWallet("email@domain.com");
             //System.out.println("Got it");
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,0 +1,38 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="srcSelect(mode)">
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="srcSelect" class="col-form-label">Source</label>
+            <select th:field="*{sid}" class="form-control custom-select" id="srcSelect"
+                    th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                <option th:if="*{sid != null}" th:value="*{sid}"></option>
+            </select>
+            <span th:if="${#fields.hasErrors('sid')}" th:errors="*{sid}" class="text-danger"></span>
+        </div>
+        <script>
+            $(document).ready(function() {
+
+                $.getJSON("/source-api/all", function(data) {
+                    var srcSelect = $('#srcSelect');
+                    var srcId = 0;
+
+                    if ($('#srcSelect').children('option').length > 0) {
+                        srcId = $('#srcSelect').val();
+                    }
+
+                    srcSelect.append($('<option></option>').val(' -- ').html(' -- '));
+                    $.each(data, function(i, src) {
+                        var opt = $('<option></option>').val(src.entityId).html(src.name);
+                        if (srcId == src.entityId) {
+                            $("#srcSelect option:eq(0)").html(src.name);
+                        }
+                        srcSelect.append(opt);
+                    });
+                });
+            });
+        </script>
+    </div>
+</div>
+</html>

@@ -26,11 +26,37 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
+    // TODO: additional details per source-type?
+    public enum SourceType {
+        NEWS("News Outlet"),
+        SOCIAL_MEDIA("Social Media"),
+        STUDY("Scientific Study"),
+        BOOK("Book"),
+        PERSON("Person"),
+        GOVERNMENT("Government Entity"),
+        PRIVATE_ORG("Private Organization"),
+        BLOG("Blog");
+
+        private final String displayValue;
+
+        private SourceType(String displayValue) {
+            this.displayValue = displayValue;
+        }
+
+        public String getDisplayValue() {
+            return displayValue;
+        }
+
+    }
+
     @NotBlank(message = "Name is mandatory")
     private String name;
 
     @URL(message = "Please provide a valid link")
     private String link;
+
+    @Enumerated(EnumType.ORDINAL)
+    private SourceType srcType;
 
     @Embedded
     @AttributeOverrides({
@@ -53,6 +79,14 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public SourceType getSrcType() {
+        return srcType;
+    }
+
+    public void setSrcType(SourceType srcType) {
+        this.srcType = srcType;
     }
 
     public Score getScore() {

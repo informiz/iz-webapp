@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping(path= SourceController.PREFIX)
+@RequestMapping(path = SourceController.PREFIX)
 public class SourceController {
 
     public static final String PREFIX = "/source";
