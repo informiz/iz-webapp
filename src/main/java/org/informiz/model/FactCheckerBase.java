@@ -16,13 +16,6 @@ public class FactCheckerBase extends ChainCodeEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
-    })
-    @Valid
-    private Score score;
-
     @NotBlank(message = "Name is mandatory")
     private String name;
 
@@ -45,15 +38,6 @@ public class FactCheckerBase extends ChainCodeEntity implements Serializable {
         this.email = email;
         this.link = link;
         this.active = active;
-        this.score = new Score();
-    }
-
-    public Score getScore() {
-        return score;
-    }
-
-    public void setScore(Score score) {
-        this.score = score;
     }
 
     public String getName() {

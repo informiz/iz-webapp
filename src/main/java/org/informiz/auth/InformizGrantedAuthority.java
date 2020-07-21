@@ -27,5 +27,4 @@ public class InformizGrantedAuthority implements GrantedAuthority {
     public String getEntityId() {
         return entityId;
     }
-
 }

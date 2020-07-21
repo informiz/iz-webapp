@@ -6,6 +6,7 @@ import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
@@ -54,6 +55,12 @@ public abstract class ChainCodeEntity implements Serializable {
     @Column(name = "removed")
     protected Long removedTs;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
+    })
+    @Valid
+    private Score score = new Score();
 
 
     public Long getId() {
@@ -79,10 +86,14 @@ public abstract class ChainCodeEntity implements Serializable {
         entityId = String.valueOf(System.currentTimeMillis());
 
         createdTs = updatedTs = new Date().getTime();
-        creatorId = ownerId = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .filter(auth -> (auth instanceof InformizGrantedAuthority))
-                .findFirst()
-                .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
+        try {
+            creatorId = ownerId = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .filter(auth -> (auth instanceof InformizGrantedAuthority))
+                    .findFirst()
+                    .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
+        } catch (NullPointerException e) {
+            // TODO: SHOULD NEVER HAPPEN!! Handle this
+        }
     }
 
     @PreUpdate
@@ -169,6 +180,14 @@ public abstract class ChainCodeEntity implements Serializable {
         this.creatorId = creatorId;
     }
 
+    public Score getScore() {
+        return score;
+    }
+
+    public void setScore(Score score) {
+        this.score = score;
+    }
+
     // TODO: is this how we want to compare entities?
     @Override
     public int hashCode() {
@@ -206,5 +225,4 @@ public abstract class ChainCodeEntity implements Serializable {
             throw new IllegalArgumentException(String.format("Failed to deserialize entity of type %s", clazz), e);
         }
     }
-
 }

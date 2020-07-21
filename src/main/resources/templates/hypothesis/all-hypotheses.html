@@ -16,7 +16,9 @@
                                 <thead>
                                 <tr>
                                     <th>Text</th>
+                                    <th>Source</th>
                                     <th>Score</th>
+                                    <th>By</th>
                                     <th>Edit</th>
                                     <th>Delete</th>
                                 </tr>
@@ -24,7 +26,9 @@
                                 <tbody>
                                 <tr th:each="hypothesis : ${hypotheses}">
                                     <td th:text="${hypothesis.claim}"></td>
+                                    <td th:id="${hypothesis.sid}"></td>
                                     <td th:text="${hypothesis.score.reliability}"></td>
+                                    <td th:id="${hypothesis.ownerId}"></td>
                                     <td><a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
                                     <td><a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
                                 </tr>
@@ -34,6 +38,21 @@
                         <p class="my-5"><a href="/hypothesis/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
                     </div>
                 </div>
+                <script>
+                    $(document).ready(function() {
+
+                        $.getJSON("/source-api/all", function(data) {
+                            $.each(data, function(i, src) {
+                                $('#'+src.entityId).text(src.name);
+                            });
+                        });
+                        $.getJSON("/checker-api/all", function(data) {
+                            $.each(data, function(i, checker) {
+                                $('#'+checker.entityId).text(checker.name);
+                            });
+                        });
+                    });
+                </script>
             </div>
         </div>
     </body>

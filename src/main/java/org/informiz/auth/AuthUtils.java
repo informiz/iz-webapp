@@ -64,7 +64,7 @@ public class AuthUtils {
         return identity != null;
     }
 
-    public static Collection<GrantedAuthority> getUserAuthorities(String email) {
+    public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {
         // TODO: get wallet from encrypted storage based on user email address
         // TODO: need to exchange user's email for entity-id
         Wallet userWallet = null;
@@ -81,15 +81,15 @@ public class AuthUtils {
         }
 
         // All users have fact-checker permissions
-        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", email));
+        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", entityId));
 
         // TODO: get current channel name
         if (isChannelMember(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", email));
+            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", entityId));
         }
 
         if (isChannelAdmin(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", email));
+            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", entityId));
         }
 
         return authorities;

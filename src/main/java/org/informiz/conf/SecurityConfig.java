@@ -1,6 +1,8 @@
 package org.informiz.conf;
 
 import org.informiz.auth.AuthUtils;
+import org.informiz.model.FactCheckerBase;
+import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     ObjectFactory<HttpSession> httpSessionFactory;
+
+    @Autowired
+    private FactCheckerRepository factCheckerRepo;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -61,6 +66,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {
+        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
+        factCheckerRepo.save(new FactCheckerBase("Albert", "ashiagborayi@gmail.com", "https://www.linkedin.com/in/albert-ayi-ashiagbor-a0233815a/"));
+        factCheckerRepo.save(new FactCheckerBase("Daniel", "danosaf291@gmail.com", "https://www.linkedin.com/in/daniel-osarfo-8b21a482/"));
+        factCheckerRepo.save(new FactCheckerBase("Richard", "richardtm905@gmail.com", "https://www.linkedin.com/in/niraamit/"));
+        factCheckerRepo.save(new FactCheckerBase("Kim", "kimberly@informiz.org", "https://www.linkedin.com/in/kimberly-caesar-bb204340/"));
+        factCheckerRepo.save(new FactCheckerBase("Nira", "nira@informiz.org", "https://www.linkedin.com/in/niraamit/"));
+        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
+
         return (authorities) -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
@@ -68,7 +81,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 if (OAuth2UserAuthority.class.isInstance(authority)) {
                     OAuth2UserAuthority oidcUserAuthority = (OAuth2UserAuthority) authority;
                     String email = oidcUserAuthority.getAttributes().get("email").toString();
-                    AuthUtils.getUserAuthorities(email).forEach(auth -> mappedAuthorities.add(auth));
+                    AuthUtils.getUserAuthorities(email,
+                            factCheckerRepo.findByEmail(email).getEntityId())
+                            .forEach(auth -> mappedAuthorities.add(auth));
                 }
                 mappedAuthorities.add(authority);
             });

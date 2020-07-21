@@ -37,12 +37,6 @@ public final class ReferenceTextBase extends ChainCodeEntity implements Serializ
 
     private String link;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
-    })
-    private Score score;
-
     public String getText() {
         return text;
     }
@@ -73,14 +67,6 @@ public final class ReferenceTextBase extends ChainCodeEntity implements Serializ
 
     public void setLink(String link) {
         this.link = link;
-    }
-
-    public Score getScore() {
-        return score;
-    }
-
-    public void setScore(Score score) {
-        this.score = score;
     }
 
     public void edit(ReferenceTextBase other) {

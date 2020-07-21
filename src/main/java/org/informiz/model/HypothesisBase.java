@@ -42,13 +42,6 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     // TODO: need source for the claim?
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
-    })
-    @Valid
-    private Score score;
-
     @ElementCollection
     @CollectionTable(name = "claim_reference")
     @MapKeyJoinColumn(name="entity_id")
@@ -57,11 +50,6 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
     private Map<String, ClaimReference.Entailment> references = new HashMap<>();
 
     // TODO: can other claims be references as well?
-
-    public HypothesisBase() {
-        score = new Score();
-    }
-
 
     public String getClaim() {
         return claim;
@@ -85,14 +73,6 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     public void setLocale(Locale locale) {
         this.locale = locale;
-    }
-
-    public Score getScore() {
-        return score;
-    }
-
-    public void setScore(Score score) {
-        this.score = score;
     }
 
     public void setReferences(Map<String, ClaimReference.Entailment> references) {

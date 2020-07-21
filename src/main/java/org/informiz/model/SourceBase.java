@@ -58,13 +58,6 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     @Enumerated(EnumType.ORDINAL)
     private SourceType srcType;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
-    })
-    @Valid
-    private Score score;
-
     public String getName() {
         return name;
     }
@@ -87,14 +80,6 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     public void setSrcType(SourceType srcType) {
         this.srcType = srcType;
-    }
-
-    public Score getScore() {
-        return score;
-    }
-
-    public void setScore(Score score) {
-        this.score = score;
     }
 
     public void edit(SourceBase other) {
