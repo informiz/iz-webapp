@@ -8,7 +8,7 @@
         <div layout:fragment="content">
             <div th:switch="${sources}" class="container my-5">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div>
                         <h2 th:case="null">No sources yet!</h2>
                         <div th:case="*">
                             <h2 class="my-5">Source</h2>

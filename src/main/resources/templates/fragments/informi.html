@@ -1,0 +1,48 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <div th:fragment="informi(mode)">
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="name" class="col-form-label">Title</label>
+                <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="The meaning of life"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="description" class="col-form-label">Description</label>
+                <textarea rows="5" th:field="*{description}" class="form-control" id="description"
+                       placeholder="The answer to the ultimate question of life, the universe, and everything"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="locale" class="col-form-label">Locale</label>
+                <select th:field="*{locale}" class="form-control custom-select" id="locale"
+                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                    <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
+                    <option th:value="'en_US'" th:text="'English (US)'"></option>
+                </select>
+                <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <input type="hidden" th:field="*{mediaPath}" id="mediaPath">
+                <img th:unless="${informi.getMediaPath() == null}" th:src="${informi.getMediaPath()}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="file" class="col-form-label">Media file</label>
+                <input type="file" th:field="*{file}" class="form-control btn-sm float-left" id="file"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}" />
+                <span th:if="${#fields.hasErrors('file')}" th:errors="*{file}" class="text-danger"></span>
+            </div>
+        </div>
+        <div th:replace="fragments/score :: score(${mode})"></div>
+    </div>
+</html>

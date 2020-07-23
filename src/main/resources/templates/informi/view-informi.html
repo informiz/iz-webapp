@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Informi Details</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <div class="row" th:object="${informi}">
+                    <div class="col-md-6">
+                        <h2 class="mb-3" th:text="*{name}"/>
+                        <p><span class="text-muted" th:text="*{description}"></span></p>
+
+                        <span class="text-muted"
+                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <img th:src="${informi.getMediaPath()}">
+                            </div>
+                        </div>
+
+                        <h3 class="mb-2">Reviewers</h3>
+                        <p><span class="text-muted">Coming soon...</span></p>
+
+                        <h3 class="mb-2">Factual claims</h3>
+                        <p><span class="text-muted">Coming soon...</span></p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

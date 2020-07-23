@@ -1,5 +1,6 @@
 package org.informiz.ctrl.informi;
 
+import org.informiz.auth.AuthUtils;
 import org.informiz.model.InformiBase;
 import org.informiz.repo.informi.InformiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 @Controller
 @RequestMapping(path = InformiController.PREFIX)
@@ -27,18 +29,7 @@ public class InformiController {
     @GetMapping(path = {"/", "/all"})
     public String getAllInformiz(Model model) {
         model.addAttribute(INFORMIZ_ATTR, informiRepo.findAll());
-        return String.format("%s/all-informi.html", PREFIX);
-    }
-
-    @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file) {
-        if (! file.isEmpty()) {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-            // save the file on the local file system
-        } // TODO: else - error
-
-        return String.format("%s/add-informi.html", PREFIX);
+        return String.format("%s/all-informiz.html", PREFIX);
     }
 
     @GetMapping("/add")
@@ -51,10 +42,25 @@ public class InformiController {
     public String addInformi(@Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                  BindingResult result) {
         if (result.hasErrors()) {
+            if (result.getErrorCount() > 1 || ! result.hasFieldErrors("mediaPath"))
+                return String.format("%s/add-informi.html", PREFIX);
+        }
+
+        MultipartFile file = informi.getFile();
+        if (! file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            try {
+                String path = AuthUtils.uploadMedia(file.getBytes(), fileName);
+                informi.setMediaPath(path);
+                informiRepo.save(informi);
+            } catch (IOException e) {
+                // TODO: error
+                return String.format("%s/add-informi.html", PREFIX);
+            }
+        } else {
+            // TODO: error
             return String.format("%s/add-informi.html", PREFIX);
         }
-        // TODO: Add to ledger
-        informiRepo.save(informi);
         return String.format("redirect:%s/all", PREFIX);
     }
 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Informi</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:switch="${informiz}" class="container my-5">
+                <div class="row">
+                    <div>
+                        <h2 th:case="null">No informiz yet!</h2>
+                        <div th:case="*">
+                            <h2 class="my-5">Informi</h2>
+                            <table class="table table-striped table-responsive-md">
+                                <thead>
+                                <tr>
+                                    <th class="th-lg">Name</th>
+                                    <th class="th-lg">Description</th>
+                                    <th>Score</th>
+                                    <th>Media</th>
+                                    <th class="th-lg">By</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="informi : ${informiz}">
+                                    <td><a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
+                                           th:text="${informi.name}"></a></td>
+                                    <!-- td th:text="${informi.name}"></td -->
+                                    <td th:text="${informi.description}" class="form-control" style="background-color: transparent; border:none" rows="4"></td>
+                                    <td th:text="${informi.score.reliability}"></td>
+                                    <td><a th:href="${informi.mediaPath}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
+                                    <td th:name="${informi.ownerId}"></td>
+                                    <td><a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
+                                    <td><a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="my-5"><a href="/informi/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                        $.getJSON("/checker-api/all", function(data) {
+                            $.each(data, function(i, checker) {
+                                $('td[name="'+checker.entityId+'"]').text(checker.name);
+                            });
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

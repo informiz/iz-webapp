@@ -2,32 +2,24 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.informiz.auth.InformizGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.util.Date;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class ChainCodeEntity implements Serializable {
+public abstract class ChainCodeEntity extends InformizEntity {
 
     static final long serialVersionUID = 1L;
 
     protected static ObjectMapper mapper = new ObjectMapper();
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    //@JsonIgnore
-    protected Long id;
-
     // The entity's id on the ledger
-    @Column(name = "entity_id")
+    @Column(name = "entity_id", unique = true)
     protected String entityId;
 
     @OneToMany
@@ -37,24 +29,6 @@ public abstract class ChainCodeEntity implements Serializable {
     )
     protected Set<Review> reviews = new HashSet<>();
 
-    @Column(name = "creator_entity_id")
-    protected String creatorId;
-
-    @Column(name = "owner_entity_id")
-    protected String ownerId;
-
-    // Creation time, as UTC timestamp in milliseconds
-    @Column(name = "created", nullable = false)
-    protected Long createdTs;
-
-    // Last-updated time, as UTC timestamp in milliseconds
-    @Column(name = "last_updated", nullable = false)
-    protected Long updatedTs;
-
-    // Removal time, as UTC timestamp in milliseconds
-    @Column(name = "removed")
-    protected Long removedTs;
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride( name = "confidence", column = @Column(name = "score_confidence"))
@@ -62,14 +36,6 @@ public abstract class ChainCodeEntity implements Serializable {
     @Valid
     private Score score = new Score();
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getEntityId() {
         return entityId;
@@ -80,35 +46,16 @@ public abstract class ChainCodeEntity implements Serializable {
     }
 
 
+    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS AVAILABLE ************************
+
+    static final Random rand = new Random();
+
     @PrePersist
     protected void onCreate() {
-        // TODO: REMOVE THIS ONCE ENTITY ID IS AVAILABLE
-        entityId = String.valueOf(System.currentTimeMillis());
-
-        createdTs = updatedTs = new Date().getTime();
-        try {
-            creatorId = ownerId = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                    .filter(auth -> (auth instanceof InformizGrantedAuthority))
-                    .findFirst()
-                    .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
-        } catch (NullPointerException e) {
-            // TODO: SHOULD NEVER HAPPEN!! Handle this
-        }
+        super.onCreate();
+        entityId = String.format("%d-%d", System.currentTimeMillis(), rand.nextInt());
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedTs = new Date().getTime();
-    }
-
-    public void remove() {
-        removedTs = updatedTs = new Date().getTime();
-    }
-
-    public void revive() {
-        removedTs = null;
-        updatedTs = new Date().getTime();
-    }
+    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS AVAILABLE ************************
 
     /**
      * Add a review by a fact-checker to this reference-text
@@ -139,46 +86,6 @@ public abstract class ChainCodeEntity implements Serializable {
         this.reviews = reviews;
     }
 
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public Long getCreatedTs() {
-        return createdTs;
-    }
-
-    public void setCreatedTs(Long createdTs) {
-        this.createdTs = createdTs;
-    }
-
-    public Long getUpdatedTs() {
-        return updatedTs;
-    }
-
-    public void setUpdatedTs(Long updatedTs) {
-        this.updatedTs = updatedTs;
-    }
-
-    public Long getRemovedTs() {
-        return removedTs;
-    }
-
-    public void setRemovedTs(Long removedTs) {
-        this.removedTs = removedTs;
-    }
-
-    public String getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
-    }
 
     public Score getScore() {
         return score;

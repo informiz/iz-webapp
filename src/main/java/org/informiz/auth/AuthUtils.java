@@ -12,7 +12,6 @@ import org.hyperledger.fabric.gateway.Identity;
 import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -112,7 +111,7 @@ public class AuthUtils {
     private static final String locationId = "global";
     private static final String keyRingId = "informiz";
     private static final String keyId = "beta-channel";
-    private static final String idsBucket = "informiz";
+    private static final String izBucket = "informiz";
     private static final String idsFolder = "identities";
     private static final String channelId = "beta-channel.informiz.org";
     private static final String checkersChannelId = "checkers.informiz.org";
@@ -120,7 +119,21 @@ public class AuthUtils {
     private static final String certFilename = "cert.pem";
     private static final String keyFilename = "key.pk";
 
+    private static final String mediaBucket = "iz-public";
+    private static final String mediaFolder = "media";
+    private static final String mediaPrefix = "https://storage.googleapis.com/iz-public/";
+
     private static final Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+
+    public static String uploadMedia(byte[] media, String filename) {
+        String path = String.format("%s/%s/%s", mediaFolder, channelId, filename);
+        BlobId certBlobId = BlobId.of(mediaBucket, path);
+
+        BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
+        storage.create(blobInfo, media);
+
+        return String.format("%s%s", mediaPrefix, blobInfo.getName());
+    }
 
     public static void saveCertificates(String userEntityId) throws IOException {
 
@@ -143,7 +156,7 @@ public class AuthUtils {
             EncryptResponse response = client.encrypt(keyVersionName, ByteString.copyFromUtf8(content));
             byte[] bytes = response.getCiphertext().toByteArray();
 
-            BlobId certBlobId = BlobId.of(idsBucket,
+            BlobId certBlobId = BlobId.of(izBucket,
                     String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, channelId, filename));
             BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
             storage.create(blobInfo, bytes);
@@ -153,13 +166,13 @@ public class AuthUtils {
     }
 
     public static  Wallet getUserWallet(String userEntityId) throws IOException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        Page<Blob> blobs = storage.list(idsBucket,
+        Page<Blob> blobs = storage.list(izBucket,
                 Storage.BlobListOption.prefix(String.format("%s/%s/", idsFolder, userEntityId)),
                 Storage.BlobListOption.pageSize(1));
         if ( ! blobs.getValues().iterator().hasNext()) return null;
 
         // TODO: check for admin identity
-        blobs = storage.list(idsBucket,
+        blobs = storage.list(izBucket,
                 Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, channelId)),
                 Storage.BlobListOption.pageSize(1));
 
@@ -173,9 +186,9 @@ public class AuthUtils {
     }
 
     private static Wallet getWalletForIdentity(String userEntityId, String role, String channel) throws IOException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        Blob certBlob = storage.get(BlobId.of(idsBucket, String.format("%s/%s/%s:%s/%s",
+        Blob certBlob = storage.get(BlobId.of(izBucket, String.format("%s/%s/%s:%s/%s",
                 idsFolder, userEntityId, role, channel, certFilename)));
-        Blob keyBlob = storage.get(BlobId.of(idsBucket, String.format("%s/%s/%s:%s/%s",
+        Blob keyBlob = storage.get(BlobId.of(izBucket, String.format("%s/%s/%s:%s/%s",
                 idsFolder, userEntityId, role, channel, keyFilename)));
 
         X509Certificate cert;

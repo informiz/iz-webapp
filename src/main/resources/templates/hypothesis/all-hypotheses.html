@@ -8,7 +8,7 @@
         <div layout:fragment="content">
             <div th:switch="${hypotheses}" class="container my-5">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div>
                         <h2 th:case="null">No claims yet!</h2>
                         <div th:case="*">
                             <h2 class="my-5">Claim</h2>
@@ -43,12 +43,12 @@
 
                         $.getJSON("/source-api/all", function(data) {
                             $.each(data, function(i, src) {
-                                $('#'+src.entityId).text(src.name);
+                                $('td[name="'+src.entityId+'"]').text(src.name);
                             });
                         });
                         $.getJSON("/checker-api/all", function(data) {
                             $.each(data, function(i, checker) {
-                                $('#'+checker.entityId).text(checker.name);
+                                $('td[name="'+checker.entityId+'"]').text(checker.name);
                             });
                         });
                     });

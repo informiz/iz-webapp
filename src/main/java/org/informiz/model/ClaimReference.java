@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 @Table(name="claim_reference")
 @Entity
-public class ClaimReference implements Serializable {
+public class ClaimReference extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
@@ -13,20 +13,19 @@ public class ClaimReference implements Serializable {
         SUPPORTS, CONTRADICTS, IRRELEVANT;
     }
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
-
     // The claim (hypothesis) entity-id
-    @Column(name = "entity_id")
-    private String entityId;
+    @Column(name = "claim_id")
+    private String claim;
 
     // The reference entity-id
+    @Column(name = "reference_id")
     private String reference;
 
     @Enumerated(EnumType.ORDINAL)
     private Entailment entailment;
 
+    @Column
+    private String comment;
 
     public Long getId() {
         return id;
@@ -36,12 +35,12 @@ public class ClaimReference implements Serializable {
         this.id = id;
     }
 
-    public String getEntityId() {
-        return entityId;
+    public String getClaim() {
+        return claim;
     }
 
-    public void setEntityId(String claimId) {
-        this.entityId = claimId;
+    public void setClaim(String claimId) {
+        this.claim = claimId;
     }
 
     public String getReference() {
@@ -58,5 +57,13 @@ public class ClaimReference implements Serializable {
 
     public void setEntailment(Entailment entailment) {
         this.entailment = entailment;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

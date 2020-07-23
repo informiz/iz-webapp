@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Update Informi</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">Update Informi</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form action="#" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
+                            <input type="hidden" class="form-control" id="id" name="id" th:value="${informi.id}"/>
+                            <div th:replace="fragments/informi :: informi('write')"></div>
+                            <div class="row">
+                                <div class="col-md-6 mt-5">
+                                    <input type="submit" class="btn btn-primary" value="Update"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -40,12 +40,10 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
     @NotNull(message = "Locale is mandatory")
     private Locale locale;
 
-    // TODO: need source for the claim?
-
     @ElementCollection
     @CollectionTable(name = "claim_reference")
-    @MapKeyJoinColumn(name="entity_id")
-    @MapKeyColumn(name = "reference")
+    @MapKeyJoinColumn(name="entity_id", referencedColumnName="claim_id")
+    @MapKeyColumn(name = "reference_id")
     @Column(name = "entailment")
     private Map<String, ClaimReference.Entailment> references = new HashMap<>();
 
