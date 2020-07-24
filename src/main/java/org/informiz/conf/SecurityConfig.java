@@ -1,6 +1,7 @@
 package org.informiz.conf;
 
 import org.informiz.auth.AuthUtils;
+import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.ObjectFactory;
@@ -72,6 +73,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         factCheckerRepo.save(new FactCheckerBase("Richard", "richardtm905@gmail.com", "https://www.linkedin.com/in/niraamit/"));
         factCheckerRepo.save(new FactCheckerBase("Kim", "kimberly@informiz.org", "https://www.linkedin.com/in/kimberly-caesar-bb204340/"));
         factCheckerRepo.save(new FactCheckerBase("Nira", "nira@informiz.org", "https://www.linkedin.com/in/niraamit/"));
+
+        InformizGrantedAuthority.setCheckers(factCheckerRepo.findAll());
         // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
 
         return (authorities) -> {

@@ -26,9 +26,9 @@
                                 <tbody>
                                 <tr th:each="hypothesis : ${hypotheses}">
                                     <td th:text="${hypothesis.claim}"></td>
-                                    <td th:id="${hypothesis.sid}"></td>
+                                    <td th:name="${hypothesis.sid}"></td>
                                     <td th:text="${hypothesis.score.reliability}"></td>
-                                    <td th:id="${hypothesis.ownerId}"></td>
+                                    <td th:name="${hypothesis.ownerId}"></td>
                                     <td><a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
                                     <td><a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
                                 </tr>

@@ -76,19 +76,20 @@ public class AuthUtils {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
         if (userWallet == null) {
+            authorities.add(new InformizGrantedAuthority("ROLE_VIEWER", entityId, email));
             return authorities; // No additional authorities
         }
 
         // All users have fact-checker permissions
-        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", entityId));
+        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", entityId, email));
 
         // TODO: get current channel name
         if (isChannelMember(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", entityId));
+            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", entityId, email));
         }
 
         if (isChannelAdmin(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", entityId));
+            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", entityId, email));
         }
 
         return authorities;
