@@ -44,11 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .oauth2Login()
                 .userInfoEndpoint()
-                .userAuthoritiesMapper(this.userAuthoritiesMapper())
-                .and()
-                .defaultSuccessUrl("/factchecker/", true)
-                .and()
-                .logout()
+                .userAuthoritiesMapper(this.userAuthoritiesMapper());
+                http.logout()
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .logoutSuccessUrl("/home.html")

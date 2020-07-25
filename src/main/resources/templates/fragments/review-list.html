@@ -1,0 +1,48 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="reviewList(reviews)">
+    <h3 class="mt-5">Reviews</h3>
+    <div class="row">
+        <div class="col-md-8">
+
+            <table id="reviews-table" class="table table-striped table-responsive-md">
+                <thead>
+                <tr>
+                    <th>Reviewer</th>
+                    <th>Score</th>
+                    <th>Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- TODO: how to set the column width? -->
+                <tr th:each="review : ${reviews}">
+                    <td class="w-25" th:id="${review.checker}">
+                        <a href="#" target="_blank"></a>
+                    </td>
+                    <td class="w-25" th:text="${review.rating}"></td>
+                    <td class="w-50" th:text="${review.comment}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <script>
+            $(document).ready(function() {
+                if ($("#reviews-table tr").length > 0) {
+                    // TODO: only get listed checkers
+                    $.getJSON("/checker-api/all", function(data) {
+                        var map = new Map();
+                        $.each(data, function(i, checker) {
+                            map.set(checker.entityId, checker);
+                        });
+                        $("td[id]").val(function(){
+                            $(this).text(map.get($(this).attr('id')).name);
+                            $(this).first().attr("href", map.get($(this).attr('id')).link);
+                        });
+                    });
+                }
+            });
+        </script>
+    </div>
+</div>
+</html>

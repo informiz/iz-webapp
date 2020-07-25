@@ -1,10 +1,15 @@
 package org.informiz.ctrl.informi;
 
 import org.informiz.auth.AuthUtils;
+import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.InformiBase;
+import org.informiz.model.Review;
 import org.informiz.repo.informi.InformiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -16,19 +21,16 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping(path = InformiController.PREFIX)
-public class InformiController {
+public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     public static final String PREFIX = "/informi";
     public static final String INFORMI_ATTR = "informi";
     public static final String INFORMIZ_ATTR = "informiz";
-    @Autowired
-    private InformiRepository informiRepo;
-    // TODO: chaincode DAO
 
 
     @GetMapping(path = {"/", "/all"})
     public String getAllInformiz(Model model) {
-        model.addAttribute(INFORMIZ_ATTR, informiRepo.findAll());
+        model.addAttribute(INFORMIZ_ATTR, entityRepo.findAll());
         return String.format("%s/all-informiz.html", PREFIX);
     }
 
@@ -50,9 +52,10 @@ public class InformiController {
         if (! file.isEmpty()) {
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
             try {
+                // TODO: reprocess images, random filename
                 String path = AuthUtils.uploadMedia(file.getBytes(), fileName);
                 informi.setMediaPath(path);
-                informiRepo.save(informi);
+                entityRepo.save(informi);
             } catch (IOException e) {
                 // TODO: error
                 return String.format("%s/add-informi.html", PREFIX);
@@ -66,16 +69,16 @@ public class InformiController {
 
     @GetMapping("/delete/{id}")
     public String deleteInformi(@PathVariable("id") long id) {
-        InformiBase informi = informiRepo.findById(Long.valueOf(id))
+        InformiBase informi = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
         // TODO: set inactive
-        informiRepo.delete(informi);
+        entityRepo.delete(informi);
         return String.format("redirect:%s/all", PREFIX);
     }
 
     @GetMapping("/view/{id}")
     public String viewInformi(@PathVariable("id")  Long id, Model model) {
-        InformiBase informi = informiRepo.findById(id)
+        InformiBase informi = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
         return String.format("%s/view-informi.html", PREFIX);
@@ -83,9 +86,10 @@ public class InformiController {
 
     @GetMapping("/details/{id}")
     public String getInformi(@PathVariable("id")  Long id, Model model) {
-        InformiBase informi = informiRepo.findById(id)
+        InformiBase informi = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
+        model.addAttribute(REVIEW_ATTR, new Review());
         return String.format("%s/update-informi.html", PREFIX);
     }
 
@@ -94,13 +98,29 @@ public class InformiController {
                                     @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
-            InformiBase current = informiRepo.findById(id)
+            InformiBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
-            informiRepo.save(current);
+            entityRepo.save(current);
             model.addAttribute(INFORMI_ATTR, current);
             return String.format("redirect:%s/all", PREFIX);
         }
+        return String.format("%s/update-informi.html", PREFIX);
+    }
+
+    @PostMapping("/review/{entityId}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String reviewInformi(@PathVariable("entityId")  String entityId,
+                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                                   BindingResult result, Authentication authentication, Model model) {
+
+        if ( ! result.hasFieldErrors("rating")) {
+            InformiBase current = reviewEntity(entityId, review, authentication);
+            model.addAttribute(INFORMI_ATTR, current);
+            model.addAttribute(REVIEW_ATTR, new Review());
+        }
+
         return String.format("%s/update-informi.html", PREFIX);
     }
 }

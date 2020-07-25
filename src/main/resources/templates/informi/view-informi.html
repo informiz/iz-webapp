@@ -19,15 +19,14 @@
                                 <img th:src="${informi.getMediaPath()}">
                             </div>
                         </div>
-
-                        <h3 class="mb-2">Reviewers</h3>
-                        <p><span class="text-muted">Coming soon...</span></p>
-
-                        <h3 class="mb-2">Factual claims</h3>
-                        <p><span class="text-muted">Coming soon...</span></p>
-
                     </div>
                 </div>
+
+                <div th:replace="fragments/review-list :: reviewList(${informi.reviews})"></div>
+
+                <h3 class="mb-2 mt-5">Factual claims</h3>
+                <p><span class="text-muted">Coming soon...</span></p>
+
             </div>
         </div>
     </body>

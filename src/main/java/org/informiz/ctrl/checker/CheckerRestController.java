@@ -29,10 +29,11 @@ public class CheckerRestController {
     public List<FactCheckerBase> getAllCheckers() {
         return StreamSupport
                 .stream(checkerRepo.findAll().spliterator(), false)
+                .map(checker -> { checker.setEmail(null); return checker; }) // do not expose email
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(path = {"/", "/source"})
+    @GetMapping(path = {"/", "/checker"})
     @ResponseBody
     public FactCheckerBase getChecker(@RequestParam String enntityId) {
         return checkerRepo.findByEntityId(enntityId);

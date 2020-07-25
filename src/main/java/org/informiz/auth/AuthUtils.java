@@ -95,6 +95,16 @@ public class AuthUtils {
         return authorities;
     }
 
+    // TODO: Very inefficient!! Implement a user-details service to keep this info
+    public static String getUserEntityId(Collection<? extends GrantedAuthority> authorities) {
+        String entityId =  authorities.stream()
+                .filter(auth -> auth instanceof InformizGrantedAuthority)
+                .findFirst()
+                .map(auth -> ((InformizGrantedAuthority)auth).getEntityId())
+                .orElse(null);
+        return entityId;
+    }
+
 
     public static void getChannelProxy(String email, String channelId) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();

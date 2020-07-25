@@ -14,14 +14,19 @@
                             <!-- TODO: hidden ID field is not submitted with the form -->
                             <input type="hidden" class="form-control" id="id" name="id" th:value="${hypothesis.id}"/>
                             <div th:replace="fragments/hypothesis :: hypothesis('write')"></div>
-                            <div class="row">
-                                <div class="col-md-6 mt-5">
+                            <div class="row mt-3">
+                                <div class="col-md-6">
                                     <input type="submit" class="btn btn-primary" value="Update"/>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
+
+                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews})"></div>
+
+                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}"
+                     th:replace="fragments/review :: reviewForm(@{'/hypothesis/review/' + ${hypothesis.entityId}})"></div>
             </div>
         </div>
     </body>

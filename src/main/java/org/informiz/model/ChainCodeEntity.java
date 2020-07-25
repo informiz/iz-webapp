@@ -23,10 +23,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     protected String entityId;
 
     @OneToMany
-    @JoinTable(name = "entity_review",
-            joinColumns=
-            @JoinColumn(name="reviewed", referencedColumnName="entity_id")
-    )
+    @JoinColumns({ @JoinColumn(name = "reviewed", referencedColumnName = "entity_id") })
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -56,27 +53,6 @@ public abstract class ChainCodeEntity extends InformizEntity {
         entityId = String.format("%d-%d", System.currentTimeMillis(), rand.nextInt());
     }
     // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS AVAILABLE ************************
-
-    /**
-     * Add a review by a fact-checker to this reference-text
-     * @param fcid the fact-checker's id
-     * @param reliability the score given by the fact-checker
-     * @return the previous score given by this fact-checker, if she reviewed this text before
-     */
-    public boolean addReview(String fcid, float reliability) {
-        // TODO: replace if exists
-        return reviews.add(new Review(fcid, getEntityId(), reliability));
-    }
-
-    /**
-     * Remove a review by a fact-checker from this reference-text
-     * @param fcid the fact-checker's id
-     * @return the score given by this fact-checker, if one was found
-     */
-    public void removeReview(String fcid) {
-        // TODO: hash-code/equals by entity-id and checker-id
-        reviews.remove(fcid);
-    }
 
     public Set<Review> getReviews() {
         return reviews;
