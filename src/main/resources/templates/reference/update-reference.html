@@ -25,7 +25,7 @@
                 <div th:replace="fragments/review-list :: reviewList(${reference.reviews})"></div>
 
                 <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}"
-                     th:replace="fragments/review :: reviewForm(@{'/reference/review/' + ${reference.entityId}})"></div>
+                     th:replace="fragments/review :: reviewForm(@{'/reference/review/' + ${reference.id}})"></div>
             </div>
         </div>
     </body>

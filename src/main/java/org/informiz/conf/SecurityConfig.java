@@ -38,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and()
-                .authorizeRequests()
+                .authorizeRequests() // TODO: allow anonymous (not logged-in?) users
                 .antMatchers("/", "/public/**", "/style*", "/home.html", "/error*").permitAll()
                 .anyRequest().authenticated()
                 .and()

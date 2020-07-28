@@ -1,14 +1,9 @@
 package org.informiz.repo.source;
 
 import org.informiz.model.SourceBase;
-import org.springframework.data.repository.CrudRepository;
+import org.informiz.repo.entity.ChaincodeEntityRepo;
 
-// TODO: extend PagingAndSortingRepository instead?
-public interface SourceRepository extends CrudRepository<SourceBase, Long> {
-
-    SourceBase findByEntityId(String entityId);
-
-    SourceBase findById(long id);
+public interface SourceRepository extends ChaincodeEntityRepo<SourceBase> {
 
     SourceBase findByName(String name);
 }

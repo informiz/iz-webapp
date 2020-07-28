@@ -22,9 +22,9 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Column(name = "entity_id", unique = true)
     protected String entityId;
 
-    @OneToMany
-    @JoinColumns({ @JoinColumn(name = "reviewed", referencedColumnName = "entity_id") })
-    protected Set<Review> reviews = new HashSet<>();
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
+    //@JoinColumns({ @JoinColumn(name = "FK_entity_id", referencedColumnName = "entity_id") })
+    protected Set<Review> reviews; // = new HashSet<>();
 
     @Embedded
     @AttributeOverrides({
@@ -62,6 +62,20 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.reviews = reviews;
     }
 
+    public void addReview(Review review) {
+        reviews.add(review);
+    }
+
+    public void removeReview(Review review) {
+        reviews.remove(review);
+    }
+
+    public Review getCheckerReview(String fcid) {
+        Review byChecker = reviews.stream().filter(review ->
+                fcid.equals(review.getChecker())).findFirst().orElse(null);
+        return byChecker;
+    }
+
 
     public Score getScore() {
         return score;
@@ -94,10 +108,14 @@ public abstract class ChainCodeEntity extends InformizEntity {
 
     @Override
     public String toString() {
+        return entityId;
+    }
+
+    public static String toEntityString(ChainCodeEntity entity) {
         try {
-            return mapper.writeValueAsString(this);
+            return mapper.writeValueAsString(entity);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize fact-checker", e);
+            throw new RuntimeException("Failed to serialize entity", e);
         }
     }
 

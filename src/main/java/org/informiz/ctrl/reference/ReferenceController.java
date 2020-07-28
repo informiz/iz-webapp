@@ -3,8 +3,6 @@ package org.informiz.ctrl.reference;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.ReferenceTextBase;
 import org.informiz.model.Review;
-import org.informiz.repo.reference.ReferenceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -50,7 +48,8 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteReference(@PathVariable("id") long id) {
+    @Secured("ROLE_MEMBER")
+    public String deleteReference(@PathVariable("id") @Valid Long id) {
         ReferenceTextBase reference = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid reference id"));
         // TODO: set inactive
@@ -59,7 +58,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     }
 
     @GetMapping("/view/{id}")
-    public String viewReference(@PathVariable("id")  Long id, Model model) {
+    public String viewReference(@PathVariable("id") @Valid Long id, Model model) {
         ReferenceTextBase reference = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid reference id"));
         model.addAttribute(REFERENCE_ATTR, reference);
@@ -78,7 +77,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
-    public String updateReference(@PathVariable("id")  Long id,
+    public String updateReference(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(REFERENCE_ATTR) ReferenceTextBase reference,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
@@ -92,19 +91,22 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
         return String.format("%s/update-reference.html", PREFIX);
     }
 
-    @PostMapping("/review/{entityId}")
+    @PostMapping("/review/{id}")
     @Secured("ROLE_USER")
     @Transactional
-    public String reviewReference(@PathVariable("entityId")  String entityId,
+    public String reviewReference(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication, Model model) {
 
+        ReferenceTextBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+
         if ( ! result.hasFieldErrors("rating")) {
-            ReferenceTextBase current = reviewEntity(entityId, review, authentication);
+            current = reviewEntity(current, review, authentication);
             model.addAttribute(REFERENCE_ATTR, current);
             model.addAttribute(REVIEW_ATTR, new Review());
         }
 
-        return String.format("%s/update-reference.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 }

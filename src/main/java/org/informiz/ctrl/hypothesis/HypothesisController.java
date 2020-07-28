@@ -48,7 +48,8 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteHypothesis(@PathVariable("id") long id) {
+    @Secured("ROLE_MEMBER")
+    public String deleteHypothesis(@PathVariable("id") @Valid Long id) {
         HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
         // TODO: set inactive
@@ -57,7 +58,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @GetMapping("/view/{id}")
-    public String viewHypothesis(@PathVariable("id")  Long id, Model model) {
+    public String viewHypothesis(@PathVariable("id") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
@@ -66,7 +67,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
-    public String getHypothesis(@PathVariable("id")  Long id, Model model) {
+    public String getHypothesis(@PathVariable("id") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
@@ -76,7 +77,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
-    public String updateHypothesis(@PathVariable("id")  Long id,
+    public String updateHypothesis(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
@@ -91,19 +92,22 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 
-    @PostMapping("/review/{entityId}")
+    @PostMapping("/review/{id}")
     @Secured("ROLE_USER")
     @Transactional
-    public String reviewHypothesis(@PathVariable("entityId")  String entityId,
+    public String reviewHypothesis(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication, Model model) {
 
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+
         if ( ! result.hasFieldErrors("rating")) {
-            HypothesisBase current = reviewEntity(entityId, review, authentication);
+            current = reviewEntity(current, review, authentication);
             model.addAttribute(HYPOTHESIS_ATTR, current);
             model.addAttribute(REVIEW_ATTR, new Review());
         }
 
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 }

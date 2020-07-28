@@ -35,12 +35,14 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/add")
+    @Secured("ROLE_MEMBER")
     public String addInformiForm(Model model) {
         model.addAttribute(INFORMI_ATTR, new InformiBase());
         return String.format("%s/add-informi.html", PREFIX);
     }
 
     @PostMapping("/add")
+    @Secured("ROLE_MEMBER")
     public String addInformi(@Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                  BindingResult result) {
         if (result.hasErrors()) {
@@ -68,7 +70,8 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteInformi(@PathVariable("id") long id) {
+    @Secured("ROLE_MEMBER")
+    public String deleteInformi(@PathVariable("id") @Valid Long id) {
         InformiBase informi = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
         // TODO: set inactive
@@ -77,7 +80,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/view/{id}")
-    public String viewInformi(@PathVariable("id")  Long id, Model model) {
+    public String viewInformi(@PathVariable("id") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
@@ -85,7 +88,8 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/details/{id}")
-    public String getInformi(@PathVariable("id")  Long id, Model model) {
+    @Secured("ROLE_MEMBER")
+    public String getInformi(@PathVariable("id") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
@@ -94,7 +98,8 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/details/{id}")
-    public String updateInformi(@PathVariable("id")  Long id,
+    @Secured("ROLE_MEMBER")
+    public String updateInformi(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
@@ -108,19 +113,22 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/update-informi.html", PREFIX);
     }
 
-    @PostMapping("/review/{entityId}")
+    @PostMapping("/review/{id}")
     @Secured("ROLE_USER")
     @Transactional
-    public String reviewInformi(@PathVariable("entityId")  String entityId,
+    public String reviewInformi(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication, Model model) {
 
+        InformiBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+
         if ( ! result.hasFieldErrors("rating")) {
-            InformiBase current = reviewEntity(entityId, review, authentication);
+            current = reviewEntity(current, review, authentication);
             model.addAttribute(INFORMI_ATTR, current);
             model.addAttribute(REVIEW_ATTR, new Review());
         }
 
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 }
