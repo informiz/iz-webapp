@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -22,10 +21,11 @@ import java.util.Locale;
  * - reviews by fact-checkers
  * Any additional metadata should be saved on a separate CMS
  */
+// TODO: rename to  "citation" and use "reference" for both Hypothesis and Text refs?
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@Table(name="reference")
+@Table(name="citation")
 @Entity
-public final class ReferenceTextBase extends ChainCodeEntity implements Serializable {
+public final class CitationBase extends ChainCodeEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
@@ -69,7 +69,7 @@ public final class ReferenceTextBase extends ChainCodeEntity implements Serializ
         this.link = link;
     }
 
-    public void edit(ReferenceTextBase other) {
+    public void edit(CitationBase other) {
         this.setText(other.getText());
         this.setSid(other.getSid());
         this.setLink(other.getLink());

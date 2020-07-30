@@ -23,10 +23,9 @@
                     </div>
                 </div>
 
-                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews})"></div>
+                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews}, @{'/hypothesis/review/' + ${hypothesis.id}})"></div>
 
-                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}"
-                     th:replace="fragments/review :: reviewForm(@{'/hypothesis/review/' + ${hypothesis.id}})"></div>
+                <div th:replace="fragments/ref-list :: referenceList(${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})"></div>
             </div>
         </div>
     </body>

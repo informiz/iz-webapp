@@ -3,10 +3,10 @@
 <div th:fragment="reviewForm(actionPath)">
     <h3 class="mt-5">Add Review</h3>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <form action="#" th:action="@{${actionPath}}" th:object="${review}" method="post">
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label for="rating" class="col-form-label">Reliability</label>
                         <input type="number" th:field="*{rating}"  min="0" max="1" step="0.01"
                                class="form-control" id="rating" placeholder="0.9"/>

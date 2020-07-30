@@ -2,6 +2,7 @@ package org.informiz.ctrl.hypothesis;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.HypothesisBase;
+import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public static final String PREFIX = "/hypothesis";
     public static final String HYPOTHESIS_ATTR = "hypothesis"; // singular
     public static final String HYPOTHESES_ATTR = "hypotheses"; // plural
+    public static final String REFERENCE_ATTR = "reference";
 
 
     @GetMapping(path = {"/", "/all"})
@@ -70,8 +72,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public String getHypothesis(@PathVariable("id") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
-        model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
-        model.addAttribute(REVIEW_ATTR, new Review());
+        prepareEditModel(model, hypothesis, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 
@@ -86,9 +87,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
             current.edit(hypothesis);
             entityRepo.save(current);
             model.addAttribute(HYPOTHESIS_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
-            return String.format("redirect:%s/all", PREFIX);
+            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
+        prepareEditModel(model, hypothesis, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 
@@ -105,9 +106,47 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
             model.addAttribute(HYPOTHESIS_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
+            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
+        prepareEditModel(model, current, review, new Reference());
+        return String.format("%s/update-hypothesis.html", PREFIX);
+    }
 
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+    @PostMapping("/reference/{id}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String addReference(@PathVariable("id") @Valid Long id,
+                               @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               BindingResult result, Model model) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+
+        if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
+            current = addReference(current, reference);
+            model.addAttribute(HYPOTHESIS_ATTR, current);
+            return String.format("redirect:%s/view/%s", PREFIX, id);
+        }
+        prepareEditModel(model, current, new Review(), reference);
+        return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
+    protected HypothesisBase addReference(HypothesisBase hypothesis, Reference reference) {
+        reference.setReviewed(hypothesis);
+        Reference current = hypothesis.getReference(reference);
+        if (current != null) {
+            current.setEntailment(reference.getEntailment());
+            current.setComment(reference.getComment());
+        } else {
+            hypothesis.addReference(new Reference(hypothesis, reference.getCitationId(),
+                    reference.getEntailment(), reference.getComment()));
+        }
+        return hypothesis;
+    }
+
+    private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
+        model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
+        model.addAttribute(REVIEW_ATTR, review);
+        model.addAttribute(REFERENCE_ATTR, ref);
     }
 }

@@ -2,7 +2,9 @@ package org.informiz.ctrl.informi;
 
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
+import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.InformiBase;
+import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.repo.informi.InformiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public static final String PREFIX = "/informi";
     public static final String INFORMI_ATTR = "informi";
     public static final String INFORMIZ_ATTR = "informiz";
+    public static final String REFERENCE_ATTR = "reference";
 
 
     @GetMapping(path = {"/", "/all"})
@@ -92,8 +95,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public String getInformi(@PathVariable("id") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
-        model.addAttribute(INFORMI_ATTR, informi);
-        model.addAttribute(REVIEW_ATTR, new Review());
+        prepareEditModel(model, informi, new Review(), new Reference());
         return String.format("%s/update-informi.html", PREFIX);
     }
 
@@ -108,8 +110,9 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
             current.edit(informi);
             entityRepo.save(current);
             model.addAttribute(INFORMI_ATTR, current);
-            return String.format("redirect:%s/all", PREFIX);
+            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
+        prepareEditModel(model, informi, new Review(), new Reference());
         return String.format("%s/update-informi.html", PREFIX);
     }
 
@@ -126,9 +129,47 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
             model.addAttribute(INFORMI_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
+            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
+        prepareEditModel(model, current, review, new Reference());
+        return String.format("%s/update-informi.html", PREFIX);
+    }
 
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+    @PostMapping("/reference/{id}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String addReference(@PathVariable("id") @Valid Long id,
+                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                BindingResult result, Model model) {
+
+        InformiBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+
+        if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
+            current = addReference(current, reference);
+            model.addAttribute(INFORMI_ATTR, current);
+            return String.format("redirect:%s/view/%s", PREFIX, id);
+        }
+        prepareEditModel(model, current, new Review(), reference);
+        return String.format("%s/update-informi.html", PREFIX);
+    }
+
+    protected InformiBase addReference(InformiBase informi, Reference reference) {
+        reference.setReviewed(informi);
+        Reference current = informi.getReference(reference);
+        if (current != null) {
+            current.setEntailment(reference.getEntailment());
+            current.setComment(reference.getComment());
+        } else {
+            informi.addReference(new Reference(informi, reference.getCitationId(),
+                    reference.getEntailment(), reference.getComment()));
+        }
+        return informi;
+    }
+
+    private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {
+        model.addAttribute(INFORMI_ATTR, informi);
+        model.addAttribute(REVIEW_ATTR, review);
+        model.addAttribute(REFERENCE_ATTR, ref);
     }
 }

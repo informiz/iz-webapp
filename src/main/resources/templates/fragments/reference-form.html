@@ -1,0 +1,69 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="referenceForm(actionPath)">
+    <h3 class="mt-5">Add Reference</h3>
+    <div class="row">
+        <div class="col-md-8">
+            <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="claimSelect" class="col-form-label">Claim</label>
+                        <select th:field="*{citationId}" class="form-control custom-select" id="claimSelect"
+                                th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                            <option th:if="*{citationId != null}" th:value="*{citationId}"></option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('citationId')}" th:errors="*{citationId}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="entailment" class="col-form-label">Type</label>
+                        <select th:field="*{entailment}" id="entailment"
+                                th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                            <option value=""> -- </option>
+                            <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
+                                    th:value="${entailmentOpt}" th:text="${entailmentOpt.displayValue}"></option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('entailment')}" th:errors="*{entailment}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="comment" class="col-form-label">Comment</label>
+                        <textarea th:field="*{comment}" class="form-control" id="comment" cols="30"
+                                  placeholder="Explain the reference..."/>
+                        <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
+                    <div class="col-md-6">
+                        <input type="submit" class="btn btn-primary" value="Update"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <script>
+            $(document).ready(function() {
+            // ********************** TODO: prevent claims referencing themselves, implement search
+                $.getJSON("/citation-api/all", function(data) {
+                    var claimSelect = $('#claimSelect');
+                    var claimId = 0;
+
+                    if ($('#claimSelect').children('option').length > 0) {
+                        claimId = $('#claimSelect').val();
+                    }
+
+                    claimSelect.append($('<option></option>').val(' -- ').html(' -- '));
+                    $.each(data, function(i, citation) {
+                        var opt = $('<option></option>').val(citation.entityId).html(citation.text);
+                        if (claimId == citation.entityId) {
+                            $("#claimSelect option:eq(0)").html(citation.text);
+                        }
+                        claimSelect.append(opt);
+                    });
+                });
+            });
+        </script>
+    </div>
+</div>
+</html>

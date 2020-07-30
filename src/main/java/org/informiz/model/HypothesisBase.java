@@ -7,13 +7,10 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import javax.persistence.*;
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A data-type managed by the hypothesis contract. A hypothesis consists of:
@@ -40,14 +37,9 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
     @NotNull(message = "Locale is mandatory")
     private Locale locale;
 
-    @ElementCollection
-    @CollectionTable(name = "claim_reference")
-    @MapKeyJoinColumn(name="entity_id", referencedColumnName="claim_id")
-    @MapKeyColumn(name = "reference_id")
-    @Column(name = "entailment")
-    private Map<String, ClaimReference.Entailment> references = new HashMap<>();
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
+    protected Set<Reference> references;
 
-    // TODO: can other claims be references as well?
 
     public String getClaim() {
         return claim;
@@ -73,44 +65,33 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
         this.locale = locale;
     }
 
-    public void setReferences(Map<String, ClaimReference.Entailment> references) {
+    public void setReferences(Set<Reference> references) {
         this.references = references;
     }
 
-    /**
-     * Add a reference to this hypothesis
-     * @param tid the reference-text's id on the ledger
-     * @return the previous entailment value, if the reference was already assigned to the hypothesis
-     * @see Map#put(Object, Object)
-     */
-    public ClaimReference.Entailment addReference(String tid, ClaimReference.Entailment entailment) {
-
-        return references.put(tid, entailment);
-    }
-
-    /**
-     * Remove a reference from this hypothesis
-     * @param tid the reference-text's id
-     * @return the entailment value, if the reference was assigned to the hypothesis
-     * @see Map#remove(Object)
-     */
-    public ClaimReference.Entailment removeReference(String tid) {
-        return references.remove(tid);
-    }
-
-    public Map<String, ClaimReference.Entailment> getReferences() {
+    public Set<Reference> getReferences() {
         return references;
     }
 
+    public boolean addReference(Reference ref) {
+        return references.add(ref);
+    }
+
+    public Reference getReference(@NotNull Reference ref) {
+        // TODO: more efficient way?
+        Reference found = references.stream().filter(reference ->
+                ref.equals(reference)).findFirst().orElse(null);
+        return found;
+    }
+    public boolean removeReference(Reference ref) {
+        return references.remove(ref);
+    }
 
     public void edit(HypothesisBase other) {
         this.setClaim(other.getClaim());
         this.setSid(other.getSid());
         this.setLocale(other.getLocale());
-        this.setReferences(new HashMap<>(other.getReferences()));
         // TODO: allow direct score edit? Calculate new score?
         this.getScore().edit(other.getScore());
     }
-
-
 }

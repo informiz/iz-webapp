@@ -71,6 +71,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     }
 
     public Review getCheckerReview(String fcid) {
+        // TODO: more efficient way?
         Review byChecker = reviews.stream().filter(review ->
                 fcid.equals(review.getChecker())).findFirst().orElse(null);
         return byChecker;

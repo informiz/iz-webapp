@@ -7,13 +7,18 @@
     <body>
         <div layout:fragment="content">
             <div class="container my-5">
-                <h2 class="mb-5">Claim Details</h2>
                 <div class="row" th:object="${hypothesis}">
                     <div class="col-md-6">
-                        <div th:replace="fragments/hypothesis :: hypothesis('read')"></div>
+                        <h4 class="mb-3" th:text="*{claim}"/>
+                        <!-- TODO: source name+link -->
+
+                        <span class="text-muted"
+                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews})"></div>
+                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews}, '')"></div>
+
+                <div th:replace="fragments/ref-list :: referenceList(${hypothesis.references}, '')"></div>
             </div>
         </div>
     </body>

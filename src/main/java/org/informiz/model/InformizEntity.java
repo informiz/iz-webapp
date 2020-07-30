@@ -22,6 +22,7 @@ public class InformizEntity  implements Serializable {
     @Column(name = "creator_entity_id")
     protected String creatorId;
 
+    // TODO: link to fact-checker entity?
     @Column(name = "owner_entity_id")
     protected String ownerId;
 

@@ -44,13 +44,17 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     @NotNull(message = "Locale is mandatory")
     private Locale locale;
 
+/*
     // TODO: why can't I specify `referencedColumnName="entity_id"` ??
     @ElementCollection
     @CollectionTable(name = "informi_claim",
             joinColumns = @JoinColumn(name = "informi_id"))
     @Column(name = "claim_id")
     private Set<String> claims = new HashSet<>();
+*/
 
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
+    protected Set<Reference> references;
 
     public String getName() {
         return name;
@@ -92,20 +96,27 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
         this.locale = locale;
     }
 
-    public Set<String> getClaims() {
-        return claims;
+    public Set<Reference> getReferences() {
+        return references;
     }
 
-    public void setClaims(Set<String> claims) {
-        this.claims = claims;
+    public void setReferences(Set<Reference> references) {
+        this.references = references;
     }
 
-    public boolean addClaim(String claimId) {
-        return claims.add(claimId);
+    public boolean addReference(Reference ref) {
+        return references.add(ref);
     }
 
-    public boolean removeClaim(String claimId) {
-        return claims.remove(claimId);
+    public boolean removeReference(Reference ref) {
+        return references.remove(ref);
+    }
+
+    public Reference getReference(@NotNull Reference ref) {
+        // TODO: more efficient way?
+        Reference found = references.stream().filter(reference ->
+                ref.equals(reference)).findFirst().orElse(null);
+        return found;
     }
 
     public void edit(InformiBase other) {
@@ -113,7 +124,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
         this.setDescription(other.getDescription());
         this.setMediaPath(other.getMediaPath());
         this.setLocale(other.getLocale());
-        this.setReviews(other.getReviews()); // TODO: move to parent edit method, proper copy
         // TODO: allow direct score edit? Calculate new score?
         this.getScore().edit(other.getScore());
     }

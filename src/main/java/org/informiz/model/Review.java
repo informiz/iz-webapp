@@ -14,6 +14,7 @@ public class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
+    // TODO: available in the "ownerId" field after persistence...
     // The fact-checker's id on the ledger (may be from a different channel, so not necessarily in the local db)
     @Column
     @NotBlank
@@ -82,7 +83,7 @@ public class Review extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s", checker, reviewed).hashCode();
+        return String.format("%s-%s", checker, reviewed.getEntityId()).hashCode();
     }
 
     @Override

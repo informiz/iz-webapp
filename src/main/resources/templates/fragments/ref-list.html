@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="referenceList(references, link)">
+    <h3 class="mt-5">References</h3>
+    <div class="row">
+        <div class="col-md-8">
+
+            <table id="references-table" class="table table-striped table-responsive-md">
+                <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Entailment</th>
+                    <th>Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- TODO: how to set the column width? -->
+                <tr th:each="ref : ${references}">
+                    <td class="w-40" th:id="${ref.citationId}"/>
+                    <td class="w-20" th:text="${ref.entailment.displayValue}"></td>
+                    <td class="w-40" th:text="${ref.comment}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(link)}">
+                <div th:replace="fragments/reference-form :: referenceForm(${link})"></div>
+            </th:block>
+        </div>
+        <script>
+            $(document).ready(function() {
+                if ($("#references-table tr").length > 0) {
+                    // TODO: only get listed claims
+                    $.getJSON("/citation-api/all", function(data) {
+                        var map = new Map();
+                        $.each(data, function(i, citation) {
+                            map.set(citation.entityId, citation);
+                        });
+                        $("#references-table td[id]").val(function(){
+                            $(this).append( "<a href='/reference/view/" + map.get($(this).attr('id')).id + "'>" +
+                                map.get($(this).attr('id')).text + "</a>" )
+                        });
+                    });
+                }
+            });
+        </script>
+    </div>
+</div>
+</html>

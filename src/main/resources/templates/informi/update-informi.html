@@ -21,10 +21,9 @@
                         </form>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${informi.reviews})"></div>
+                <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, @{'/informi/review/' + ${informi.id}})"></div>
 
-                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}"
-                     th:replace="fragments/review :: reviewForm(@{'/informi/review/' + ${informi.id}})"></div>
+                <div th:replace="fragments/ref-list :: referenceList(${informi.references}, @{'/informi/reference/' + ${informi.id}})"></div>
             </div>
         </div>
     </body>

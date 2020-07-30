@@ -1,7 +1,7 @@
-package org.informiz.ctrl.reference;
+package org.informiz.ctrl.citation;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.ReferenceTextBase;
+import org.informiz.model.CitationBase;
 import org.informiz.model.Review;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping(path= ReferenceController.PREFIX)
-public class ReferenceController extends ChaincodeEntityController<ReferenceTextBase> {
+@RequestMapping(path= CitationController.PREFIX)
+public class CitationController extends ChaincodeEntityController<CitationBase> {
 
     public static final String PREFIX = "/reference";
     public static final String REFERENCE_ATTR = "reference";
@@ -31,13 +31,13 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     @GetMapping("/add")
     @Secured("ROLE_MEMBER")
     public String addReferenceForm(Model model) {
-        model.addAttribute(REFERENCE_ATTR, new ReferenceTextBase());
+        model.addAttribute(REFERENCE_ATTR, new CitationBase());
         return String.format("%s/add-reference.html", PREFIX);
     }
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addReference(@Valid @ModelAttribute(REFERENCE_ATTR) ReferenceTextBase reference,
+    public String addReference(@Valid @ModelAttribute(REFERENCE_ATTR) CitationBase reference,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-reference.html", PREFIX);
@@ -50,7 +50,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     @GetMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
     public String deleteReference(@PathVariable("id") @Valid Long id) {
-        ReferenceTextBase reference = entityRepo.findById(Long.valueOf(id))
+        CitationBase reference = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid reference id"));
         // TODO: set inactive
         entityRepo.delete(reference);
@@ -59,7 +59,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
 
     @GetMapping("/view/{id}")
     public String viewReference(@PathVariable("id") @Valid Long id, Model model) {
-        ReferenceTextBase reference = entityRepo.findById(id)
+        CitationBase reference = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid reference id"));
         model.addAttribute(REFERENCE_ATTR, reference);
         return String.format("%s/view-reference.html", PREFIX);
@@ -68,7 +68,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getReference(@PathVariable("id")  Long id, Model model) {
-        ReferenceTextBase reference = entityRepo.findById(id)
+        CitationBase reference = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid reference id"));
         model.addAttribute(REFERENCE_ATTR, reference);
         model.addAttribute(REVIEW_ATTR, new Review());
@@ -78,10 +78,10 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String updateReference(@PathVariable("id") @Valid Long id,
-                                    @Valid @ModelAttribute(REFERENCE_ATTR) ReferenceTextBase reference,
+                                    @Valid @ModelAttribute(REFERENCE_ATTR) CitationBase reference,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
-            ReferenceTextBase current = entityRepo.findById(id)
+            CitationBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid reference id"));
             current.edit(reference);
             entityRepo.save(current);
@@ -98,7 +98,7 @@ public class ReferenceController extends ChaincodeEntityController<ReferenceText
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication, Model model) {
 
-        ReferenceTextBase current = entityRepo.findById(id)
+        CitationBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
 
         if ( ! result.hasFieldErrors("rating")) {

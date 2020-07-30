@@ -138,10 +138,13 @@ public class AuthUtils {
 
     public static String uploadMedia(byte[] media, String filename) {
         String path = String.format("%s/%s/%s", mediaFolder, channelId, filename);
-        BlobId certBlobId = BlobId.of(mediaBucket, path);
-
-        BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
-        storage.create(blobInfo, media);
+        BlobId blobId = BlobId.of(mediaBucket, path);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        Blob current = storage.get(blobId);
+        // TODO: handle duplicate names!!
+        if ( ! ((current != null) && current.exists()) ) {
+            storage.create(blobInfo, media);
+        }
 
         return String.format("%s%s", mediaPrefix, blobInfo.getName());
     }

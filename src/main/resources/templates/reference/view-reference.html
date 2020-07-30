@@ -13,7 +13,7 @@
                         <div th:replace="fragments/reference :: reference('read')"></div>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${reference.reviews})"></div>
+                <div th:replace="fragments/review-list :: reviewList(${reference.reviews}, '')"></div>
             </div>
         </div>
     </body>

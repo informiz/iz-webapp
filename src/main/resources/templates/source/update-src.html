@@ -22,10 +22,7 @@
                         </form>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${source.reviews})"></div>
-
-                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}"
-                     th:replace="fragments/review :: reviewForm(@{'/source/review/' + ${source.id}})"></div>
+                <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/review/' + ${source.id}})"></div>
             </div>
         </div>
     </body>
