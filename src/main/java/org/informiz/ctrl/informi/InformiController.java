@@ -2,12 +2,9 @@ package org.informiz.ctrl.informi;
 
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.InformiBase;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
-import org.informiz.repo.informi.InformiRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
