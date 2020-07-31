@@ -3,6 +3,8 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Table(name="reference")
@@ -36,9 +38,11 @@ public class Reference extends InformizEntity implements Serializable {
 
     // The citation's entity-id on the ledger
     @Column(name = "citation_entity_id")
+    @NotBlank
     private String citationId;
 
     @Enumerated(EnumType.ORDINAL)
+    @NotNull
     private Entailment entailment;
 
     @Column
