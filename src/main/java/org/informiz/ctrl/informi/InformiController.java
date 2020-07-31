@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Controller
 @RequestMapping(path = InformiController.PREFIX)
@@ -56,9 +57,9 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         MultipartFile file = informi.getFile();
         if (! file.isEmpty()) {
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            try {
+            try (InputStream inStream = file.getInputStream()) {
                 // TODO: reprocess images, random filename
-                String path = AuthUtils.uploadMedia(file.getBytes(), fileName);
+                String path = AuthUtils.uploadMedia(inStream, fileName);
                 informi.setMediaPath(path);
                 entityRepo.save(informi);
             } catch (IOException e) {

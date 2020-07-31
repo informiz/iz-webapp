@@ -1,6 +1,7 @@
 package org.informiz.auth;
 
 import com.google.api.gax.paging.Page;
+import com.google.cloud.WriteChannel;
 import com.google.cloud.kms.v1.CryptoKeyName;
 import com.google.cloud.kms.v1.DecryptResponse;
 import com.google.cloud.kms.v1.EncryptResponse;
@@ -21,6 +22,8 @@ import javax.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -136,16 +139,21 @@ public class AuthUtils {
 
     private static final Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 
-    public static String uploadMedia(byte[] media, String filename) {
+    public static String uploadMedia(InputStream inputStream, String filename) throws IOException {
         String path = String.format("%s/%s/%s", mediaFolder, channelId, filename);
         BlobId blobId = BlobId.of(mediaBucket, path);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build(); // TODO: content-type? MD5?
         Blob current = storage.get(blobId);
         // TODO: handle duplicate names!!
         if ( ! ((current != null) && current.exists()) ) {
-            storage.create(blobInfo, media);
+            try (WriteChannel writer = storage.writer(blobInfo)) {
+                byte[] buffer = new byte[1024];
+                int limit;
+                while ((limit = inputStream.read(buffer)) >= 0) {
+                    writer.write(ByteBuffer.wrap(buffer, 0, limit));
+                }
+            }
         }
-
         return String.format("%s%s", mediaPrefix, blobInfo.getName());
     }
 
