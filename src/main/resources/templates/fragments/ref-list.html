@@ -31,8 +31,20 @@
             citationsCallbacks.push(function() {
                 if ($('#references-table tr').length > 0) {
                     $('#references-table td[id]').val(function(){
-                        $(this).append( '<a href = "/reference/view/' + citations[$(this).attr('id')].id + '">' +
-                            citations[$(this).attr('id')].text + '</a>' )
+                        var ref = citations[$(this).attr('id')];
+                        if (ref) {
+                            $(this).append('<a href = "/reference/view/' + ref.id + '">' + ref.text + '</a>')
+                        }
+                    });
+                }
+            });
+            claimsCallbacks.push(function() {
+                if ($('#references-table tr').length > 0) {
+                    $('#references-table td[id]').val(function(){
+                        var ref = claims[$(this).attr('id')];
+                        if (ref) {
+                            $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
+                        }
                     });
                 }
             });

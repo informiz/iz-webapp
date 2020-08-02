@@ -7,11 +7,10 @@
             <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
                 <div class="row">
                     <div class="form-group col-md-6">
+                        <input type="hidden" th:value="${reference.citationId}" name="citationId" />
                         <label for="refSelect" class="col-form-label">Reference</label>
-                        <select th:field="*{citationId}" class="form-control custom-select" id="refSelect"
-                                th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
-                            <option th:if="*{citationId != null}" th:value="*{citationId}"></option>
-                        </select>
+                        <input type="text" id="refSelect" class="form-control" placeholder="Start typing to search..."
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
                         <span th:if="${#fields.hasErrors('citationId')}" th:errors="*{citationId}" class="text-danger"></span>
                     </div>
                 </div>
@@ -43,24 +42,29 @@
             </form>
         </div>
         <script>
-            // ********************** TODO: prevent claims referencing themselves, implement search
+            // ********************** TODO: prevent entities referencing themselves **********************
+            var references = []
+
             citationsCallbacks.push(function() {
-                var refSelect = $('#refSelect');
-                var refId = 0;
-
-                if ($('#refSelect').children('option').length > 0) {
-                    refId = $('#refSelect').val();
-                }
-
-                refSelect.append($('<option></option>').val(' -- ').html(' -- '));
                 $.each(citations, function(id, citation) {
-                    var opt = $('<option></option>').val(citation.entityId).html(citation.text);
-                    if (refId == citation.entityId) {
-                        $("#refSelect option:eq(0)").html(citation.text);
-                    }
-                    refSelect.append(opt);
+                    references.push( { id: citation.entityId, value: citation.text } );
                 });
             });
+
+            claimsCallbacks.push(function() {
+                $.each(claims, function(id, hypothesis) {
+                    references.push( { id: hypothesis.entityId, value: hypothesis.claim } );
+                });
+            });
+
+            $('#refSelect').autocomplete({
+                source: references,
+                select: function(event, ui) {
+                    $(this).val(ui.item.value);
+                    $("input[name='citationId']").val(ui.item.id);
+                }
+            });
+
         </script>
     </div>
 </div>
