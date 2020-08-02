@@ -2,12 +2,12 @@
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>Reference Details</title>
+        <title>Citation Details</title>
     </head>
     <body>
         <div layout:fragment="content">
             <div class="container my-5">
-                <h2 class="mb-5">Reference Details</h2>
+                <h2 class="mb-5">Citation Details</h2>
                 <div class="row" th:object="${reference}">
                     <div class="col-md-6">
                         <div th:replace="fragments/reference :: reference('read')"></div>

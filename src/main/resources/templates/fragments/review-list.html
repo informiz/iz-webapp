@@ -16,9 +16,7 @@
                 <tbody>
                 <!-- TODO: how to set the column width? -->
                 <tr th:each="review : ${reviews}">
-                    <td class="w-25" th:id="${review.checker}">
-                        <a href="#" target="_blank"></a>
-                    </td>
+                    <td class="w-25" th:id="${review.checker}"/>
                     <td class="w-25" th:text="${review.rating}"></td>
                     <td class="w-50" th:text="${review.comment}"></td>
                 </tr>
@@ -31,18 +29,11 @@
 
         </div>
         <script>
-            $(document).ready(function() {
-                if ($("#reviews-table tr").length > 0) {
-                    // TODO: only get listed checkers
-                    $.getJSON("/checker-api/all", function(data) {
-                        var map = new Map();
-                        $.each(data, function(i, checker) {
-                            map.set(checker.entityId, checker);
-                        });
-                        $("#reviews-table td[id]").val(function(){
-                            $(this).text(map.get($(this).attr('id')).name);
-                            $(this).first().attr("href", map.get($(this).attr('id')).link);
-                        });
+            checkersCallbacks.push(function() {
+                if ($('#reviews-table tr').length > 0) {
+                    $('#reviews-table td[id]').val(function(){
+                        $(this).append( '<a href = "' + checkers[$(this).attr('id')].link + '" target="_blank">' +
+                            checkers[$(this).attr('id')].name + '</a>' )
                     });
                 }
             });

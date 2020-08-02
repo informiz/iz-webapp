@@ -28,18 +28,11 @@
             </th:block>
         </div>
         <script>
-            $(document).ready(function() {
-                if ($("#references-table tr").length > 0) {
-                    // TODO: only get listed claims
-                    $.getJSON("/citation-api/all", function(data) {
-                        var map = new Map();
-                        $.each(data, function(i, citation) {
-                            map.set(citation.entityId, citation);
-                        });
-                        $("#references-table td[id]").val(function(){
-                            $(this).append( "<a href='/reference/view/" + map.get($(this).attr('id')).id + "'>" +
-                                map.get($(this).attr('id')).text + "</a>" )
-                        });
+            citationsCallbacks.push(function() {
+                if ($('#references-table tr').length > 0) {
+                    $('#references-table td[id]').val(function(){
+                        $(this).append( '<a href = "/reference/view/' + citations[$(this).attr('id')].id + '">' +
+                            citations[$(this).attr('id')].text + '</a>' )
                     });
                 }
             });

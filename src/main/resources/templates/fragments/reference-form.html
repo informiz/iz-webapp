@@ -7,8 +7,8 @@
             <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
                 <div class="row">
                     <div class="form-group col-md-6">
-                        <label for="claimSelect" class="col-form-label">Claim</label>
-                        <select th:field="*{citationId}" class="form-control custom-select" id="claimSelect"
+                        <label for="refSelect" class="col-form-label">Reference</label>
+                        <select th:field="*{citationId}" class="form-control custom-select" id="refSelect"
                                 th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
                             <option th:if="*{citationId != null}" th:value="*{citationId}"></option>
                         </select>
@@ -17,7 +17,7 @@
                 </div>
                 <div class="row">
                     <div class="form-group col-md-6">
-                        <label for="entailment" class="col-form-label">Type</label>
+                        <label for="entailment" class="col-form-label">Entailment</label>
                         <select th:field="*{entailment}" id="entailment"
                                 th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
                             <option value=""> -- </option>
@@ -43,24 +43,22 @@
             </form>
         </div>
         <script>
-            $(document).ready(function() {
             // ********************** TODO: prevent claims referencing themselves, implement search
-                $.getJSON("/citation-api/all", function(data) {
-                    var claimSelect = $('#claimSelect');
-                    var claimId = 0;
+            citationsCallbacks.push(function() {
+                var refSelect = $('#refSelect');
+                var refId = 0;
 
-                    if ($('#claimSelect').children('option').length > 0) {
-                        claimId = $('#claimSelect').val();
+                if ($('#refSelect').children('option').length > 0) {
+                    refId = $('#refSelect').val();
+                }
+
+                refSelect.append($('<option></option>').val(' -- ').html(' -- '));
+                $.each(citations, function(id, citation) {
+                    var opt = $('<option></option>').val(citation.entityId).html(citation.text);
+                    if (refId == citation.entityId) {
+                        $("#refSelect option:eq(0)").html(citation.text);
                     }
-
-                    claimSelect.append($('<option></option>').val(' -- ').html(' -- '));
-                    $.each(data, function(i, citation) {
-                        var opt = $('<option></option>').val(citation.entityId).html(citation.text);
-                        if (claimId == citation.entityId) {
-                            $("#claimSelect option:eq(0)").html(citation.text);
-                        }
-                        claimSelect.append(opt);
-                    });
+                    refSelect.append(opt);
                 });
             });
         </script>

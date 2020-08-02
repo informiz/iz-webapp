@@ -11,7 +11,7 @@
                     <div>
                         <h2 th:case="null">No claims yet!</h2>
                         <div th:case="*">
-                            <h2 class="my-5">Claim</h2>
+                            <h2 class="my-5">Claims</h2>
                             <table class="table table-striped table-responsive-md">
                                 <thead>
                                 <tr>
@@ -39,17 +39,14 @@
                     </div>
                 </div>
                 <script>
-                    $(document).ready(function() {
-
-                        $.getJSON("/source-api/all", function(data) {
-                            $.each(data, function(i, src) {
-                                $('td[name="'+src.entityId+'"]').text(src.name);
-                            });
+                    sourcesCallbacks.push(function() {
+                        $.each(sources, function(id, src) {
+                            $('td[name="'+src.entityId+'"]').text(src.name);
                         });
-                        $.getJSON("/checker-api/all", function(data) {
-                            $.each(data, function(i, checker) {
-                                $('td[name="'+checker.entityId+'"]').text(checker.name);
-                            });
+                    });
+                    checkersCallbacks.push(function() {
+                        $.each(checkers, function(id, checker) {
+                            $('td[name="'+checker.entityId+'"]').text(checker.name);
                         });
                     });
                 </script>

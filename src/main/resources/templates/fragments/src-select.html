@@ -12,24 +12,22 @@
             <span th:if="${#fields.hasErrors('sid')}" th:errors="*{sid}" class="text-danger"></span>
         </div>
         <script>
-            $(document).ready(function() {
 
-                $.getJSON("/source-api/all", function(data) {
-                    var srcSelect = $('#srcSelect');
-                    var srcId = 0;
+            sourcesCallbacks.push(function() {
+                var srcSelect = $('#srcSelect');
+                var srcId = 0;
 
-                    if ($('#srcSelect').children('option').length > 0) {
-                        srcId = $('#srcSelect').val();
+                if ($('#srcSelect').children('option').length > 0) {
+                    srcId = $('#srcSelect').val();
+                }
+
+                srcSelect.append($('<option></option>').val(' -- ').html(' -- '));
+                $.each(sources, function(id, src) {
+                    var opt = $('<option></option>').val(src.entityId).html(src.name);
+                    if (srcId == src.entityId) {
+                        $("#srcSelect option:eq(0)").html(src.name);
                     }
-
-                    srcSelect.append($('<option></option>').val(' -- ').html(' -- '));
-                    $.each(data, function(i, src) {
-                        var opt = $('<option></option>').val(src.entityId).html(src.name);
-                        if (srcId == src.entityId) {
-                            $("#srcSelect option:eq(0)").html(src.name);
-                        }
-                        srcSelect.append(opt);
-                    });
+                    srcSelect.append(opt);
                 });
             });
         </script>

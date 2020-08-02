@@ -2,12 +2,12 @@
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>Update Reference</title>
+        <title>Update Citation</title>
     </head>
     <body>
         <div layout:fragment="content">
             <div class="container my-5">
-                <h2 class="mb-5">Update Reference</h2>
+                <h2 class="mb-5">Update Citation</h2>
                 <div class="row">
                     <div class="col-md-6">
                         <form action="#" th:action="@{/reference/details/{id}(id=${reference.id.toString()})}" th:object="${reference}" method="post">
