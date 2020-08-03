@@ -2,14 +2,14 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.*;
-import javax.validation.Valid;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -35,23 +35,11 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     @NotBlank(message = "Description is mandatory")
     private String description;
 
-    @NotBlank(message = "Media file/link is mandatory")
+    @URL(message = "A valid link to a media file is mandatory")
     private String mediaPath;
-
-    @Transient
-    private MultipartFile file;
 
     @NotNull(message = "Locale is mandatory")
     private Locale locale;
-
-/*
-    // TODO: why can't I specify `referencedColumnName="entity_id"` ??
-    @ElementCollection
-    @CollectionTable(name = "informi_claim",
-            joinColumns = @JoinColumn(name = "informi_id"))
-    @Column(name = "claim_id")
-    private Set<String> claims = new HashSet<>();
-*/
 
     @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
     protected Set<Reference> references;
@@ -78,14 +66,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
 
     public void setMediaPath(String link) {
         this.mediaPath = link;
-    }
-
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
     }
 
     public Locale getLocale() {

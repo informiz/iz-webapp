@@ -45,28 +45,11 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
     public String addInformi(@Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
-                                 BindingResult result) {
+                             BindingResult result, Model model) {
         if (result.hasErrors()) {
-            if (result.getErrorCount() > 1 || ! result.hasFieldErrors("mediaPath"))
-                return String.format("%s/add-informi.html", PREFIX);
-        }
-
-        MultipartFile file = informi.getFile();
-        if (! file.isEmpty()) {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            try (InputStream inStream = file.getInputStream()) {
-                // TODO: reprocess images, random filename
-                String path = AuthUtils.uploadMedia(inStream, fileName);
-                informi.setMediaPath(path);
-                entityRepo.save(informi);
-            } catch (IOException e) {
-                // TODO: error
-                return String.format("%s/add-informi.html", PREFIX);
-            }
-        } else {
-            // TODO: error
             return String.format("%s/add-informi.html", PREFIX);
         }
+        model.addAttribute(INFORMI_ATTR, entityRepo.save(informi));
         return String.format("redirect:%s/all", PREFIX);
     }
 
