@@ -1,5 +1,12 @@
 package org.informiz.conf;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.model.FactCheckerBase;
@@ -9,14 +16,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -90,5 +103,43 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             return mappedAuthorities;
         };
+    }
+
+    @Value("${server.ssl.key-store}")
+    private Resource keyStore;
+
+    @Value("${server.ssl.key-store-password}")
+    private String keyStorePassword;
+
+    @Value("${server.ssl.trust-store}")
+    private Resource trustStore;
+
+    @Value("${server.ssl.trust-store-password}")
+    private String trustStorePassword;
+
+    private RestTemplate getRestTemplate() {
+        try {
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadKeyMaterial(
+                            keyStore.getFile(),
+                            keyStorePassword.toCharArray(),
+                            keyStorePassword.toCharArray())
+                    .loadTrustMaterial(
+                            trustStore.getURL(),
+                            keyStorePassword.toCharArray(),
+// TODO: ******************************** DEVELOPING, REMOVE THIS!! ********************************
+                            new TrustSelfSignedStrategy())
+                    .build();
+
+            HttpClient httpClient = HttpClients.custom()
+// TODO: ************************ DEVELOPING, REMOVE NoopHostnameVerifier!! ************************
+                    // use NoopHostnameVerifier with caution, see https://stackoverflow.com/a/22901289/3890673
+                    .setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier()))
+                    .build();
+
+            return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+        } catch (IOException | GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
