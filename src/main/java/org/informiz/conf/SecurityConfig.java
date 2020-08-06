@@ -50,7 +50,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
-                .cors().and()
+                .cors().and().
+                requiresChannel()
+                .anyRequest().requiresSecure().and()
                 .authorizeRequests() // TODO: allow anonymous (not logged-in?) users
                 .antMatchers("/", "/public/**", "/style*", "/home.html", "/error*").permitAll()
                 .anyRequest().authenticated()
