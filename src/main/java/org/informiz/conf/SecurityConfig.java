@@ -5,7 +5,6 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.InformizGrantedAuthority;
@@ -25,6 +24,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpSession;
@@ -75,6 +76,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public interface ClientIdService {
         String getClientId();
+    }
+
+    @Bean
+    public MultipartResolver multipartResolver() {
+        return new CommonsMultipartResolver();
     }
 
 

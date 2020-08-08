@@ -162,10 +162,10 @@ public class AuthUtils {
         // TODO: get real credentials
         String userCertContent = FileUtils.readFileToString(
                 new File(AuthUtils.class.getClassLoader().getResource("test-crypto/test-cert.pem").getPath()),
-                StandardCharsets.UTF_8);
+                StandardCharsets.UTF_8.toString());
         String privateKeyContent = FileUtils.readFileToString(
                 new File(AuthUtils.class.getClassLoader().getResource("test-crypto/test_pk").getPath()),
-                StandardCharsets.UTF_8);
+                StandardCharsets.UTF_8.toString());
 
         uploadIdentityContent(storage, userEntityId, userCertContent, certFilename);
         uploadIdentityContent(storage, userEntityId, privateKeyContent, keyFilename);
