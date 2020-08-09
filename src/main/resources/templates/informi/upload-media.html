@@ -1,0 +1,40 @@
+<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Upload infographic file</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="container my-5">
+                <h2 class="mb-5">Upload infographic file</h2>
+                <form id="uploadMediaForm" name="uploadMediaForm" enctype="multipart/form-data"
+                      th:action="@{/informi/upload}" class="col-md-6 mb-5" method="post">
+                    <div class="card">
+                        <div class="form-group">
+                            <div class="card-header">
+                                Upload media file
+                            </div>
+                            <input type="file" class="form-control btn-sm float-left" id="file" name="file"
+                                   th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')')}" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mt-2">
+                            <input id="uploadButton" type="submit" class="btn btn-primary" value="Upload" />
+                        </div>
+                        <div id="mediaUploadError" style="display:none" class="text-danger"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function() {
+                $('#uploadMediaForm').onerror(function() {
+                    var fileUploadError = document.querySelector('#mediaUploadError');
+                    fileUploadError.innerHTML = "Upload failed";
+                    singleFileUploadError.style.display = "block";
+                });
+            });
+        </script>
+    </body>
+</html>

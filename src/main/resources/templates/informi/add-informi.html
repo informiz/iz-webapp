@@ -7,7 +7,6 @@
         <div layout:fragment="content">
             <div class="container my-5">
                 <h2 class="mb-5">New Informi</h2>
-                <div th:replace="fragments/informi :: uploadMedia"></div>
                 <form action="#" th:action="@{/informi/add}" th:object="${informi}" method="post">
                     <div th:replace="fragments/informi :: informi('write')"></div>
                     <div class="row">

@@ -24,8 +24,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpSession;
@@ -77,12 +75,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public interface ClientIdService {
         String getClientId();
     }
-
-    @Bean
-    public MultipartResolver multipartResolver() {
-        return new CommonsMultipartResolver();
-    }
-
 
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {
         // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************

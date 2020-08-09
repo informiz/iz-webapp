@@ -35,6 +35,33 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/all-informiz.html", PREFIX);
     }
 
+    @GetMapping("/upload")
+    @Secured("ROLE_MEMBER")
+    public String uploadInformiMedia() {
+        return String.format("%s/upload-media.html", PREFIX);
+    }
+
+    //@PostMapping("/upload")
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
+    @Secured("ROLE_MEMBER")
+    public String uploadInformiMedia(@RequestPart("file") MultipartFile file, Model model) {
+        if (file != null && ! file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            try (InputStream inStream = file.getInputStream()) {
+                // TODO: reprocess images, random filename
+                String path = AuthUtils.uploadMedia(inStream, fileName);
+                InformiBase informi = new InformiBase();
+                informi.setMediaPath(path);
+                model.addAttribute(INFORMI_ATTR, informi);
+                return String.format("%s/add-informi.html", PREFIX);
+            } catch (IOException e) {
+                // TODO: implement @ControllerAdvice
+                e.printStackTrace();
+            }
+        }
+        return String.format("%s/upload-media.html", PREFIX);
+    }
+
     @GetMapping("/add")
     @Secured("ROLE_MEMBER")
     public String addInformiForm(Model model) {

@@ -1,26 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <div th:fragment="uploadMedia">
-        <form id="uploadMediaForm" class="col-md-6 mb-5">
-            <div class="card">
-                <div class="form-group">
-                    <div class="card-header">
-                        Upload media file
-                    </div>
-                    <!--h5 class="card-title">Upload media file</h5-->
-                    <input type="file" class="form-control btn-sm float-left" id="file"
-                           th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')')}" />
-                    <span id="mediaErr" style="display:none" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mt-2">
-                    <input id="uploadButton" type="submit" class="btn btn-primary" value="Upload" />
-                </div>
-            </div>
-        </form>
-    </div>
-
     <div th:fragment="informi(mode)">
         <div class="row">
             <div class="form-group col-md-6">
@@ -57,66 +36,11 @@
                 <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath"
                        placeholder="No file uploaded" readonly="readonly"/>
                 <div class="form-group col-md-6">
-                    <img id="media" style="display:none" class="mw-100 mh-100" th:src="${informi.getMediaPath()}"/>
+                    <img id="media" class="mw-100 mh-100" th:src="${informi.getMediaPath()}"/>
                 </div>
                 <span id="mediaPathErr" th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
             </div>
         </div>
         <div th:replace="fragments/score :: score(${mode})"></div>
-        <script>
-            $(document).ready(function() {
-                if($("#media").attr('src')) {
-                    $("#media").attr('style', 'display:block');
-                }
-            });
-
-            function displayFileError(message) {
-                        $('#mediaErr').text(message);
-                        $("#mediaErr").attr('style', 'display:block');
-                        $("#uploadButton").prop("disabled", false);
-            }
-
-            $("#uploadButton").click(function (event) {
-
-                //stop submit the form, we will post it manually.
-                event.preventDefault();
-
-                //var fd = new FormData();
-                //fd.append( 'file', $('#file').files[0] );
-
-
-                var form = new FormData();
-                // TODO: handle no file
-                form.append('file', document.getElementById('file').files[0]);
-
-                $("#uploadButton").prop("disabled", true);
-
-                $.ajax({
-                    type: "POST",
-                    enctype: 'multipart/form-data',
-                    url: "/informi-api/upload",
-                    data: form,
-                    processData: false,
-                    contentType: false,
-                    cache: false,
-                    timeout: 600000,
-                    success: function (data) {
-
-                        if (data.mediaPath) {
-                            $('#media').attr('src', data.mediaPath);
-                            $("#media").attr('style', 'display:block');
-                            $("input[name='mediaPath']").val(data.mediaPath);
-                            $("#mediaPathErr").attr('style', 'display:none');
-                            $("#uploadButton").prop("disabled", false);
-                        } else {
-                            displayFileError(data.error);
-                        }
-                    },
-                    error: function (e) {
-                        displayFileError(e.responseJSON.message);
-                    }
-                });
-            });
-        </script>
     </div>
 </html>
