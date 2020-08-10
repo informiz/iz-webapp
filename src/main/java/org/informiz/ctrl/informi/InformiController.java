@@ -44,7 +44,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     //@PostMapping("/upload")
     @RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Secured("ROLE_MEMBER")
-    public String uploadInformiMedia(@RequestPart("file") MultipartFile file, Model model) {
+    public String uploadInformiMedia(@RequestParam("file") MultipartFile file, Model model) {
         if (file != null && ! file.isEmpty()) {
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
             try (InputStream inStream = file.getInputStream()) {
