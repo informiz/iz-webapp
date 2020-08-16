@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.informiz</groupId>
 	<artifactId>iz-webapp</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-ALPHA</version>
 	<name>iz-webapp</name>
 	<description>A webapp that integrates with informiz.org chaincode</description>
 
@@ -27,7 +27,7 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<activatedProperties>dev</activatedProperties>
+				<spring.profiles.active>dev</spring.profiles.active>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -43,7 +43,7 @@
 		<profile>
 			<id>prod</id>
 			<properties>
-				<activatedProperties>prod</activatedProperties>
+				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -56,8 +56,15 @@
 		<profile>
 			<id>test</id>
 			<properties>
-				<activatedProperties>test</activatedProperties>
+				<spring.profiles.active>test</spring.profiles.active>
 			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>1.4.200</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 
@@ -97,7 +104,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-        <!-- TODO: TEMPORARY DESIGN SOLUTION, REPLACE THIS!!! -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -194,6 +200,15 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>application.properties.*</exclude>
+					<exclude>application-dev*</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

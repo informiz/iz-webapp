@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iz-deployment
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+      channel: demo-channel
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: webapp
+        channel: demo-channel
+    spec:
+      containers:
+      - name: iz-webapp
+        image: "gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT"
+        env:
+        - name: profile
+          value: <PROFILE>
+        - name: dbUser
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>__dbUser
+              key: db-username
+        - name: dbPass
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>__dbUser
+              key: db-password
+        - name: clientId
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>__oauthClient
+              key: oauth_client
+        - name: clientSecret
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>__oauthClient
+              key: oauth_secret
