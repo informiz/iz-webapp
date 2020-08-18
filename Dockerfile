@@ -1,6 +1,7 @@
-FROM openjdk:8-jdk-alpine
+# TODO: official linux+java8 image that does not conflict with IBM/Spring grpc and netty libs?
+FROM rtfpessoa/ubuntu-jdk8
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd spring && useradd -g spring spring
 USER spring:spring
 
 ARG DEPENDENCY=target/dependency
@@ -8,7 +9,7 @@ COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY ${DEPENDENCY}/META-INF /app/META-INF
 COPY ${DEPENDENCY}/BOOT-INF/classes /app
 
-ENV profile dev
+ENV profile test
 ENV clientId overrideMe
 ENV clientSecret overrideMe
 ENV dbUser overrideMe

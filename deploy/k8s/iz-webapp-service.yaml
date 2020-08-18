@@ -8,7 +8,7 @@ spec:
   type: NodePort
   selector:
     app: webapp
-    channel: demo-channel
+    channel: <CHANNEL_NAME>
   ports:
   - name: iz-secure-port
     protocol: TCP

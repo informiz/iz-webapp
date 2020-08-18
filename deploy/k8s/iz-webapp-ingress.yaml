@@ -3,14 +3,16 @@ kind: Ingress
 metadata:
   name: iz-webapp-ingress
   annotations:
+      kubernetes.io/ingress.global-static-ip-name: <CHANNEL_NAME>
       kubernetes.io/ingress.allow-http: "false"
 spec:
   tls:
   - secretName: ingress-cert-key
   rules:
-  - host: demo-channel.informiz.org
+  - host: <CHANNEL_NAME>.informiz.org
     http:
       paths:
-      - backend:
+      - path: /*
+        backend:
           serviceName: iz-webapp-service
           servicePort: iz-secure-port
