@@ -23,28 +23,3 @@ steps:
 
 images:
 - 'gcr.io/$PROJECT_ID/iz-webapp:$TAG_NAME'
-
-
-# TODO: automate - get domain certificate, store in secret-manager, delete from local disk
-  - name: 'bash'
-    args: ['rm', '-f', '${_CHANNEL_NAME}']
-  - name: 'bash'
-    args: ['mkdir', '${_CHANNEL_NAME}']
-  - name: 'bash'
-    args: ['cp', 'deploy/k8s/*.yaml', '${_CHANNEL_NAME}/']
-  - name: 'bash'
-    args: ['sed', '-i', '"s/<PROFILE>/${_PROFILE}/g"', '${_CHANNEL_NAME}/iz-deployment.yaml']
-  - name: 'bash'
-    args: ['sed', '-i', '"s/<CHANNEL_NAME>/${_CHANNEL_NAME}/g"', '${_CHANNEL_NAME}/*.yaml']
-
-  - name: "gcr.io/cloud-builders/gke-deploy"
-    args:
-    - run
-    - --filename=${_CHANNEL_NAME}/
-    # TODO: does this work with default substitution?
-    - --image=gcr.io/${PROJECT_ID}/iz-webapp:${TAG_NAME}
-    - --location=europe-west1-b
-    - --cluster=iz-europe-west1-b
-
-# gcloud builds submit --config cloudbuild.yaml --substitutions=TAG_NAME="0.0.1-ALPHA"
-# TODO: trigger from github
