@@ -46,10 +46,16 @@
 				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>
 			<dependencies>
-				<dependency>
+				<!-- TODO: ********************* TESTING, REVERT THIS ********************* -->
+				<!--dependency>
 					<groupId>mysql</groupId>
 					<artifactId>mysql-connector-java</artifactId>
 					<scope>runtime</scope>
+				</dependency-->
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>1.4.200</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -67,19 +73,6 @@
 			</dependencies>
 		</profile>
 	</profiles>
-
-    <!-- TODO: Is it necessary to add these repos?
-     repositories>
-        <repository>
-            <id>hyperledger</id>
-            <name>Hyperledger Nexus</name>
-            <url>https://hyperledger.jfrog.io/hyperledger/fabric-maven</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories-->
 
 	<dependencyManagement>
 		<dependencies>
@@ -200,16 +193,18 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<excludes>
-					<exclude>application.properties.*</exclude>
-					<exclude>application-dev*</exclude>
-				</excludes>
-			</resource>
-		</resources>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<excludes>
+						<exclude>**/application-dev*.*</exclude>
+						<exclude>**/application.properties.base</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
