@@ -7,7 +7,7 @@ metadata:
       kubernetes.io/ingress.allow-http: "false"
 spec:
   tls:
-  - secretName: ingress-cert-key
+  - secretName: <CHANNEL_NAME>-tls
   rules:
   - host: <CHANNEL_NAME>.informiz.org
     http:
