@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iz-deployment
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+      channel: <CHANNEL_NAME>
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: webapp
+        channel: <CHANNEL_NAME>
+    spec:
+      volumes:
+      - name: service-account-creds-volume
+        secret:
+          secretName: <CHANNEL_NAME>-service-account-creds
+      containers:
+      - name: iz-webapp
+        image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
+        volumeMounts:
+        - name: service-account-creds-volume
+          mountPath: /var/secrets/google
+          readOnly: true
+        env:
+        - name: profile
+          value: <PROFILE>
+        - name: dbUser
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-db-creds
+              key: username
+        - name: dbPass
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-db-creds
+              key: password
+        - name: clientId
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-oauth-creds
+              key: client
+        - name: clientSecret
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-oauth-creds
+              key: secret
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json

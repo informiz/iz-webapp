@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: iz-webapp-ingress
+  annotations:
+      kubernetes.io/ingress.global-static-ip-name: <CHANNEL_NAME>
+      kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+  - secretName: <CHANNEL_NAME>-tls
+  rules:
+  - host: <CHANNEL_NAME>.informiz.org
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: iz-webapp-service
+          servicePort: iz-secure-port

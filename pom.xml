@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.informiz</groupId>
 	<artifactId>iz-webapp</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-ALPHA</version>
 	<name>iz-webapp</name>
 	<description>A webapp that integrates with informiz.org chaincode</description>
 
@@ -27,7 +27,7 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<activatedProperties>dev</activatedProperties>
+				<spring.profiles.active>dev</spring.profiles.active>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -43,36 +43,36 @@
 		<profile>
 			<id>prod</id>
 			<properties>
-				<activatedProperties>prod</activatedProperties>
+				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>
 			<dependencies>
-				<dependency>
+				<!-- TODO: ********************* TESTING, REVERT THIS ********************* -->
+				<!--dependency>
 					<groupId>mysql</groupId>
 					<artifactId>mysql-connector-java</artifactId>
 					<scope>runtime</scope>
+				</dependency-->
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>1.4.200</version>
 				</dependency>
 			</dependencies>
 		</profile>
 		<profile>
 			<id>test</id>
 			<properties>
-				<activatedProperties>test</activatedProperties>
+				<spring.profiles.active>test</spring.profiles.active>
 			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>1.4.200</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
-
-    <!-- TODO: Is it necessary to add these repos?
-     repositories>
-        <repository>
-            <id>hyperledger</id>
-            <name>Hyperledger Nexus</name>
-            <url>https://hyperledger.jfrog.io/hyperledger/fabric-maven</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories-->
 
 	<dependencyManagement>
 		<dependencies>
@@ -97,7 +97,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-        <!-- TODO: TEMPORARY DESIGN SOLUTION, REPLACE THIS!!! -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -196,6 +195,17 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<excludes>
+						<exclude>**/application-dev*.*</exclude>
+						<exclude>**/application.properties.base</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
@@ -208,6 +218,29 @@
 					</argLine>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>extract-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <workingDirectory>${project.build.directory}/dependency</workingDirectory>
+                            <executable>jar</executable>
+                            <arguments>
+                                <argument>-xf</argument>
+                                <argument>${project.build.directory}/${project.build.finalName}.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 	</build>
 </project>
