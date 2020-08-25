@@ -7,10 +7,11 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.informiz.auth.AuthUtils;
+import org.informiz.auth.CookieAuthRequestRepository;
+import org.informiz.auth.InformizAuthSuccessHandler;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,13 +21,15 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
@@ -41,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     String googleAuthClientId;
 
     @Autowired
-    ObjectFactory<HttpSession> httpSessionFactory;
+    InformizAuthSuccessHandler authSuccessHandler;
 
     @Autowired
     private FactCheckerRepository factCheckerRepo;
@@ -49,22 +52,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
-                .cors().and().
-                requiresChannel()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                //.addFilterAfter(new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class).and()
+                .requiresChannel()
                 .anyRequest().requiresSecure().and()
                 .authorizeRequests() // TODO: allow anonymous (not logged-in?) users
                 .antMatchers("/", "/public/**", "/style*", "/home.html", "/error*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
+                .authorizationEndpoint()
+                .authorizationRequestRepository(this.cookieAuthorizationRequestRepository())
+                .and()
                 .userInfoEndpoint()
-                .userAuthoritiesMapper(this.userAuthoritiesMapper());
-                http.logout()
-                .invalidateHttpSession(true)
+                .userAuthoritiesMapper(this.userAuthoritiesMapper())
+                .and()
+                .successHandler(authSuccessHandler);
+        http
+                .logout()
                 .clearAuthentication(true)
                 .logoutSuccessUrl("/home.html")
-                .permitAll()
-                .and().csrf().disable();
+                .permitAll();
     }
 
     @Bean(name = "googleOAuthService")
@@ -74,6 +83,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public interface ClientIdService {
         String getClientId();
+    }
+
+    private AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieAuthorizationRequestRepository() {
+        return new CookieAuthRequestRepository();
     }
 
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {
@@ -142,4 +155,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             throw new RuntimeException(e);
         }
     }
+
+
+    // TODO: create filter to validate JWT, set Authentication in security-context
+    // TODO: VERIFY: onAuthSuccess called when Gmail session is refreshed??
+    // TODO: CHECK: can redirect to login page if JWT invalid?
 }

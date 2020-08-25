@@ -24,9 +24,7 @@
                  Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
 
             <li id="signinButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
-                <a href="/login/oauth2/code/google">
-                    <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage" data-onsuccess="onSignIn"></span>
-                </a>
+                <div class="g-signin2" aria-hidden="true" data-accesstype="postmessage" data-onsuccess="onSignIn"></div>
             </li>
             <li id="signoutButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
                 <a class="btn btn-outline-success" onclick="signOut();">Sign out</a>
@@ -64,6 +62,16 @@
 
 
             function onSignIn(googleUser) {
+                var id_token = googleUser.getAuthResponse().id_token;
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'https://yourbackend.example.com/tokensignin');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function() {
+                  console.log('Signed in as: ' + xhr.responseText);
+                };
+                xhr.send('idtoken=' + id_token);
+
                 showLogout();
                 // TODO: need to redirect to protected page to trigger authentication. Is there a better way?
                 if (window.location.href.endsWith('/home.html')) {

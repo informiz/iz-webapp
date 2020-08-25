@@ -12,11 +12,10 @@ import org.apache.commons.io.FileUtils;
 import org.hyperledger.fabric.gateway.Identity;
 import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
@@ -31,6 +30,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 public class AuthUtils {
@@ -64,6 +64,12 @@ public class AuthUtils {
             throw new IllegalStateException("Unexpected error while retrieving identity", e);
         }
         return identity != null;
+    }
+
+    public static Authentication anonymousAuthToken() {
+        Collection<GrantedAuthority> authorities = Arrays.asList(
+                new InformizGrantedAuthority("ROLE_VIEWER", "anonymous", "anonymous"));
+        return new AnonymousAuthenticationToken("anonymous", "anonymous", authorities);
     }
 
     public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {
@@ -109,16 +115,17 @@ public class AuthUtils {
     }
 
 
+/*
     public static void getChannelProxy(String email, String channelId) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpSession userSession =  attr.getRequest().getSession(true);
 
-        // TODO: if no proxy or channel changed - create proxy
         if (userSession.getAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR) == null) {
             //CryptoUtils.ChaincodeProxy proxy = CryptoUtils.createChaincodeProxy(channelId, "informiz");
         }
         // TODO: update granted authorities if channel changes (trigger re-authentication?)
     }
+*/
 
     // TODO: use config
     private static final String projectId = "key-master-283113";
@@ -172,11 +179,8 @@ public class AuthUtils {
     }
 
     private static void uploadIdentityContent(Storage storage, String userEntityId, String content, String filename) {
-        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
-
-            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
-            EncryptResponse response = client.encrypt(keyVersionName, ByteString.copyFromUtf8(content));
-            byte[] bytes = response.getCiphertext().toByteArray();
+        try {
+            byte[] bytes = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
 
             BlobId certBlobId = BlobId.of(izBucket,
                     String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, channelId, filename));
@@ -213,27 +217,45 @@ public class AuthUtils {
         Blob keyBlob = storage.get(BlobId.of(izBucket, String.format("%s/%s/%s:%s/%s",
                 idsFolder, userEntityId, role, channel, keyFilename)));
 
-        X509Certificate cert;
-        PrivateKey key;
-        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
+        byte[] certBytes = decrypt(ByteString.copyFrom(certBlob.getContent()), keyRingId, keyId).toByteArray();
+        X509Certificate cert = CryptoUtils.getCertificate(new ByteArrayInputStream(certBytes));
 
-            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
-
-            DecryptResponse response = client.decrypt(keyVersionName, ByteString.copyFrom(certBlob.getContent()));
-            byte[] certBytes = response.getPlaintext().toByteArray();
-            cert = CryptoUtils.getCertificate(new ByteArrayInputStream(certBytes));
-
-            response = client.decrypt(keyVersionName, ByteString.copyFrom(keyBlob.getContent()));
-            ByteString keyContent = response.getPlaintext();
-            key = CryptoUtils.getPKCS8Key(keyContent.toString(StandardCharsets.UTF_8), CryptoUtils.ALGORITHM);
-        }
+        ByteString keyContent = decrypt(ByteString.copyFrom(keyBlob.getContent()), keyRingId, keyId);
+        PrivateKey key = CryptoUtils.getPKCS8Key(keyContent.toString(StandardCharsets.UTF_8), CryptoUtils.ALGORITHM);
 
         // TODO: same MSP for all organizations?
         return CryptoUtils.setUpWallet(String.format("%s:%s:%s", userEntityId, role, channelId),
                 CryptoUtils.ORG_1_MSP, cert, key);
     }
 
- // TODO: REMOVE THIS
+
+    public static String encrypt(String content, String keyRingId, String keyId) throws IOException {
+        return encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toStringUtf8();
+    }
+
+    public static ByteString encrypt(ByteString content, String keyRingId, String keyId) throws IOException {
+        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
+
+            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
+            EncryptResponse response = client.encrypt(keyVersionName, content);
+            return response.getCiphertext();
+        }
+    }
+
+    public static String decrypt(String content, String keyRingId, String keyId) throws IOException {
+        return decrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toStringUtf8();
+    }
+
+    public static ByteString decrypt(ByteString content, String keyRingId, String keyId) throws IOException {
+        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
+
+            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
+            DecryptResponse response = client.decrypt(keyVersionName, content);
+            return response.getPlaintext();
+        }
+    }
+
+    // TODO: REMOVE THIS
 /*
     public static void main(String[] args) {
         try {

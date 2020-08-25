@@ -32,6 +32,9 @@ mvnw.cmd
 /.nb-gradle/
 build/
 
+tmp/
+test-*
+
 ### VS Code ###
 .vscode/
 
