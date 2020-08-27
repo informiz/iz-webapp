@@ -28,19 +28,33 @@ public class TokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
     public static final int MINUTE_IN_MILLIS = 60000;
 
-    // TODO: secret, issuer, audience per channel
-    @Value("${iz.webapp.token.secret")
-    private String tokenSecret;
-
-    @Value("${iz.webapp.token.issuer")
-    private String tokenIssuer;
-
-    @Value("${iz.webapp.token.audience")
-    private String tokenAudience;
-
     private int tokenExpiration = 24 * 60 * 60;
 
-    private static JWTVerifier verifier = null;
+    // TODO: secret, issuer, audience per channel
+    @Value("${iz.webapp.token.secret}")
+    private String tokenSecret;
+
+    @Value("${iz.webapp.token.issuer}")
+    private String tokenIssuer;
+
+    @Value("${iz.webapp.token.audience}")
+    private String tokenAudience;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
+
+    private static JWTVerifier instance;
+
+    public JWTVerifier getVerifier() {
+        // Lazy init to make sure @Values are available, doesn't matter if initialized more than once
+        if (instance == null) {
+            instance  = JWT.require(HMAC512(tokenSecret))
+                    .withIssuer(tokenIssuer)
+                    .withAudience(tokenAudience)
+                    .build(); // Automatically verifies expiration
+        }
+        return instance;
+    }
 
     public String createToken(Authentication authentication) {
         DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
@@ -78,14 +92,8 @@ public class TokenProvider {
         }
 
     public DecodedJWT validateToken(String token) {
-        if (verifier == null) {
-            verifier = JWT.require(HMAC512(tokenSecret))
-                    .withIssuer(tokenIssuer)
-                    .withAudience(tokenAudience)
-                    .build(); // Automatically verifies expiration
-        }
         try {
-            DecodedJWT decodedJWT = verifier.verify(token);
+            DecodedJWT decodedJWT = getVerifier().verify(token);
             // TODO: verify subject?
             return decodedJWT;
         } catch (JWTVerificationException exception){
@@ -95,7 +103,7 @@ public class TokenProvider {
     }
 
     public OAuth2AuthenticationToken authFromToken(String token) {
-        return authFromToken(verifier.verify(token));
+        return authFromToken(getVerifier().verify(token));
     }
 
     // TODO: get rid of email in the code
@@ -113,7 +121,7 @@ public class TokenProvider {
         });
 
         OAuth2User user = new DefaultOAuth2User(authorities, attributes, "name");
-        return new OAuth2AuthenticationToken(user, authorities, ""); // TODO: client-id
+        return new OAuth2AuthenticationToken(user, authorities, clientId);
     }
 
     public static DecodedJWT decodeJWT(@NotBlank String token) {

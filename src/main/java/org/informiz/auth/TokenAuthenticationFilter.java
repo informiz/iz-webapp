@@ -1,13 +1,11 @@
 package org.informiz.auth;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
@@ -18,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -35,20 +34,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (cookie == null) {
                 SecurityContextHolder.getContext().setAuthentication(AuthUtils.anonymousAuthToken());
             } else {
+                // TODO: why does this fail for Anonymous?
                 SecurityContextHolder.getContext().setAuthentication(tokenProvider.authFromToken(cookie.getValue()));
             }
+        } catch (JWTVerificationException ex) {
+            SecurityContextHolder.getContext().setAuthentication(AuthUtils.anonymousAuthToken());
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            logger.warn("Could not set user authentication in security context", ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
-        }
-        return null;
     }
 }

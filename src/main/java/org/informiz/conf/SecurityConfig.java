@@ -1,15 +1,13 @@
 package org.informiz.conf;
 
+import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
-import org.informiz.auth.AuthUtils;
-import org.informiz.auth.CookieAuthRequestRepository;
-import org.informiz.auth.InformizAuthSuccessHandler;
-import org.informiz.auth.InformizGrantedAuthority;
+import org.informiz.auth.*;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,8 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,7 +42,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     String googleAuthClientId;
 
     @Autowired
+    TokenAuthenticationFilter tokenAuthFilter;
+
+    @Autowired
     InformizAuthSuccessHandler authSuccessHandler;
+
+    @Autowired
+    CookieAuthRequestRepository authRequestRepo;
 
     @Autowired
     private FactCheckerRepository factCheckerRepo;
@@ -52,28 +56,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http
+                // TODO: why is a session still created??
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                //.addFilterAfter(new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class).and()
-                .requiresChannel()
-                .anyRequest().requiresSecure().and()
-                .authorizeRequests() // TODO: allow anonymous (not logged-in?) users
-                .antMatchers("/", "/public/**", "/style*", "/home.html", "/error*").permitAll()
+                .requiresChannel().anyRequest().requiresSecure()
+                .and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.GET).permitAll()
+                .antMatchers(HttpMethod.HEAD).permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
+                .antMatchers(HttpMethod.TRACE).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
                 .authorizationEndpoint()
-                .authorizationRequestRepository(this.cookieAuthorizationRequestRepository())
+                .authorizationRequestRepository(authRequestRepo)
                 .and()
                 .userInfoEndpoint()
                 .userAuthoritiesMapper(this.userAuthoritiesMapper())
                 .and()
-                .successHandler(authSuccessHandler);
+                .successHandler(authSuccessHandler)
+                .and()
+                .addFilterAfter(tokenAuthFilter, OAuth2LoginAuthenticationFilter.class)
+        ;
         http
                 .logout()
                 .clearAuthentication(true)
                 .logoutSuccessUrl("/home.html")
                 .permitAll();
+
     }
 
     @Bean(name = "googleOAuthService")
@@ -81,12 +92,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return () -> googleAuthClientId;
     }
 
-    public interface ClientIdService {
-        String getClientId();
+    @Bean
+    public LayoutDialect layoutDialect() {
+        return new LayoutDialect();
     }
 
-    private AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieAuthorizationRequestRepository() {
-        return new CookieAuthRequestRepository();
+    public interface ClientIdService {
+        String getClientId();
     }
 
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {

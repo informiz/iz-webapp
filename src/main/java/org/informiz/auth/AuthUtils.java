@@ -31,6 +31,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 
 public class AuthUtils {
@@ -230,7 +231,8 @@ public class AuthUtils {
 
 
     public static String encrypt(String content, String keyRingId, String keyId) throws IOException {
-        return encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toStringUtf8();
+        byte[] encrypted = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
+        return Base64.getEncoder().encodeToString(encrypted);
     }
 
     public static ByteString encrypt(ByteString content, String keyRingId, String keyId) throws IOException {
@@ -243,7 +245,8 @@ public class AuthUtils {
     }
 
     public static String decrypt(String content, String keyRingId, String keyId) throws IOException {
-        return decrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toStringUtf8();
+        byte[] restored = Base64.getDecoder().decode(content);
+        return decrypt(ByteString.copyFrom(restored), keyRingId, keyId).toStringUtf8();
     }
 
     public static ByteString decrypt(ByteString content, String keyRingId, String keyId) throws IOException {
