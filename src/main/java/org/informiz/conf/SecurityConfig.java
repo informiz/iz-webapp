@@ -8,8 +8,6 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.informiz.auth.*;
-import org.informiz.model.FactCheckerBase;
-import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,21 +15,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.HashSet;
-import java.util.Set;
+
+import static org.informiz.auth.InformizGrantedAuthority.*;
 
 
 @Configuration
@@ -42,48 +42,64 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     String googleAuthClientId;
 
     @Autowired
-    TokenAuthenticationFilter tokenAuthFilter;
-
-    @Autowired
-    InformizAuthSuccessHandler authSuccessHandler;
+    InformizLoginSuccessHandler loginSuccessHandler;
 
     @Autowired
     CookieAuthRequestRepository authRequestRepo;
 
     @Autowired
-    private FactCheckerRepository factCheckerRepo;
+    CookieRequestCache requestCache;
+
+    @Autowired
+    TokenSecurityContextRepository securityContextRepo;
+
+    @Autowired
+    InformizAuthMapper userAuthoritiesMapper;
+
+    @Autowired
+    InformizOAuth2RequestRedirectFilter cachedRequestFilter;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+
         http
-                // TODO: why is a session still created??
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .securityContext().securityContextRepository(securityContextRepo)
                 .and()
                 .requiresChannel().anyRequest().requiresSecure()
                 .and()
+                .anonymous().authorities(AuthUtils.anonymousAuthorities())
+                .and()
+                .csrf()
+                .csrfTokenRepository(new CookieCsrfTokenRepository())
+                .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET).permitAll()
-                .antMatchers(HttpMethod.HEAD).permitAll()
-                .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.TRACE).permitAll()
+                .antMatchers("/loggedin").fullyAuthenticated()
+                .antMatchers(HttpMethod.GET).hasRole("VIEWER")
+                .antMatchers(HttpMethod.HEAD).hasRole("VIEWER")
+                .antMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
+                .antMatchers(HttpMethod.TRACE).hasRole("VIEWER")
                 .anyRequest().authenticated()
                 .and()
+                .addFilterBefore(cachedRequestFilter, OAuth2AuthorizationRequestRedirectFilter.class)
+                .requestCache().requestCache(requestCache)
+                .and()
                 .oauth2Login()
-                .authorizationEndpoint()
-                .authorizationRequestRepository(authRequestRepo)
+                .successHandler(loginSuccessHandler)
+                .authorizationEndpoint().authorizationRequestRepository(authRequestRepo)
                 .and()
-                .userInfoEndpoint()
-                .userAuthoritiesMapper(this.userAuthoritiesMapper())
-                .and()
-                .successHandler(authSuccessHandler)
-                .and()
-                .addFilterAfter(tokenAuthFilter, OAuth2LoginAuthenticationFilter.class)
+                .userInfoEndpoint().userAuthoritiesMapper(userAuthoritiesMapper)
         ;
+
+        // TODO: finish logout
+/*
         http
                 .logout()
                 .clearAuthentication(true)
                 .logoutSuccessUrl("/home.html")
                 .permitAll();
+*/
 
     }
 
@@ -101,34 +117,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String getClientId();
     }
 
-    private GrantedAuthoritiesMapper userAuthoritiesMapper() {
-        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
-        factCheckerRepo.save(new FactCheckerBase("Albert", "ashiagborayi@gmail.com", "https://www.linkedin.com/in/albert-ayi-ashiagbor-a0233815a/"));
-        factCheckerRepo.save(new FactCheckerBase("Daniel", "danosaf291@gmail.com", "https://www.linkedin.com/in/daniel-osarfo-8b21a482/"));
-        factCheckerRepo.save(new FactCheckerBase("Richard", "richardtm905@gmail.com", "https://www.linkedin.com/in/niraamit/"));
-        factCheckerRepo.save(new FactCheckerBase("Kim", "kimberly@informiz.org", "https://www.linkedin.com/in/kimberly-caesar-bb204340/"));
-        factCheckerRepo.save(new FactCheckerBase("Nira", "nira@informiz.org", "https://www.linkedin.com/in/niraamit/"));
-
-        InformizGrantedAuthority.setCheckers(factCheckerRepo.findAll());
-        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
-
-        return (authorities) -> {
-            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-
-            authorities.forEach(authority -> {
-                if (OAuth2UserAuthority.class.isInstance(authority)) {
-                    OAuth2UserAuthority oidcUserAuthority = (OAuth2UserAuthority) authority;
-                    String email = oidcUserAuthority.getAttributes().get("email").toString();
-                    AuthUtils.getUserAuthorities(email,
-                            factCheckerRepo.findByEmail(email).getEntityId())
-                            .forEach(auth -> mappedAuthorities.add(auth));
-                }
-                mappedAuthorities.add(authority);
-            });
-
-            return mappedAuthorities;
-        };
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy(String.format("%s > %s > %s > %s",
+                ROLE_ADMIN, ROLE_MEMBER, ROLE_CHECKER, ROLE_VIEWER));
+        return roleHierarchy;
     }
+
+    // TODO: ******************************** DEVELOPING, REMOVE THIS!! ********************************
+    @Bean
+    public HttpFirewall testHttpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true);
+        return firewall;
+    }
+// TODO: ******************************** DEVELOPING, REMOVE THIS!! ********************************
 
     @Value("${server.ssl.key-store}")
     private Resource keyStore;
@@ -167,9 +171,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             throw new RuntimeException(e);
         }
     }
-
-
-    // TODO: create filter to validate JWT, set Authentication in security-context
-    // TODO: VERIFY: onAuthSuccess called when Gmail session is refreshed??
-    // TODO: CHECK: can redirect to login page if JWT invalid?
 }

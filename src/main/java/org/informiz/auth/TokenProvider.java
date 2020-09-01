@@ -2,22 +2,19 @@ package org.informiz.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.sun.security.auth.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -26,9 +23,7 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class TokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
-    public static final int MINUTE_IN_MILLIS = 60000;
-
-    private int tokenExpiration = 24 * 60 * 60;
+    public static final int TOKEN_MAX_AGE = 24 * 60 * 60; // 1 day in seconds
 
     // TODO: secret, issuer, audience per channel
     @Value("${iz.webapp.token.secret}")
@@ -51,17 +46,18 @@ public class TokenProvider {
             instance  = JWT.require(HMAC512(tokenSecret))
                     .withIssuer(tokenIssuer)
                     .withAudience(tokenAudience)
+                    // TODO: verify subject is channel name
                     .build(); // Automatically verifies expiration
         }
         return instance;
     }
 
-    public String createToken(Authentication authentication) {
-        DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
-        String email = user.getAttributes().get("email").toString();
+    public String createToken(@NotNull Authentication authentication) {
+        OAuth2User user = (OAuth2User) authentication.getPrincipal();
+        String email = (String) user.getAttributes().get("email");
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + tokenExpiration);
+        Date expiryDate = new Date(now.getTime() + TOKEN_MAX_AGE);
 
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));
@@ -72,6 +68,7 @@ public class TokenProvider {
                 .findFirst().map(auth -> ((InformizGrantedAuthority)auth).getEntityId()).orElse(null);
 
         return JWT.create()
+                // TODO: use channel name instead of user name
                 .withSubject(user.getName())
                 .withIssuer(tokenIssuer)
                 .withAudience(tokenAudience)
@@ -79,7 +76,7 @@ public class TokenProvider {
                 .withExpiresAt(expiryDate)
                 .withClaim("scopes", scopes)
                 .withClaim("eid", entityId)
-                .withClaim("email", email)
+                .withClaim("email", email) // TODO: REMOVE
                 .sign(HMAC512(tokenSecret.getBytes()));
     }
 
@@ -92,14 +89,7 @@ public class TokenProvider {
         }
 
     public DecodedJWT validateToken(String token) {
-        try {
-            DecodedJWT decodedJWT = getVerifier().verify(token);
-            // TODO: verify subject?
-            return decodedJWT;
-        } catch (JWTVerificationException exception){
-            logger.info("Invalid token: " + token, exception);
-        }
-        return null;
+        return getVerifier().verify(token);
     }
 
     public OAuth2AuthenticationToken authFromToken(String token) {
@@ -127,4 +117,25 @@ public class TokenProvider {
     public static DecodedJWT decodeJWT(@NotBlank String token) {
         return JWT.decode(token);
     }
+
+    /**
+     * TODO: need additional info in the access-token?
+     *
+     public class CustomTokenEnhancer implements TokenEnhancer {
+
+    @Override
+    public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+    final Map<String, Object> additionalInfo = new HashMap<>();
+
+    additionalInfo.put("foo", "bar");
+    additionalInfo.put("bar", u"baz");
+
+    ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+
+    return accessToken;
+    }
+
+    }
+     */
+
 }

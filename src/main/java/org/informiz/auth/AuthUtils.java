@@ -12,8 +12,6 @@ import org.apache.commons.io.FileUtils;
 import org.hyperledger.fabric.gateway.Identity;
 import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.NotBlank;
@@ -29,10 +27,9 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
+import java.util.*;
+
+import static org.informiz.auth.InformizGrantedAuthority.*;
 
 public class AuthUtils {
 
@@ -67,10 +64,9 @@ public class AuthUtils {
         return identity != null;
     }
 
-    public static Authentication anonymousAuthToken() {
-        Collection<GrantedAuthority> authorities = Arrays.asList(
+    public static List<GrantedAuthority> anonymousAuthorities() {
+        return Arrays.asList(
                 new InformizGrantedAuthority("ROLE_VIEWER", "anonymous", "anonymous"));
-        return new AnonymousAuthenticationToken("anonymous", "anonymous", authorities);
     }
 
     public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {
@@ -86,20 +82,20 @@ public class AuthUtils {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
         if (userWallet == null) {
-            authorities.add(new InformizGrantedAuthority("ROLE_VIEWER", entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_VIEWER, entityId, email));
             return authorities; // No additional authorities
         }
 
         // All users have fact-checker permissions
-        authorities.add(new InformizGrantedAuthority("ROLE_CHECKER", entityId, email));
+        authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId, email));
 
         // TODO: get current channel name
         if (isChannelMember(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_MEMBER", entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId, email));
         }
 
         if (isChannelAdmin(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority("ROLE_ADMIN", entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId, email));
         }
 
         return authorities;

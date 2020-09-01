@@ -74,7 +74,7 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
                 throw new IllegalStateException("Failed to serialize auth request", e);
             }
         }
-        CookieUtils.setCookie(response, OAUTH2_REQUEST_COOKIE_NAME, age, value);
+        CookieUtils.setLaxCookie(response, OAUTH2_REQUEST_COOKIE_NAME, age, value);
     }
 
     @Override
