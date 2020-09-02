@@ -1,7 +1,6 @@
 HELP.md
 target/
 
-# TODO: check - what are those?
 .mvn
 mvnw
 mvnw.cmd
@@ -31,9 +30,8 @@ mvnw.cmd
 /nbdist/
 /.nb-gradle/
 build/
-
 tmp/
-test-*
+deploy-test/
 
 ### VS Code ###
 .vscode/
