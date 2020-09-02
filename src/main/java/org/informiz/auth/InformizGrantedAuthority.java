@@ -8,6 +8,11 @@ import java.util.Map;
 
 public class InformizGrantedAuthority implements GrantedAuthority {
 
+    public static final String ROLE_VIEWER = "ROLE_VIEWER";
+    public static final String ROLE_CHECKER = "ROLE_CHECKER";
+    public static final String ROLE_MEMBER = "ROLE_MEMBER";
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     // The fact-checker's role
     private String role;
 

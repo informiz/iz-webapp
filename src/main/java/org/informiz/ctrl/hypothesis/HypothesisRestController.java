@@ -4,17 +4,15 @@ import org.informiz.model.HypothesisBase;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Controller
+@RestController
 @RequestMapping(path = HypothesisRestController.PREFIX)
+@CrossOrigin(origins = "${iz.webapp.url}")
 public class HypothesisRestController {
 
     public static final String PREFIX = "/claim-api";
@@ -23,7 +21,6 @@ public class HypothesisRestController {
     private HypothesisRepository hypothesisRepo;
 
     @GetMapping(path = {"/", "/all"})
-    @ResponseBody
     public List<HypothesisBase> getAllClaims() {
         return StreamSupport
                 .stream(hypothesisRepo.findAll().spliterator(), false)
@@ -31,7 +28,6 @@ public class HypothesisRestController {
     }
 
     @GetMapping(path = {"/", "/claim"})
-    @ResponseBody
     public HypothesisBase getHypothesis(@RequestParam String entityId) {
         return hypothesisRepo.findByEntityId(entityId);
     }

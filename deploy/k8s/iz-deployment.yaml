@@ -28,22 +28,33 @@ spec:
         env:
         - name: profile
           value: <PROFILE>
-        - name: dbUser
+        - name: iz.webapp.key-id
+          value: <CHANNEL_NAME>
+        - name: iz.webapp.token.issuer
+          value: <CHANNEL_NAME>
+        - name: iz.webapp.token.audience
+          value: <CHANNEL_NAME>
+        - name: iz.webapp.token.secret
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-jwt-secret
+              key: secret
+        - name: spring.datasource.username
           valueFrom:
             secretKeyRef:
               name: <CHANNEL_NAME>-db-creds
               key: username
-        - name: dbPass
+        - name: spring.datasource.password
           valueFrom:
             secretKeyRef:
               name: <CHANNEL_NAME>-db-creds
               key: password
-        - name: clientId
+        - name: spring.security.oauth2.client.registration.google.client-id
           valueFrom:
             secretKeyRef:
               name: <CHANNEL_NAME>-oauth-creds
               key: client
-        - name: clientSecret
+        - name: spring.security.oauth2.client.registration.google.client-secret
           valueFrom:
             secretKeyRef:
               name: <CHANNEL_NAME>-oauth-creds

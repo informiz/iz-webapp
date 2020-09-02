@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <div th:fragment="header">
 
@@ -19,17 +19,12 @@
                 <li class="nav-item"><a class="nav-link" href="/reference/">Citations</a></li>
                 <li class="nav-item"><a class="nav-link" href="/informi/">Informiz</a></li>
             </ul>
-            <!-- TODO: Unable to show/hide buttons based on authentication state.
-                 Tried th:if=${#authorization.expression('isAuthenticated()')}
-                 Tried sec:authorize="isAuthenticated()" (xmlns:sec="http://www.thymeleaf.org/extras/spring-security")-->
 
-            <li id="signinButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
-                <a href="/login/oauth2/code/google">
-                    <span class="g-signin2" aria-hidden="true" data-accesstype="postmessage" data-onsuccess="onSignIn"></span>
-                </a>
+            <li th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="nav-item d-inline-block align-right">
+                <a href="#" class="btn btn-outline-success" onclick="signIn();">Sign in</a>
             </li>
-            <li id="signoutButton" class="nav-item d-inline-block align-right" style="visibility: hidden;">
-                <a class="btn btn-outline-success" onclick="signOut();">Sign out</a>
+            <li th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="nav-item d-inline-block align-right">
+                <a href="#" class="btn btn-outline-success" onclick="signOut();">Sign out</a>
             </li>
 
         </div>
@@ -48,49 +43,29 @@
 
     <script>
 
-            // TODO: Fix configuration - without init buttons don't show in home page, with init 'show' is called twice
-            gapi.load('auth2', function() {
-                gapi.auth2.init().then(function (googleAuth) {
-                    if (googleAuth.isSignedIn.get()) {
-                        showLogout();
-                    } else {
-                        showLogin();
-                    }
-                },
-                function () {
-                    showLogin();
-                });
-            });
-
-
-            function onSignIn(googleUser) {
-                showLogout();
-                // TODO: need to redirect to protected page to trigger authentication. Is there a better way?
-                if (window.location.href.endsWith('/home.html')) {
-                    window.location.replace('/factchecker/');
-                }
+            function signIn() {
+                window.location.replace('/oauth_login');
             }
+
 
             function signOut() {
-                var auth2 = gapi.auth2.getAuthInstance();
-                auth2.signOut();
-                auth2.disconnect(); // TODO: This logs the user out of gmail. Necessary?
-                window.location.href = '/home.html';
             }
 
+    </script>
 
-            function showLogin() {
-                $('#signoutButton').css('visibility', 'hidden');
-                $('#signinButton').css('visibility', 'visible');
-            }
+    <!--
+                function signOut() {
+                    var auth2 = gapi.auth2.getAuthInstance();
+                    auth2.signOut();
+                    auth2.disconnect(); // TODO: This logs the user out of gmail. Necessary?
+                }
 
-            function showLogout() {
-                $('#signinButton').css('visibility', 'hidden');
-                $('#signoutButton').css('visibility', 'visible');
-            }
-
-        </script>
-
+                $(document).ready(function() {
+                    gapi.load('auth2', function() {
+                        gapi.auth2.init();
+                    });
+                });
+    -->
 </div>
 
 </html>

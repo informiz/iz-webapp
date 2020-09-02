@@ -28,6 +28,7 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     // TODO: additional details per source-type?
     public enum SourceType {
+        UNIVERSITY("University"),
         NEWS("News Outlet"),
         SOCIAL_MEDIA("Social Media"),
         STUDY("Scientific Study"),
