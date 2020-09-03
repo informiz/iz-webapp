@@ -21,10 +21,10 @@
             </ul>
 
             <li th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="nav-item d-inline-block align-right">
-                <a href="#" class="btn btn-outline-success" onclick="signIn();">Sign in</a>
+                <a href="/oauth_login" class="btn btn-outline-success" onclick="signIn();">Sign in</a>
             </li>
             <li th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="nav-item d-inline-block align-right">
-                <a href="#" class="btn btn-outline-success" onclick="signOut();">Sign out</a>
+                <a href="/logout" class="btn btn-outline-success">Sign out</a>
             </li>
 
         </div>
@@ -39,33 +39,6 @@
             <a href="https://www.gofundme.com/f/informiz-collaborative-factchecking" target="_blank">Go fund us!</a>
         </small>
     </div>
-
-
-    <script>
-
-            function signIn() {
-                window.location.replace('/oauth_login');
-            }
-
-
-            function signOut() {
-            }
-
-    </script>
-
-    <!--
-                function signOut() {
-                    var auth2 = gapi.auth2.getAuthInstance();
-                    auth2.signOut();
-                    auth2.disconnect(); // TODO: This logs the user out of gmail. Necessary?
-                }
-
-                $(document).ready(function() {
-                    gapi.load('auth2', function() {
-                        gapi.auth2.init();
-                    });
-                });
-    -->
 </div>
 
 </html>

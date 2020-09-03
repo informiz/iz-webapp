@@ -42,7 +42,7 @@ public class AccessController {
         return "oauth_login.html";
     }
 
-    @RequestMapping(value = {"/", "/home", "/home.html"})
+    @RequestMapping(value = {"/", "/home", "/home.html", "/logout"})
     public String index() {
         return "home.html";
     }

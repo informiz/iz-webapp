@@ -21,16 +21,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import static org.informiz.auth.CookieRequestCache.CACHE_REQUEST_COOKIE_NAME;
+import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
 
@@ -75,32 +84,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrfTokenRepository(new CookieCsrfTokenRepository())
                 .and()
                 .authorizeRequests()
-                .antMatchers("/loggedin").fullyAuthenticated()
                 .antMatchers(HttpMethod.GET).hasRole("VIEWER")
                 .antMatchers(HttpMethod.HEAD).hasRole("VIEWER")
                 .antMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
                 .antMatchers(HttpMethod.TRACE).hasRole("VIEWER")
                 .anyRequest().authenticated()
                 .and()
+                .logout()
+                .deleteCookies(JWT_COOKIE_NAME)
+                .and()
                 .addFilterBefore(cachedRequestFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .requestCache().requestCache(requestCache)
                 .and()
                 .oauth2Login()
                 .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler())
                 .authorizationEndpoint().authorizationRequestRepository(authRequestRepo)
                 .and()
                 .userInfoEndpoint().userAuthoritiesMapper(userAuthoritiesMapper)
         ;
-
-        // TODO: finish logout
-/*
-        http
-                .logout()
-                .clearAuthentication(true)
-                .logoutSuccessUrl("/home.html")
-                .permitAll();
-*/
-
     }
 
     @Bean(name = "googleOAuthService")
@@ -125,14 +127,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return roleHierarchy;
     }
 
-    // TODO: ******************************** DEVELOPING, REMOVE THIS!! ********************************
     @Bean
-    public HttpFirewall testHttpFirewall() {
-        StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowSemicolon(true);
-        return firewall;
+    AuthenticationFailureHandler loginFailureHandler() {
+        return new AuthenticationFailureHandler() {
+            @Override
+            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+                CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
+                CookieUtils.setCookie(response, CACHE_REQUEST_COOKIE_NAME, 0, "");
+            }
+        };
     }
-// TODO: ******************************** DEVELOPING, REMOVE THIS!! ********************************
 
     @Value("${server.ssl.key-store}")
     private Resource keyStore;

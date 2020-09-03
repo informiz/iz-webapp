@@ -23,7 +23,7 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class TokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
-    public static final int TOKEN_MAX_AGE = 24 * 60 * 60; // 1 day in seconds
+    public static final int TOKEN_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day in miliseconds
 
     // TODO: secret, issuer, audience per channel
     @Value("${iz.webapp.token.secret}")
@@ -62,13 +62,12 @@ public class TokenProvider {
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));
 
-        // TODO: no entity-id for ROLE_VIEWER? Random? email hash-code?
         String entityId = authentication.getAuthorities().stream()
                 .filter(authority -> InformizGrantedAuthority.class.isInstance(authority))
                 .findFirst().map(auth -> ((InformizGrantedAuthority)auth).getEntityId()).orElse(null);
 
         return JWT.create()
-                // TODO: use channel name instead of user name
+                // TODO: what to use as subject? How to verify?
                 .withSubject(user.getName())
                 .withIssuer(tokenIssuer)
                 .withAudience(tokenAudience)

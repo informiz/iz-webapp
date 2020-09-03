@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.informiz.auth.CookieRequestCache.CACHE_REQUEST_COOKIE_NAME;
 import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
 import static org.informiz.auth.TokenProvider.TOKEN_MAX_AGE;
 
@@ -35,6 +36,7 @@ public class InformizLoginSuccessHandler extends SavedRequestAwareAuthentication
         if (auth != null && (auth instanceof OAuth2AuthenticationToken)) {
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
         }
+        CookieUtils.setCookie(response, CACHE_REQUEST_COOKIE_NAME, 0, "");
         setRequestCache(cache);
         super.onAuthenticationSuccess(request, response, auth);
     }
