@@ -8,12 +8,14 @@
         <div layout:fragment="content">
             <div class="container my-5">
                 <h2 class="mb-5">Citation Details</h2>
-                <div class="row" th:object="${reference}">
+                <div class="row" th:object="${citation}">
                     <div class="col-md-6">
-                        <div th:replace="fragments/reference :: reference('read')"></div>
+                        <div th:replace="fragments/citation :: citation('read')"></div>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${reference.reviews}, '')"></div>
+                <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, '')"></div>
+
+                <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, '')"></div>
             </div>
         </div>
     </body>

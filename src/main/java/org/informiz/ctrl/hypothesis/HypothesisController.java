@@ -4,12 +4,14 @@ import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.HypothesisBase;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
+import org.informiz.model.SourceRef;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,6 +24,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public static final String HYPOTHESIS_ATTR = "hypothesis"; // singular
     public static final String HYPOTHESES_ATTR = "hypotheses"; // plural
     public static final String REFERENCE_ATTR = "reference";
+    public static final String SOURCE_ATTR = "source";
 
 
     @GetMapping(path = {"/", "/all"})
@@ -86,8 +89,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                     .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
             current.edit(hypothesis);
             entityRepo.save(current);
-            model.addAttribute(HYPOTHESIS_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
+//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
         prepareEditModel(model, hypothesis, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
@@ -105,8 +107,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-            model.addAttribute(HYPOTHESIS_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
+//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
         prepareEditModel(model, current, review, new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
@@ -124,8 +125,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
         if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
             current = addReference(current, reference);
-            model.addAttribute(HYPOTHESIS_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
+//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
         prepareEditModel(model, current, new Review(), reference);
         return String.format("%s/update-hypothesis.html", PREFIX);
@@ -144,9 +144,32 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return hypothesis;
     }
 
+    @PostMapping("/source/{id}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
+                            BindingResult result, Model model) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
+
+        try {
+            SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
+            current.addSource(toAdd);
+            model.addAttribute(HYPOTHESIS_ATTR, current);
+            model.addAttribute(SOURCE_ATTR, new SourceRef());
+        } catch (IllegalArgumentException e) {
+            result.addError(new ObjectError("link",
+                    "Please provide either a link, a source or both"));
+        }
+        prepareEditModel(model, current, new Review(), new Reference());
+        return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
         model.addAttribute(REVIEW_ATTR, review);
         model.addAttribute(REFERENCE_ATTR, ref);
+        model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
 }

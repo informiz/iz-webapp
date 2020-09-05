@@ -1,0 +1,61 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="sourceForm(actionPath)">
+    <h3 class="mt-5">Add Source</h3>
+    <div class="row">
+        <div class="col-md-8">
+            <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
+                        <label for="srcSelect" class="col-form-label">Source</label>
+                        <input type="text" id="srcSelect" class="form-control" placeholder="Start typing to search..."
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                        <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="link" class="col-form-label">Link</label>
+                        <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.com/some/article"
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}" />
+                        <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="description" class="col-form-label">Description</label>
+                        <textarea th:field="*{description}" class="form-control" id="description" cols="30" placeholder="Describe the source..."
+                                  th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}"/>
+                        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+                    </div>
+                </div>
+                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
+                    <div class="col-md-6">
+                        <input type="submit" class="btn btn-primary" value="Update"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <script>
+
+            var sources_info = []
+
+            sourcesCallbacks.push(function() {
+                $.each(sources, function(id, source) {
+                    sources_info.push( { id: source.entityId, value: source.name } );
+                });
+            });
+
+            $('#srcSelect').autocomplete({
+                source: sources_info,
+                select: function(event, ui) {
+                    $(this).val(ui.item.value);
+                    $("input[name='srcEntityId']").val(ui.item.id);
+                }
+            });
+
+        </script>
+    </div>
+</div>
+</html>

@@ -16,7 +16,6 @@
                                 <thead>
                                 <tr>
                                     <th>Text</th>
-                                    <th>Source</th>
                                     <th>Score</th>
                                     <th>By</th>
                                     <th>Edit</th>
@@ -26,7 +25,6 @@
                                 <tbody>
                                 <tr th:each="hypothesis : ${hypotheses}">
                                     <td th:text="${hypothesis.claim}"></td>
-                                    <td th:name="${hypothesis.sid}"></td>
                                     <td th:text="${hypothesis.score.reliability}"></td>
                                     <td th:name="${hypothesis.ownerId}"></td>
                                     <td><a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
@@ -40,11 +38,6 @@
                     </div>
                 </div>
                 <script>
-                    sourcesCallbacks.push(function() {
-                        $.each(sources, function(id, src) {
-                            $('td[name="'+src.entityId+'"]').text(src.name);
-                        });
-                    });
                     checkersCallbacks.push(function() {
                         $.each(checkers, function(id, checker) {
                             $('td[name="'+checker.entityId+'"]').text(checker.name);

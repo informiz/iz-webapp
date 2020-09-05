@@ -10,10 +10,10 @@
                 <h2 class="mb-5">Update Citation</h2>
                 <div class="row">
                     <div class="col-md-6">
-                        <form action="#" th:action="@{/reference/details/{id}(id=${reference.id.toString()})}" th:object="${reference}" method="post">
+                        <form action="#" th:action="@{/citation/details/{id}(id=${citation.id.toString()})}" th:object="${citation}" method="post">
                             <!-- TODO: hidden ID field is not submitted with the form -->
-                            <input type="hidden" class="form-control" id="id" name="id" th:value="${reference.id}"/>
-                            <div th:replace="fragments/reference :: reference('write')"></div>
+                            <input type="hidden" class="form-control" id="id" name="id" th:value="${citation.id}"/>
+                            <div th:replace="fragments/citation :: citation('write')"></div>
                             <div th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}" class="row">
                                 <div class="col-md-6 mt-2">
                                     <input type="submit" class="btn btn-primary" value="Update"/>
@@ -22,7 +22,9 @@
                         </form>
                     </div>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${reference.reviews}, @{'/reference/review/' + ${reference.id}})"></div>
+                <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})"></div>
+
+                <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/review/' + ${citation.id}})"></div>
             </div>
         </div>
     </body>

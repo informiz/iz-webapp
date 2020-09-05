@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.util.HashSet;
+import javax.validation.constraints.NotNull;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -16,15 +18,40 @@ public abstract class ChainCodeEntity extends InformizEntity {
 
     static final long serialVersionUID = 1L;
 
+    // TODO: better way to get channel name?
+    static final String channelName = System.getProperty("iz.channel.name");
+
+    public enum EntityType {
+        FACT_CHECKER("Fact Checker"),
+        SOURCE("Source"),
+        CLAIM("Claim"),
+        CITATION("Citation"),
+        INFORMI("Informi");
+
+        private final String displayValue;
+
+        private EntityType(String displayValue) {
+            this.displayValue = displayValue;
+        }
+
+        public String getDisplayValue() {
+            return displayValue;
+        }
+
+    }
+
     protected static ObjectMapper mapper = new ObjectMapper();
+
 
     // The entity's id on the ledger
     @Column(name = "entity_id", unique = true)
     protected String entityId;
 
+    @NotNull(message = "Locale is mandatory")
+    private Locale locale = Locale.ENGLISH; // Default to English
+
     @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
-    //@JoinColumns({ @JoinColumn(name = "FK_entity_id", referencedColumnName = "entity_id") })
-    protected Set<Review> reviews; // = new HashSet<>();
+    protected Set<Review> reviews;
 
     @Embedded
     @AttributeOverrides({
@@ -32,6 +59,38 @@ public abstract class ChainCodeEntity extends InformizEntity {
     })
     @Valid
     private Score score = new Score();
+
+
+    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS PROVIDED BY CHAINCODE ************************
+
+    @PrePersist
+    protected void onCreate() {
+        super.onCreate();
+        entityId = createEntityId();
+    }
+
+    protected String createEntityId() {
+        EntityType entityType;
+
+        if (this instanceof FactCheckerBase) {
+            entityType = EntityType.FACT_CHECKER;
+        } else if (this instanceof SourceBase) {
+            entityType = EntityType.SOURCE;
+        } else if (this instanceof HypothesisBase) {
+            entityType = EntityType.CLAIM;
+        } else if (this instanceof CitationBase) {
+            entityType = EntityType.CITATION;
+        } else if (this instanceof InformiBase) {
+            entityType = EntityType.INFORMI;
+        } else {
+            throw new IllegalStateException("Unexpected entity type: " + this.toString());
+        }
+
+        // TODO: check uniqueness
+        return String.format("%s_%s_%s",
+                entityType, channelName, UUID.randomUUID().toString().substring(0, 16));
+    }
+    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS PROVIDED BY CHAINCODE ************************
 
 
     public String getEntityId() {
@@ -42,17 +101,13 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.entityId = entityId;
     }
 
-
-    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS AVAILABLE ************************
-
-    static final Random rand = new Random();
-
-    @PrePersist
-    protected void onCreate() {
-        super.onCreate();
-        entityId = String.format("%d-%d", System.currentTimeMillis(), rand.nextInt());
+    public Locale getLocale() {
+        return locale;
     }
-    // TODO: ************************ REMOVE THIS ONCE ENTITY ID IS AVAILABLE ************************
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 
     public Set<Review> getReviews() {
         return reviews;
@@ -76,7 +131,6 @@ public abstract class ChainCodeEntity extends InformizEntity {
                 fcid.equals(review.getChecker())).findFirst().orElse(null);
         return byChecker;
     }
-
 
     public Score getScore() {
         return score;

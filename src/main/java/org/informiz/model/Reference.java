@@ -48,7 +48,6 @@ public class Reference extends InformizEntity implements Serializable {
     @Column
     private String comment;
 
-
     public Reference() {}
 
     public Reference(ChainCodeEntity reviewed, String citationId, Entailment entailment, String comment) {

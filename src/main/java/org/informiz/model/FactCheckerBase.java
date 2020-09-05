@@ -3,8 +3,9 @@ package org.informiz.model;
 import org.hibernate.validator.constraints.URL;
 import org.informiz.auth.AuthUtils;
 
-import javax.persistence.*;
-import javax.validation.Valid;
+import javax.persistence.Entity;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;

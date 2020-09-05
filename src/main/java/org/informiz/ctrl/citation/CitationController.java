@@ -3,12 +3,14 @@ package org.informiz.ctrl.citation;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.CitationBase;
 import org.informiz.model.Review;
+import org.informiz.model.SourceRef;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -17,96 +19,128 @@ import javax.validation.Valid;
 @RequestMapping(path= CitationController.PREFIX)
 public class CitationController extends ChaincodeEntityController<CitationBase> {
 
-    public static final String PREFIX = "/reference";
-    public static final String REFERENCE_ATTR = "reference";
-    public static final String REFERENCES_ATTR = "references";
+    public static final String PREFIX = "/citation";
+    public static final String CITATION_ATTR = "citation";
+    public static final String SOURCE_ATTR = "source";
+    public static final String CITATIONS_ATTR = "citations";
 
 
     @GetMapping(path = {"/", "/all"})
-    public String getAllReferences(Model model) {
-        model.addAttribute(REFERENCES_ATTR, entityRepo.findAll());
-        return String.format("%s/all-references.html", PREFIX);
+    public String getAllCitations(Model model) {
+        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
+        return String.format("%s/all-citations.html", PREFIX);
     }
 
     @GetMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addReferenceForm(Model model) {
-        model.addAttribute(REFERENCE_ATTR, new CitationBase());
-        return String.format("%s/add-reference.html", PREFIX);
+    public String addCitationForm(Model model) {
+        model.addAttribute(CITATION_ATTR, new CitationBase());
+        return String.format("%s/add-citation.html", PREFIX);
     }
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addReference(@Valid @ModelAttribute(REFERENCE_ATTR) CitationBase reference,
-                                 BindingResult result) {
+    public String addCitation(@Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
+                              BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return String.format("%s/add-reference.html", PREFIX);
+            return String.format("%s/add-citation.html", PREFIX);
         }
-        // TODO: Add to ledger
-        entityRepo.save(reference);
-        return String.format("redirect:%s/all", PREFIX);
+
+        CitationBase created = entityRepo.save(citation);
+
+        model.addAttribute(CITATION_ATTR, created);
+        model.addAttribute(REVIEW_ATTR, new Review());
+        model.addAttribute(SOURCE_ATTR, new SourceRef());
+        return String.format("%s/update-citation.html", PREFIX);
     }
 
     @GetMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
-    public String deleteReference(@PathVariable("id") @Valid Long id) {
-        CitationBase reference = entityRepo.findById(Long.valueOf(id))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid reference id"));
+    public String deleteCitation(@PathVariable("id") @Valid Long id) {
+        CitationBase citation = entityRepo.findById(Long.valueOf(id))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         // TODO: set inactive
-        entityRepo.delete(reference);
+        entityRepo.delete(citation);
         return String.format("redirect:%s/all", PREFIX);
     }
 
     @GetMapping("/view/{id}")
-    public String viewReference(@PathVariable("id") @Valid Long id, Model model) {
-        CitationBase reference = entityRepo.findById(id)
-                .orElseThrow(() ->new IllegalArgumentException("Invalid reference id"));
-        model.addAttribute(REFERENCE_ATTR, reference);
-        return String.format("%s/view-reference.html", PREFIX);
+    public String viewCitation(@PathVariable("id") @Valid Long id, Model model) {
+        CitationBase citation = entityRepo.findById(id)
+                .orElseThrow(() ->new IllegalArgumentException("Invalid citation id"));
+        model.addAttribute(CITATION_ATTR, citation);
+        return String.format("%s/view-citation.html", PREFIX);
     }
 
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
-    public String getReference(@PathVariable("id")  Long id, Model model) {
-        CitationBase reference = entityRepo.findById(id)
-                .orElseThrow(() ->new IllegalArgumentException("Invalid reference id"));
-        model.addAttribute(REFERENCE_ATTR, reference);
+    public String getCitation(@PathVariable("id")  Long id, Model model) {
+        CitationBase citation = entityRepo.findById(id)
+                .orElseThrow(() ->new IllegalArgumentException("Invalid citation id"));
+        model.addAttribute(CITATION_ATTR, citation);
         model.addAttribute(REVIEW_ATTR, new Review());
-        return String.format("%s/update-reference.html", PREFIX);
+        model.addAttribute(SOURCE_ATTR, new SourceRef());
+        return String.format("%s/update-citation.html", PREFIX);
     }
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
-    public String updateReference(@PathVariable("id") @Valid Long id,
-                                    @Valid @ModelAttribute(REFERENCE_ATTR) CitationBase reference,
+    public String updateCitation(@PathVariable("id") @Valid Long id,
+                                    @Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
             CitationBase current = entityRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid reference id"));
-            current.edit(reference);
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+            current.edit(citation);
             entityRepo.save(current);
-            model.addAttribute(REFERENCE_ATTR, current);
+            model.addAttribute(CITATION_ATTR, current);
             return String.format("redirect:%s/all", PREFIX);
         }
-        return String.format("%s/update-reference.html", PREFIX);
+        return String.format("%s/update-citation.html", PREFIX);
     }
 
     @PostMapping("/review/{id}")
     @Secured("ROLE_USER")
     @Transactional
-    public String reviewReference(@PathVariable("id") @Valid Long id,
+    public String reviewCitation(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication, Model model) {
 
         CitationBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-            model.addAttribute(REFERENCE_ATTR, current);
+            model.addAttribute(CITATION_ATTR, current);
             model.addAttribute(REVIEW_ATTR, new Review());
         }
 
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
+
+    @PostMapping("/source/{id}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
+                            BindingResult result, Model model) {
+
+        CitationBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
+
+        try {
+            SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
+            current.addSource(toAdd);
+            model.addAttribute(CITATION_ATTR, current);
+            model.addAttribute(SOURCE_ATTR, new SourceRef());
+        } catch (IllegalArgumentException e) {
+            result.addError(new ObjectError("link",
+                    "Please provide either a link, a source or both"));
+        }
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+    }
+    // TODO: remove-source method
+
+    // TODO: which methods need to be declared transactional?
+
+    // TODO: is it  necessary to add empty objects to the model?
 }

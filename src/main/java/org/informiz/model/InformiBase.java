@@ -38,9 +38,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     @URL(message = "A valid link to a media file is mandatory")
     private String mediaPath;
 
-    @NotNull(message = "Locale is mandatory")
-    private Locale locale;
-
     @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
     protected Set<Reference> references;
 
@@ -66,14 +63,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
 
     public void setMediaPath(String link) {
         this.mediaPath = link;
-    }
-
-    public Locale getLocale() {
-        return locale;
-    }
-
-    public void setLocale(Locale locale) {
-        this.locale = locale;
     }
 
     public Set<Reference> getReferences() {

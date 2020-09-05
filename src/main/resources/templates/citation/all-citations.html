@@ -6,7 +6,7 @@
     </head>
     <body>
         <div layout:fragment="content">
-            <div th:switch="${references}" class="container my-5">
+            <div th:switch="${citations}" class="container my-5">
                 <div class="row">
                     <div>
                         <h2 th:case="null">No citations yet!</h2>
@@ -16,7 +16,6 @@
                                 <thead>
                                 <tr>
                                     <th>Text</th>
-                                    <th>Source</th>
                                     <th>Score</th>
                                     <th>Link</th>
                                     <th>By</th>
@@ -25,28 +24,22 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="reference : ${references}">
-                                    <td th:text="${reference.text}"></td>
-                                    <td th:name="${reference.sid}"></td>
-                                    <td th:text="${reference.score.reliability}"></td>
-                                    <td><a th:href="${reference.link}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
-                                    <td th:name="${reference.ownerId}"></td>
-                                    <td><a th:href="@{/reference/details/{id}(id=${reference.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
-                                    <td><a th:href="@{/reference/delete/{id}(id=${reference.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
+                                <tr th:each="citation : ${citations}">
+                                    <td th:text="${citation.text}"></td>
+                                    <td th:text="${citation.score.reliability}"></td>
+                                    <td><a th:href="${citation.link}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
+                                    <td th:name="${citation.ownerId}"></td>
+                                    <td><a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
+                                    <td><a th:href="@{/citation/delete/{id}(id=${citation.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
-                           class="my-5"><a href="/reference/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
+                           class="my-5"><a href="/citation/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
                     </div>
                 </div>
                 <script>
-                    sourcesCallbacks.push(function() {
-                        $.each(sources, function(id, src) {
-                            $('td[name="'+src.entityId+'"]').text(src.name);
-                        });
-                    });
                     checkersCallbacks.push(function() {
                         $.each(checkers, function(id, checker) {
                             $('td[name="'+checker.entityId+'"]').text(checker.name);

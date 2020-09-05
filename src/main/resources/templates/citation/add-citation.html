@@ -9,8 +9,8 @@
                 <h2 class="mb-5">New Citation</h2>
                 <div class="row">
                     <div class="col-md-6">
-                        <form action="#" th:action="@{/reference/add}" th:object="${reference}" method="post">
-                            <div th:replace="fragments/reference :: reference('write')"></div>
+                        <form action="#" th:action="@{/citation/add}" th:object="${citation}" method="post">
+                            <div th:replace="fragments/citation :: citation('write')"></div>
                             <div class="row">
                                 <div class="col-md-6 mt-5">
                                     <input type="submit" class="btn btn-primary" value="Add" />

@@ -10,7 +10,7 @@
                         <input type="hidden" th:value="${reference.citationId}" name="citationId" />
                         <label for="refSelect" class="col-form-label">Reference</label>
                         <input type="text" id="refSelect" class="form-control" placeholder="Start typing to search..."
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
                         <span th:if="${#fields.hasErrors('citationId')}" th:errors="*{citationId}" class="text-danger"></span>
                     </div>
                 </div>

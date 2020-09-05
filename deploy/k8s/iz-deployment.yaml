@@ -25,9 +25,27 @@ spec:
         - name: service-account-creds-volume
           mountPath: /var/secrets/google
           readOnly: true
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /health/
+            port: iz-secure-port
+          initialDelaySeconds: 60
+          failureThreshold: 2
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /health/
+            port: iz-secure-port
+          initialDelaySeconds: 30
+          failureThreshold: 10
+          periodSeconds: 10
         env:
         - name: profile
           value: <PROFILE>
+        - name: iz.channel.name
+          value: <CHANNEL_NAME>
         - name: iz.webapp.key-id
           value: <CHANNEL_NAME>
         - name: iz.webapp.token.issuer

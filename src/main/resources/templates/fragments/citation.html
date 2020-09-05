@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <div th:fragment="reference(mode)">
+    <div th:fragment="citation(mode)">
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="text" class="col-form-label">Text</label>
@@ -9,10 +9,9 @@
                 <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="text-danger"></span>
             </div>
         </div>
-        <div th:replace="fragments/src-select :: srcSelect(${mode})"></div>
         <div class="row">
             <div class="form-group col-md-6">
-                <label for="link" class="col-form-label">Reference link</label>
+                <label for="link" class="col-form-label">Link to citation</label>
                 <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://server.com/link/to/ref"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}" />
                 <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>

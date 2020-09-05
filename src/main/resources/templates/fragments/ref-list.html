@@ -33,7 +33,7 @@
                     $('#references-table td[id]').val(function(){
                         var ref = citations[$(this).attr('id')];
                         if (ref) {
-                            $(this).append('<a href = "/reference/view/' + ref.id + '">' + ref.text + '</a>')
+                            $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
                         }
                     });
                 }

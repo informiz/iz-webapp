@@ -3,22 +3,13 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
 
-import javax.persistence.*;
-import javax.validation.Valid;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
-/**
- * A data-type managed by the source contract, representing a source for references (e.g the NASA website):
- * - the id of the source
- * - the source's name
- * - the current reliability/confidence score
- * - reviews by fact-checkers
- * Any additional metadata should be saved on a separate CMS
- */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="source")
 @Entity
