@@ -12,7 +12,6 @@ import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(path = SourceRestController.PREFIX)
-@CrossOrigin(origins = "${iz.webapp.url}")
 public class SourceRestController {
 
     public static final String PREFIX = "/source-api";

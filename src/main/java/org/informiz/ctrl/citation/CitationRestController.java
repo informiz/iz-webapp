@@ -12,7 +12,6 @@ import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(path = CitationRestController.PREFIX)
-@CrossOrigin(origins = "${iz.webapp.url}")
 public class CitationRestController {
 
     public static final String PREFIX = "/citation-api";

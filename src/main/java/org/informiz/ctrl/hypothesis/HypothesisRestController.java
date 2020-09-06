@@ -12,7 +12,6 @@ import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(path = HypothesisRestController.PREFIX)
-@CrossOrigin(origins = "${iz.webapp.url}")
 public class HypothesisRestController {
 
     public static final String PREFIX = "/claim-api";

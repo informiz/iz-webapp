@@ -14,7 +14,6 @@ import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(path = CheckerRestController.PREFIX)
-@CrossOrigin(origins = "${iz.webapp.url}")
 public class CheckerRestController {
 
     public static final String PREFIX = "/checker-api";

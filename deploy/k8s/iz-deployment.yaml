@@ -14,26 +14,11 @@ spec:
         app: webapp
         channel: <CHANNEL_NAME>
     spec:
-      volumes:
-      - name: service-account-creds-volume
-        secret:
-          secretName: <CHANNEL_NAME>-service-account-creds
+      serviceAccountName: <CHANNEL_NAME>-ksa
       containers:
       - name: iz-webapp
         image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
-        volumeMounts:
-        - name: service-account-creds-volume
-          mountPath: /var/secrets/google
-          readOnly: true
-        livenessProbe:
-          httpGet:
-            scheme: HTTPS
-            path: /health/
-            port: iz-secure-port
-          initialDelaySeconds: 60
-          failureThreshold: 2
-          periodSeconds: 10
-        startupProbe:
+        readinessProbe:
           httpGet:
             scheme: HTTPS
             path: /health/
@@ -57,6 +42,11 @@ spec:
             secretKeyRef:
               name: <CHANNEL_NAME>-jwt-secret
               key: secret
+        - name: spring.datasource.url
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-db-creds
+              key: url
         - name: spring.datasource.username
           valueFrom:
             secretKeyRef:
@@ -77,5 +67,12 @@ spec:
             secretKeyRef:
               name: <CHANNEL_NAME>-oauth-creds
               key: secret
-        - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: /var/secrets/google/key.json
+      - name: cloud-sql-proxy
+        # It is recommended to use the latest version of the Cloud SQL proxy
+        # Make sure to update on a regular schedule!
+        image: gcr.io/cloudsql-docker/gce-proxy:1.17
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=informiz-beta=tcp:3306"
+        securityContext:
+          runAsNonRoot: false
