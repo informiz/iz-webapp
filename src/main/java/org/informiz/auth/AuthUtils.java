@@ -66,13 +66,12 @@ public class AuthUtils {
 
     public static List<GrantedAuthority> anonymousAuthorities() {
         return Arrays.asList(
-                new InformizGrantedAuthority("ROLE_VIEWER", "anonymous", "anonymous"));
+                new InformizGrantedAuthority("ROLE_VIEWER", "anonymous"));
     }
 
     public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {
-        // TODO: get wallet from encrypted storage based on user email address
-        // TODO: need to exchange user's email for entity-id
-        Wallet userWallet = null;
+        // TODO: get wallet from secret-manager based on user entity-id
+        Wallet userWallet;
         try {
             userWallet = getUserWallet(email);
         } catch (Exception e) {
@@ -82,20 +81,20 @@ public class AuthUtils {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
         if (userWallet == null) {
-            authorities.add(new InformizGrantedAuthority(ROLE_VIEWER, entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_VIEWER, entityId));
             return authorities; // No additional authorities
         }
 
         // All users have fact-checker permissions
-        authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId, email));
+        authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId));
 
         // TODO: get current channel name
         if (isChannelMember(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId));
         }
 
         if (isChannelAdmin(email, userWallet, channelId)) {
-            authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId, email));
+            authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId));
         }
 
         return authorities;

@@ -54,7 +54,6 @@ public class TokenProvider {
 
     public String createToken(@NotNull Authentication authentication) {
         OAuth2User user = (OAuth2User) authentication.getPrincipal();
-        String email = (String) user.getAttributes().get("email");
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + TOKEN_MAX_AGE);
@@ -75,7 +74,6 @@ public class TokenProvider {
                 .withExpiresAt(expiryDate)
                 .withClaim("scopes", scopes)
                 .withClaim("eid", entityId)
-                .withClaim("email", email) // TODO: REMOVE
                 .sign(HMAC512(tokenSecret.getBytes()));
     }
 
@@ -95,18 +93,15 @@ public class TokenProvider {
         return authFromToken(getVerifier().verify(token));
     }
 
-    // TODO: get rid of email in the code
     public OAuth2AuthenticationToken authFromToken(DecodedJWT jwt) {
         String entityId = jwt.getClaim("eid").asString();
-        String email = jwt.getClaim("email").asString();
         Map<String, Object> attributes = new HashMap<>();
 
         attributes.put("eid", entityId);
-        attributes.put("email", email);
         attributes.put("name", jwt.getSubject());
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         jwt.getClaim("scopes").asList(String.class).forEach(scope -> {
-            authorities.add(new InformizGrantedAuthority(scope, entityId, email));
+            authorities.add(new InformizGrantedAuthority(scope, entityId));
         });
 
         OAuth2User user = new DefaultOAuth2User(authorities, attributes, "name");

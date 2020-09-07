@@ -19,10 +19,6 @@ public class InformizAuthMapper implements GrantedAuthoritiesMapper {
 
     @Override
     public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
-        factCheckerRepo.init();
-        // TODO: *************************** TESTING, REMOVE THIS!!!! ***************************
-
         Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
         authorities.forEach(authority -> {
@@ -30,6 +26,7 @@ public class InformizAuthMapper implements GrantedAuthoritiesMapper {
                 OAuth2UserAuthority oidcUserAuthority = (OAuth2UserAuthority) authority;
                 String email = oidcUserAuthority.getAttributes().get("email").toString();
                 AuthUtils.getUserAuthorities(email,
+                        // TODO: may not be a member, get user from ES
                         factCheckerRepo.findByEmail(email).getEntityId())
                         .forEach(auth -> mappedAuthorities.add(auth));
             }
@@ -37,11 +34,5 @@ public class InformizAuthMapper implements GrantedAuthoritiesMapper {
         });
 
         return mappedAuthorities;
-    }
-
-    private boolean initialized = false;
-
-    private void init() {
-
     }
 }

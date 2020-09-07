@@ -102,7 +102,7 @@ public class CryptoUtils {
      * @return a wallet associated with the user, or null if the user doesn't have a wallet
      */
     public static void saveUserWallet(@NotBlank String userEmail, @NotNull Wallet wallet) {
-        // TODO: save wallet to encrypted storage, path based on email used for login.
+        // TODO: save wallet to secret-manager, secret's name based on user entity-id
     }
 
     public static X509Certificate getCertificate(Path userCertPath) throws IOException, CertificateException {

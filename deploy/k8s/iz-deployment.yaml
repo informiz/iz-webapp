@@ -22,7 +22,7 @@ spec:
           httpGet:
             scheme: HTTPS
             path: /health/
-            port: iz-secure-port
+            port: 8083
           initialDelaySeconds: 30
           failureThreshold: 10
           periodSeconds: 10
@@ -73,6 +73,6 @@ spec:
         image: gcr.io/cloudsql-docker/gce-proxy:1.17
         command:
           - "/cloud_sql_proxy"
-          - "-instances=informiz-beta=tcp:3306"
+          - "-instances=key-master-283113:europe-west1:informiz-beta=tcp:3306"
         securityContext:
           runAsNonRoot: false
