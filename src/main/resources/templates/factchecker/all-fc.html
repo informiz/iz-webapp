@@ -18,36 +18,27 @@
                                     <th>Name</th>
                                     <th>Score</th>
                                     <th>Profile</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="checker : ${checkers}">
-                                    <td th:text="${checker.name}"></td>
+                                    <td>
+                                        <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                                           th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}"
+                                           th:text="${checker.name}"/>
+                                        <a th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                                           th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}"
+                                           th:text="${checker.name}"/>
+                                    </td>
                                     <td th:text="${checker.score.reliability}"></td>
-                                    <td><a th:href="${checker.link}" target="_blank" class="btn btn-primary">
-                                        <i class="fas fa-user-check ml-2"></i>
-                                    </a></td>
-                                    <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                                        <a th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}" class="btn btn-primary">
-                                            <i class="fas fa-user-edit ml-2"></i>
-                                        </a>
-                                    </td>
-                                    <td th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                                        <a th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}" class="btn btn-primary">
-                                            <i class="fas fa-user-edit ml-2"></i>
-                                        </a>
+                                    <td>
+                                        <a th:href="${checker.link}" target="_blank"
+                                           class="btn btn-primary fas fa-user-check ml-2"/>
                                     </td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                                        <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}" class="btn btn-primary">
-                                            <i class="fas fa-user-times ml-2"></i>
-                                        </a>
-                                    </td>
-                                    <td th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                                        <a href="#" class="btn btn-primary" style="color:Gray">
-                                            <i class="fas fa-user-times ml-2"></i>
-                                        </a>
+                                        <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}"
+                                           class="btn btn-primary fas fa-user-times ml-2"/>
                                     </td>
                                 </tr>
                                 </tbody>

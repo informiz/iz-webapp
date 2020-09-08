@@ -10,7 +10,12 @@
                 <h2 class="mb-5">Citation Details</h2>
                 <div class="row" th:object="${citation}">
                     <div class="col-md-6">
-                        <div th:replace="fragments/citation :: citation('read')"></div>
+                        <div class="row pb-3">
+                            <h4 class="pr-2" th:text="*{text}"/>
+                            <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
+                        </div>
+                        <span class="text-muted"
+                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
                     </div>
                 </div>
                 <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, '')"></div>

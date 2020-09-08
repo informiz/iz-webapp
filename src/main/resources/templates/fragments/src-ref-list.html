@@ -17,9 +17,8 @@
                 <tr th:each="src : ${sources}">
                     <td class="w-20" th:id="${src.srcEntityId}"/>
                     <td class="w-20" th:id="${src.link}"/>
-                    <td class="w-60">
-                        <textarea th:text="${src.description}" class="form-control" disabled="true" rows="1"/>
-                    </td>
+                    <td th:text="${src.description}" class="form-control w-60"
+                        style="background-color: transparent; border:none"></td>
                 </tr>
                 </tbody>
             </table>
@@ -34,13 +33,13 @@
                     $('tbody tr td:nth-child(1)').val(function(){
                         var source = sources[$(this).attr('id')];
                         if (source) {
-                            $(this).append('<a href="' + source.link + '" target="_blank">' + source.name + '</a>')
+                            $(this).append('<a href="/source/details/' + source.id + '">' + source.name + '</a>')
                         }
                     });
                     $('tbody tr td:nth-child(2)').val(function(){
                         if ($(this).attr('id')) {
                             $(this).append('<a href="' + $(this).attr('id') +
-                                 '" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a>')
+                                 '" target="_blank" class="btn btn-primary fas fa-link"/>')
                         }
                     });
                 }

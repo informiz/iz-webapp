@@ -18,17 +18,25 @@
                                     <th>Text</th>
                                     <th>Score</th>
                                     <th>By</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="hypothesis : ${hypotheses}">
-                                    <td th:text="${hypothesis.claim}"></td>
+                                    <td>
+                                        <a th:text="${hypothesis.claim}" th:href="@{/hypothesis/view/{id}(id=${hypothesis.id.toString()})}"/>
+                                    </td>
                                     <td th:text="${hypothesis.score.reliability}"></td>
                                     <td th:name="${hypothesis.ownerId}"></td>
-                                    <td><a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
-                                    <td><a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
+                                           class="btn btn-primary fas fa-pencil-alt"/>
+                                    </td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
+                                           class="btn btn-primary fas fa-times"/>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -40,7 +48,7 @@
                 <script>
                     checkersCallbacks.push(function() {
                         $.each(checkers, function(id, checker) {
-                            $('td[name="'+checker.entityId+'"]').text(checker.name);
+                            $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                         });
                     });
                 </script>

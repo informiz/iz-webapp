@@ -19,18 +19,29 @@
                                     <th>Score</th>
                                     <th>Link</th>
                                     <th>By</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="citation : ${citations}">
-                                    <td th:text="${citation.text}"></td>
+                                    <td>
+                                        <a th:text="${citation.text}" th:href="@{/citation/view/{id}(id=${citation.id.toString()})}"/>
+                                    </td>
                                     <td th:text="${citation.score.reliability}"></td>
-                                    <td><a th:href="${citation.link}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
-                                    <td th:name="${citation.ownerId}"></td>
-                                    <td><a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
-                                    <td><a th:href="@{/citation/delete/{id}(id=${citation.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
+                                    <td>
+                                        <a th:href="${citation.link}" target="_blank" class="btn btn-primary fas fa-link"/>
+                                    </td>
+                                    <td th:name="${citation.ownerId}">
+                                    </td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}"
+                                           class="btn btn-primary fas fa-pencil-alt"/>
+                                    </td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/citation/delete/{id}(id=${citation.id.toString()})}"
+                                           class="btn btn-primary fas fa-times"/>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -42,7 +53,7 @@
                 <script>
                     checkersCallbacks.push(function() {
                         $.each(checkers, function(id, checker) {
-                            $('td[name="'+checker.entityId+'"]').text(checker.name);
+                            $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                         });
                     });
                 </script>

@@ -10,7 +10,12 @@
                 <h2 class="mb-5">Fact-Checker Details</h2>
                 <div class="row" th:object="${checker}">
                     <div class="col-md-6">
-                        <div th:replace="fragments/checker :: checker('read')"></div>
+                        <div class="row pb-3">
+                            <h4 class="pr-2" th:text="*{name}"/>
+                            <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
+                        </div>
+                        <span class="text-muted"
+                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
                     </div>
                 </div>
             </div>

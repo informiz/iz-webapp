@@ -18,19 +18,26 @@
                                     <th>Name</th>
                                     <th>Type</th>
                                     <th>Score</th>
-                                    <th>Link</th>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="source : ${sources}">
-                                    <td th:text="${source.name}"></td>
+                                    <td>
+                                        <a th:text="${source.name}" th:href="${source.link}" target="_blank"/>
+                                    </td>
+
                                     <td th:text="${source.srcType.displayValue}"></td>
                                     <td th:text="${source.score.reliability}"></td>
-                                    <td><a th:href="${source.link}" target="_blank" class="btn btn-primary"><i class="fas fa-link"></i></a></td>
-                                    <td><a th:href="@{/source/details/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a></td>
-                                    <td><a th:href="@{/source/delete/{id}(id=${source.id.toString()})}" class="btn btn-primary"><i class="fas fa-times"></i></a></td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/source/details/{id}(id=${source.id.toString()})}"
+                                           class="btn btn-primary fas fa-pencil-alt"/>
+                                    </td>
+                                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/source/delete/{id}(id=${source.id.toString()})}"
+                                           class="btn btn-primary fas fa-times"/>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>

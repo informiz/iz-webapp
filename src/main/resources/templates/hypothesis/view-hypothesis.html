@@ -10,8 +10,6 @@
                 <div class="row" th:object="${hypothesis}">
                     <div class="col-md-6">
                         <h4 class="mb-3" th:text="*{claim}"/>
-                        <!-- TODO: source name+link -->
-
                         <span class="text-muted"
                               th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
                     </div>
