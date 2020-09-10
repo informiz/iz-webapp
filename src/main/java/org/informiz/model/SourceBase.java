@@ -77,6 +77,7 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     public void edit(SourceBase other) {
         this.setName(other.getName());
         this.setLink(other.getLink());
+        this.setSrcType(other.getSrcType());
         this.setReviews(other.getReviews()); // TODO: move to parent edit method, proper copy
         // TODO: allow direct score edit? Calculate new score?
         this.getScore().edit(other.getScore());

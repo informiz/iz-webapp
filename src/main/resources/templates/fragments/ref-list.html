@@ -16,9 +16,9 @@
                 <tbody>
                 <!-- TODO: how to set the column width? -->
                 <tr th:each="ref : ${references}">
-                    <td class="w-40" th:id="${ref.citationId}"/>
-                    <td class="w-20" th:text="${ref.entailment.displayValue}"></td>
-                    <td class="w-40" th:text="${ref.comment}"></td>
+                    <td th:id="${ref.citationId}"/>
+                    <td th:text="${ref.entailment.displayValue}"></td>
+                    <td th:text="${ref.comment}"></td>
                 </tr>
                 </tbody>
             </table>

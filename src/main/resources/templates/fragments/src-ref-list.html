@@ -15,10 +15,9 @@
                 </thead>
                 <tbody>
                 <tr th:each="src : ${sources}">
-                    <td class="w-20" th:id="${src.srcEntityId}"/>
-                    <td class="w-20" th:id="${src.link}"/>
-                    <td th:text="${src.description}" class="form-control w-60"
-                        style="background-color: transparent; border:none"></td>
+                    <td th:id="${src.srcEntityId}"/>
+                    <td th:id="${src.link}"/>
+                    <td th:text="${src.description}"/>
                 </tr>
                 </tbody>
             </table>

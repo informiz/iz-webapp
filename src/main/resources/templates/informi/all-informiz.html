@@ -29,8 +29,8 @@
                                         <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
                                            th:text="${informi.name}"/>
                                     </td>
-                                    <td th:text="${informi.description}" class="form-control"
-                                        style="background-color: transparent; border:none"></td>
+                                    <td th:text="${informi.description}">
+                                    </td>
                                     <td th:text="${informi.score.reliability}"></td>
                                     <td th:name="${informi.ownerId}"></td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">

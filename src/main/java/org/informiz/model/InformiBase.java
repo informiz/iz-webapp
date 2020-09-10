@@ -3,14 +3,11 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -33,6 +30,8 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     private String name;
 
     @NotBlank(message = "Description is mandatory")
+    @Column(length = 1000)
+    @Size(max = 1000)
     private String description;
 
     @URL(message = "A valid link to a media file is mandatory")

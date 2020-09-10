@@ -16,9 +16,9 @@
                 <tbody>
                 <!-- TODO: how to set the column width? -->
                 <tr th:each="review : ${reviews}">
-                    <td class="w-25" th:id="${review.checker}"/>
-                    <td class="w-25" th:text="${review.rating}"></td>
-                    <td class="w-50" th:text="${review.comment}"></td>
+                    <td th:id="${review.checker}"/>
+                    <td th:text="${review.rating}"></td>
+                    <td th:text="${review.comment}"></td>
                 </tr>
                 </tbody>
             </table>
