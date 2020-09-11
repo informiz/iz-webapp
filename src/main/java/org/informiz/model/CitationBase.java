@@ -64,11 +64,9 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
     }
 
     public void edit(CitationBase other) {
+        super.edit(other);
         this.setText(other.getText());
         this.setLink(other.getLink());
-        this.setLocale(other.getLocale());
-        // TODO: allow direct score edit? Calculate new score?
-        this.getScore().edit(other.getScore());
     }
 
 }

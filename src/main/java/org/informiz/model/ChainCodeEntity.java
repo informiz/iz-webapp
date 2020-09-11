@@ -23,6 +23,9 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Column(name = "entity_id", unique = true)
     protected String entityId;
 
+    @Column(columnDefinition = "boolean default 1")
+    protected Boolean active;
+
     @NotNull(message = "Locale is mandatory")
     private Locale locale = Locale.ENGLISH; // Default to English
 
@@ -90,6 +93,15 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.score = score;
     }
 
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     // TODO: is this how we want to compare entities?
     @Override
     public int hashCode() {
@@ -113,7 +125,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
 
     @Override
     public String toString() {
-        return entityId;
+        return String.format("Entity: %s", entityId);
     }
 
     public static String toEntityString(ChainCodeEntity entity) {
@@ -122,6 +134,12 @@ public abstract class ChainCodeEntity extends InformizEntity {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize entity", e);
         }
+    }
+
+    public void edit(@NotNull ChainCodeEntity other) {
+        this.setLocale(other.getLocale());
+        // TODO: Replace with score calculation, no direct edit
+        this.setScore(other.getScore());
     }
 
     public static <T extends ChainCodeEntity> T fromEntityString(@NotBlank String jsonStr, Class<T> clazz) {

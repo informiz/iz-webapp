@@ -21,13 +21,18 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     public enum SourceType {
         UNIVERSITY("University"),
         NEWS("News Outlet"),
+        JOURNALIST("Journalist"),
         SOCIAL_MEDIA("Social Media"),
         STUDY("Scientific Study"),
+        SCHOLAR("Scholar"),
         BOOK("Book"),
+        POLITICIAN("Political Figure"),
         PERSON("Person"),
         GOVERNMENT("Government Entity"),
         PRIVATE_ORG("Private Organization"),
-        BLOG("Blog");
+        NONPROFIT_ORG("Non Profit Organization"),
+        BLOG("Blog"),
+        WEBSITE("Website");
 
         private final String displayValue;
 
@@ -49,6 +54,8 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     @Enumerated(EnumType.ORDINAL)
     private SourceType srcType;
+
+    private String description;
 
     public String getName() {
         return name;
@@ -74,12 +81,19 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
         this.srcType = srcType;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public void edit(SourceBase other) {
+        super.edit(other);
         this.setName(other.getName());
         this.setLink(other.getLink());
         this.setSrcType(other.getSrcType());
-        this.setReviews(other.getReviews()); // TODO: move to parent edit method, proper copy
-        // TODO: allow direct score edit? Calculate new score?
-        this.getScore().edit(other.getScore());
+        this.setDescription(other.getDescription());
     }
 }

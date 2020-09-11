@@ -10,9 +10,9 @@
                 <div class="row">
                     <div>
                         <div>
-                            <h2 class="my-5">Citations</h2>
-                            <p>Quotes from e.g people, books or articles, ranked for reliability</p>
-                            <table class="table table-striped table-responsive-md">
+                            <h2 class="my-3">Citations</h2>
+                            <p class="mb-5">Quotes from e.g people, books or articles, ranked for reliability</p>
+                            <table id="citationsTable" class="table table-striped table-responsive btn-table">
                                 <thead>
                                 <tr>
                                     <th>Text</th>
@@ -30,17 +30,18 @@
                                     </td>
                                     <td th:text="${citation.score.reliability}"></td>
                                     <td>
-                                        <a th:href="${citation.link}" target="_blank" class="btn btn-primary fas fa-link"/>
+                                        <a th:href="${citation.link}" target="_blank"
+                                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-link"/>
                                     </td>
                                     <td th:name="${citation.ownerId}">
                                     </td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                         <a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}"
-                                           class="btn btn-primary fas fa-pencil-alt"/>
+                                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                                     </td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                         <a th:href="@{/citation/delete/{id}(id=${citation.id.toString()})}"
-                                           class="btn btn-primary fas fa-times"/>
+                                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -55,6 +56,11 @@
                         $.each(checkers, function(id, checker) {
                             $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                         });
+                    });
+
+                    $(document).ready(function () {
+                        $('#citationsTable').DataTable();
+                        $('.dataTables_length').addClass('bs-select');
                     });
                 </script>
             </div>

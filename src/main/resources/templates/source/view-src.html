@@ -15,8 +15,10 @@
                             <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
                         </div>
                         <p><span class="text-muted" th:text="${source.srcType.displayValue}"/></p>
-                        <span class="text-muted"
-                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
+                        <span class="text-muted">
+                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                        </span>
                     </div>
                 </div>
                 <div th:replace="fragments/review-list :: reviewList(${source.reviews}, '')"></div>

@@ -84,14 +84,13 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public String updateHypothesis(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
         if (! result.hasErrors()) {
-            HypothesisBase current = entityRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
             current.edit(hypothesis);
             entityRepo.save(current);
-//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
-        prepareEditModel(model, hypothesis, new Review(), new Reference());
+        prepareEditModel(model, current, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 
@@ -107,7 +106,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
         prepareEditModel(model, current, review, new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
@@ -125,7 +123,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
         if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
             current = addReference(current, reference);
-//            model.addAttribute(HYPOTHESIS_ATTR, current);
         }
         prepareEditModel(model, current, new Review(), reference);
         return String.format("%s/update-hypothesis.html", PREFIX);

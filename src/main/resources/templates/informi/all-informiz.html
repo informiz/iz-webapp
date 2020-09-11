@@ -6,22 +6,21 @@
     </head>
     <body>
         <div layout:fragment="content">
-            <div th:switch="${informiz}" class="container my-5">
+            <div th:object="${informiz}" class="container my-5">
                 <div class="row">
                     <div>
-                        <h2 th:case="null">No informiz yet!</h2>
-                        <div th:case="*">
+                        <div>
                             <h2 class="my-5">Informiz</h2>
-                            <table class="table table-striped table-responsive-md">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Score</th>
-                                    <th>By</th>
-                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
-                                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
-                                </tr>
+                            <table id="informizTable" class="table table-striped table-responsive btn-table">
+                                <thead class="black white-text">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Score</th>
+                                        <th>By</th>
+                                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="informi : ${informiz}">
@@ -35,11 +34,11 @@
                                     <td th:name="${informi.ownerId}"></td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                         <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                                           class="btn btn-primary fas fa-pencil-alt"/>
+                                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                                     </td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                         <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                                           class="btn btn-primary fas fa-times"/>
+                                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -54,6 +53,10 @@
                         $.each(checkers, function(id, checker) {
                             $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                         });
+                    });
+                    $(document).ready(function () {
+                        $('#informizTable').DataTable();
+                        $('.dataTables_length').addClass('bs-select');
                     });
                 </script>
             </div>

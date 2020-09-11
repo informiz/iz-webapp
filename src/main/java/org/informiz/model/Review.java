@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Table(name="review")
@@ -22,6 +23,7 @@ public class Review extends InformizEntity implements Serializable {
 
     @DecimalMin("0.0")
     @DecimalMax("1.0")
+    @NotNull
     private Float rating;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -76,9 +76,7 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
     }
 
     public void edit(HypothesisBase other) {
+        super.edit(other);
         this.setClaim(other.getClaim());
-        this.setLocale(other.getLocale());
-        // TODO: allow direct score edit? Calculate new score?
-        this.getScore().edit(other.getScore());
     }
 }

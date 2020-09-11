@@ -54,10 +54,7 @@ public class InformizEntity  implements Serializable {
                     .findFirst()
                     .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
         } catch (NullPointerException e) {
-            // TODO: *************************** DEVELOPING, REMOVE THIS!!!! ***************************
-            creatorId = ownerId = "anonymous";
-            // TODO: *************************** DEVELOPING, REMOVE THIS!!!! ***************************
-            //throw new IllegalStateException("Entity creation - no authenticated user found");
+            throw new IllegalStateException("Entity creation - no authenticated user found");
         }
     }
 

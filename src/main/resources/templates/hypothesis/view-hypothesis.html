@@ -10,8 +10,10 @@
                 <div class="row" th:object="${hypothesis}">
                     <div class="col-md-6">
                         <h4 class="mb-3" th:text="*{claim}"/>
-                        <span class="text-muted"
-                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
+                        <span class="text-muted">
+                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                        </span>
                     </div>
                 </div>
                 <div th:replace="fragments/src-ref-list :: sourceList(${hypothesis.sources}, '')"></div>

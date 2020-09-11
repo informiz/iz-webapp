@@ -88,11 +88,9 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     }
 
     public void edit(InformiBase other) {
+        super.edit(other);
         this.setName(other.getName());
         this.setDescription(other.getDescription());
         this.setMediaPath(other.getMediaPath());
-        this.setLocale(other.getLocale());
-        // TODO: allow direct score edit? Calculate new score?
-        this.getScore().edit(other.getScore());
     }
 }

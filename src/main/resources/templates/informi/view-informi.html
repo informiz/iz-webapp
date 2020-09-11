@@ -12,8 +12,10 @@
                         <h2 class="mb-3" th:text="*{name}"/>
                         <p><span class="text-muted" th:text="*{description}"></span></p>
 
-                        <span class="text-muted"
-                              th:text="@{Reliability: {value}, Confidence: {conf}(value=*{score.reliability}, conf=*{score.confidence})}"></span>
+                        <span class="text-muted">
+                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                        </span>
                         <div class="row">
                             <div class="form-group col-md-6">
                                 <img th:src="${informi.getMediaPath()}">
