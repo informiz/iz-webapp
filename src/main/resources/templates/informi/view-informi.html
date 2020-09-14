@@ -10,7 +10,7 @@
                 <div class="row" th:object="${informi}">
                     <div class="col-md-6">
                         <h2 id="title" class="mb-3" th:text="*{name}"/>
-                        <p><span class="text-muted" th:text="*{description}"></span></p>
+                        <p><span id="description" class="text-muted" th:text="*{description}"></span></p>
 
                         <span class="text-muted">
                             <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
@@ -31,10 +31,20 @@
             </div>
             <script>
             $(document).ready(function() {
+                // TODO: Facebook sharing, verify image is shared
                 $('head').append('<meta property="og:title" content="' + $('#title').text() + '"/>');
+                $('head').append('<meta property="og:description" content="' + $('#description').text() + '" />');
                 $('head').append('<meta property="og:type" content="website" />');
                 $('head').append('<meta property="og:url" content="' + window.location.href + '"/>');
                 $('head').append('<meta property="og:image" content="' + $('#media').attr('src') + '"/>');
+
+                // TODO: Twitter sharing, verify image is shared
+                $('head').append('<meta name="twitter:card" content="summary_large_image"');
+                $('head').append('<meta name="twitter:site" content="' + window.location.href + '"/>');
+                $('head').append('<meta name="twitter:title" content="' + $('#title').text() + '"/>');
+                $('head').append('<meta name="twitter:description" content="' + $('#description').text() + '"/>');
+                $('head').append('<meta name="twitter:image" content="' + $('#media').attr('src') + '"/>');
+
             });
         </script>
         </div>
