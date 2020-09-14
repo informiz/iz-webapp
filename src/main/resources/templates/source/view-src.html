@@ -15,6 +15,7 @@
                             <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
                         </div>
                         <p><span class="text-muted" th:text="${source.srcType.displayValue}"/></p>
+                        <p><span th:text="${source.description}"/></p>
                         <span class="text-muted">
                             <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
                             <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>

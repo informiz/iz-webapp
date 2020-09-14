@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"  prefix="og: https://ogp.me/ns#">
     <head>
         <title>Informi Details</title>
     </head>
@@ -9,7 +9,7 @@
             <div class="container my-5">
                 <div class="row" th:object="${informi}">
                     <div class="col-md-6">
-                        <h2 class="mb-3" th:text="*{name}"/>
+                        <h2 id="title" class="mb-3" th:text="*{name}"/>
                         <p><span class="text-muted" th:text="*{description}"></span></p>
 
                         <span class="text-muted">
@@ -18,7 +18,7 @@
                         </span>
                         <div class="row">
                             <div class="form-group col-md-6">
-                                <img th:src="${informi.getMediaPath()}">
+                                <img id="media" th:src="${informi.getMediaPath()}">
                             </div>
                         </div>
                     </div>
@@ -29,6 +29,14 @@
                 <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, '')"></div>
 
             </div>
+            <script>
+            $(document).ready(function() {
+                $('head').append('<meta property="og:title" content="' + $('#title').text() + '"/>');
+                $('head').append('<meta property="og:type" content="website" />');
+                $('head').append('<meta property="og:url" content="' + window.location.href + '"/>');
+                $('head').append('<meta property="og:image" content="' + $('#media').attr('src') + '"/>');
+            });
+        </script>
         </div>
     </body>
 </html>

@@ -25,7 +25,6 @@ public class TokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
     public static final int TOKEN_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day in miliseconds
 
-    // TODO: secret, issuer, audience per channel
     @Value("${iz.webapp.token.secret}")
     private String tokenSecret;
 
@@ -46,7 +45,6 @@ public class TokenProvider {
             instance  = JWT.require(HMAC512(tokenSecret))
                     .withIssuer(tokenIssuer)
                     .withAudience(tokenAudience)
-                    // TODO: verify subject is channel name
                     .build(); // Automatically verifies expiration
         }
         return instance;

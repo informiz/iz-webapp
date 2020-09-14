@@ -18,6 +18,7 @@
                                     <th>Name</th>
                                     <th>Type</th>
                                     <th>Score</th>
+                                    <th>Description</th>
                                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
                                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                                 </tr>
@@ -25,11 +26,11 @@
                                 <tbody>
                                 <tr th:each="source : ${sources}">
                                     <td>
-                                        <a th:text="${source.name}" th:href="${source.link}" target="_blank"/>
+                                        <a th:text="${source.name}" th:href="@{/source/view/{id}(id=${source.id.toString()})}"/>
                                     </td>
-
                                     <td th:text="${source.srcType.displayValue}"></td>
                                     <td th:text="${source.score.reliability}"></td>
+                                    <td th:text="${source.description}"></td>
                                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                         <a th:href="@{/source/details/{id}(id=${source.id.toString()})}"
                                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>

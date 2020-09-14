@@ -39,7 +39,6 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
     }
 
     // TODO: get config from https://cloud.spring.io/spring-cloud-consul/reference/html/
-    // TODO: key for each channel
     @Value("${iz.webapp.key-ring-id}")
     private String keyRingId;
 

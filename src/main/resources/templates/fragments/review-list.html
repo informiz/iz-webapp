@@ -14,7 +14,6 @@
                 </tr>
                 </thead>
                 <tbody>
-                <!-- TODO: how to set the column width? -->
                 <tr th:each="review : ${reviews}">
                     <td th:id="${review.checker}"/>
                     <td th:text="${review.rating}"></td>

@@ -29,6 +29,15 @@
                 <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="description" class="col-form-label">Description</label>
+                <textarea rows="5" th:field="*{description}" class="form-control" id="description"
+                          placeholder="US space agency"
+                          th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+            </div>
+        </div>
         <div th:replace="fragments/score :: score(${mode})"></div>
     </div>
 </html>
