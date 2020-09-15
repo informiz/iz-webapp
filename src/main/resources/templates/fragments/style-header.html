@@ -6,28 +6,28 @@
 
         <a class="navbar-brand" href="/home.html">Informiz</a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- TODO: collapsed menu aligns left because of the login/out button, fix this -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
+        <div class="collapse navbar-collapse flex-grow-0" id="collapsibleNavbar">
+            <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
                 <li class="nav-item"><a class="nav-link" href="/source/">Sources</a></li>
                 <li class="nav-item"><a class="nav-link" href="/hypothesis/">Claims</a></li>
                 <li class="nav-item"><a class="nav-link" href="/citation/">Citations</a></li>
                 <li class="nav-item"><a class="nav-link" href="/informi/">Informiz</a></li>
             </ul>
-
-            <li th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="nav-item d-inline-block align-right">
-                <a href="/oauth_login" class="btn btn-outline-success" onclick="signIn();">Sign in</a>
-            </li>
-            <li th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="nav-item d-inline-block align-right">
-                <a href="/logout" class="btn btn-outline-success">Sign out</a>
-            </li>
-
         </div>
+
+        <button th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="btn btn-info ml-auto mr-1 align-right">
+            <a href="/oauth_login" style="text-decoration: none; color: inherit;" onclick="signIn();">Sign in</a>
+        </button>
+        <button th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="btn btn-info ml-auto mr-1 align-right">
+            <a href="/logout" style="text-decoration: none; color: inherit;">Sign out</a>
+        </button>
+
     </nav>
     <div class="container my-5">
         <h4>
