@@ -29,24 +29,6 @@
                 <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, '')"></div>
 
             </div>
-            <script>
-            $(document).ready(function() {
-                // TODO: Facebook sharing, verify image is shared
-                $('head').append('<meta property="og:title" content="' + $('#title').text() + '"/>');
-                $('head').append('<meta property="og:description" content="' + $('#description').text() + '" />');
-                $('head').append('<meta property="og:type" content="website" />');
-                $('head').append('<meta property="og:url" content="' + window.location.href + '"/>');
-                $('head').append('<meta property="og:image" content="' + $('#media').attr('src') + '"/>');
-
-                // TODO: Twitter sharing, verify image is shared
-                $('head').append('<meta name="twitter:card" content="summary_large_image"');
-                $('head').append('<meta name="twitter:site" content="' + window.location.href + '"/>');
-                $('head').append('<meta name="twitter:title" content="' + $('#title').text() + '"/>');
-                $('head').append('<meta name="twitter:description" content="' + $('#description').text() + '"/>');
-                $('head').append('<meta name="twitter:image" content="' + $('#media').attr('src') + '"/>');
-
-            });
-        </script>
         </div>
     </body>
 </html>

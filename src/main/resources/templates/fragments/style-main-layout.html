@@ -35,6 +35,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta name="google-signin-client_id" th:content="${@googleOAuthService.getClientId()}">
 
+        <!-- TODO: hacky, improve this -->
+        <meta th:if="${informi != null}" property="og:title" th:content="${informi.name}"/>
+        <meta th:if="${informi != null}" property="og:description" th:content="${informi.description}"/>
+        <meta th:if="${informi != null}" property="og:type" content="website" />
+        <meta th:if="${informi != null}" property="og:url" th:content="${#httpServletRequest.scheme}+'://'+${#httpServletRequest.serverName}+${#httpServletRequest.requestURI}"/>
+        <meta th:if="${informi != null}" property="og:image" th:content="${informi.getMediaPath()}"/>
+
+        <meta th:if="${informi != null}" name="twitter:card" content="summary_large_image"/>
+        <meta th:if="${informi != null}" name="twitter:site" th:content="${#httpServletRequest.scheme}+'://'+${#httpServletRequest.serverName}+${#httpServletRequest.requestURI}"/>
+        <meta th:if="${informi != null}" name="twitter:title" th:content="${informi.name}"/>
+        <meta th:if="${informi != null}" name="twitter:description" th:content="${informi.description}"/>
+        <meta th:if="${informi != null}" name="twitter:image" th:content="${informi.getMediaPath()}"/>
+
+
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
               integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
