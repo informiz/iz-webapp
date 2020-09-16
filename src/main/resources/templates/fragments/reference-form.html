@@ -47,13 +47,15 @@
 
             citationsCallbacks.push(function() {
                 $.each(citations, function(id, citation) {
-                    references.push( { id: citation.entityId, value: citation.text } );
+                    text = 'Citation: ' + citation.text;
+                    references.push( { id: citation.entityId, value: text } );
                 });
             });
 
             claimsCallbacks.push(function() {
                 $.each(claims, function(id, hypothesis) {
-                    references.push( { id: hypothesis.entityId, value: hypothesis.claim } );
+                    text = 'Claim: ' + hypothesis.claim;
+                    references.push( { id: hypothesis.entityId, value: text } );
                 });
             });
 
