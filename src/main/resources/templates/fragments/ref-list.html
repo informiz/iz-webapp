@@ -9,6 +9,7 @@
                 <thead>
                 <tr>
                     <th>Reference</th>
+                    <th>Score</th>
                     <th>Entailment</th>
                     <th>Comment</th>
                 </tr>
@@ -16,6 +17,7 @@
                 <tbody>
                 <tr th:each="ref : ${references}">
                     <td th:id="${ref.citationId}"/>
+                    <td th:name="@{score_{id}(id=${ref.citationId})}"/>
                     <td th:text="${ref.entailment.displayValue}"></td>
                     <td th:text="${ref.comment}"></td>
                 </tr>
@@ -30,9 +32,12 @@
             citationsCallbacks.push(function() {
                 if ($('#references-table tr').length > 0) {
                     $('#references-table td[id]').val(function(){
-                        var ref = citations[$(this).attr('id')];
+                        var id = $(this).attr('id');
+                        var ref = citations[id];
                         if (ref) {
                             $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
+                            var selector = "td[name='score_"  + id + "']";
+                            $(selector).text(ref.score.reliability);
                         }
                     });
                 }
@@ -40,9 +45,12 @@
             claimsCallbacks.push(function() {
                 if ($('#references-table tr').length > 0) {
                     $('#references-table td[id]').val(function(){
-                        var ref = claims[$(this).attr('id')];
+                        var id = $(this).attr('id');
+                        var ref = claims[id];
                         if (ref) {
                             $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
+                            var selector = "td[name='score_"  + id + "']";
+                            $(selector).text(ref.score.reliability);
                         }
                     });
                 }

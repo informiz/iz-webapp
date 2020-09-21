@@ -15,6 +15,11 @@ spec:
         channel: <CHANNEL_NAME>
     spec:
       serviceAccountName: <CHANNEL_NAME>-ksa
+      securityContext:
+        capabilities:
+          drop:
+            -NET_RAW
+        # TODO: can add "runAsNonRoot: true" here and change iz-webapp to use numeric user-id?
       containers:
       - name: iz-webapp
         image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
@@ -75,4 +80,4 @@ spec:
           - "/cloud_sql_proxy"
           - "-instances=key-master-283113:europe-west1:informiz-beta=tcp:3306"
         securityContext:
-          runAsNonRoot: false
+          runAsNonRoot: true
