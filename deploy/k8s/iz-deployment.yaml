@@ -15,11 +15,7 @@ spec:
         channel: <CHANNEL_NAME>
     spec:
       serviceAccountName: <CHANNEL_NAME>-ksa
-      securityContext:
-        capabilities:
-          drop:
-            -NET_RAW
-        # TODO: can add "runAsNonRoot: true" here and change iz-webapp to use numeric user-id?
+      # TODO: can add a securityContext with  "runAsNonRoot: true" here and change iz-webapp to use numeric user-id?
       containers:
       - name: iz-webapp
         image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
@@ -72,6 +68,10 @@ spec:
             secretKeyRef:
               name: <CHANNEL_NAME>-oauth-creds
               key: secret
+        securityContext:
+          capabilities:
+            drop:
+              - NET_RAW
       - name: cloud-sql-proxy
         # It is recommended to use the latest version of the Cloud SQL proxy
         # Make sure to update on a regular schedule!
@@ -81,3 +81,6 @@ spec:
           - "-instances=key-master-283113:europe-west1:informiz-beta=tcp:3306"
         securityContext:
           runAsNonRoot: true
+          capabilities:
+            drop:
+              - NET_RAW

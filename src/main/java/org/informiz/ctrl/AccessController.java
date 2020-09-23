@@ -47,4 +47,9 @@ public class AccessController {
         return "home.html";
     }
 
+    @GetMapping(value = {"/policy"})
+    public String policy() {
+        return "policy.html";
+    }
+
 }
