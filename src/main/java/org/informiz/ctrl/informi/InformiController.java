@@ -166,11 +166,10 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         reference.setReviewed(informi);
         Reference current = informi.getReference(reference);
         if (current != null) {
-            current.setEntailment(reference.getEntailment());
             current.setComment(reference.getComment());
+            current.setDegree(reference.getDegree());
         } else {
-            informi.addReference(new Reference(informi, reference.getCitationId(),
-                    reference.getEntailment(), reference.getComment()));
+            informi.addReference(new Reference(informi, reference));
         }
         return informi;
     }

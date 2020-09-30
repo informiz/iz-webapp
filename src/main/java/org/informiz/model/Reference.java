@@ -3,6 +3,8 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -33,28 +35,35 @@ public class Reference extends InformizEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_entity_id")
     @JsonIgnore
-    private ChainCodeEntity reviewed;
+    private ChainCodeEntity reviewed; // TODO: rename this field/column
 
 
-    // The citation's entity-id on the ledger
+    // The entity-id of the claim/citation on the ledger
     @Column(name = "citation_entity_id")
     @NotBlank
-    private String citationId;
+    private String referencedId; // TODO: rename this column
 
     @Enumerated(EnumType.ORDINAL)
     @NotNull
     private Entailment entailment;
+
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
+    //@NotNull
+    // The degree to which the reference entails the entity
+    private Float degree = 0.9f;
 
     @Column
     private String comment;
 
     public Reference() {}
 
-    public Reference(ChainCodeEntity reviewed, String citationId, Entailment entailment, String comment) {
-        this.reviewed = reviewed;
-        this.citationId = citationId;
-        this.entailment = entailment;
-        this.comment = comment;
+    public Reference(ChainCodeEntity reviewed, Reference other) {
+        this.reviewed = other.reviewed;
+        this.referencedId = other.referencedId;
+        this.entailment = other.entailment;
+        this.degree = other.degree;
+        this.comment = other.comment;
     }
 
     public ChainCodeEntity getReviewed() {
@@ -65,12 +74,12 @@ public class Reference extends InformizEntity implements Serializable {
         this.reviewed = reviewed;
     }
 
-    public String getCitationId() {
-        return citationId;
+    public String getReferencedId() {
+        return referencedId;
     }
 
-    public void setCitationId(String citationId) {
-        this.citationId = citationId;
+    public void setReferencedId(String referencedId) {
+        this.referencedId = referencedId;
     }
 
     public Entailment getEntailment() {
@@ -79,6 +88,14 @@ public class Reference extends InformizEntity implements Serializable {
 
     public void setEntailment(Entailment entailment) {
         this.entailment = entailment;
+    }
+
+    public Float getDegree() {
+        return degree;
+    }
+
+    public void setDegree(Float degree) {
+        this.degree = degree;
     }
 
     public String getComment() {
@@ -91,7 +108,7 @@ public class Reference extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", reviewed.getEntityId(), citationId, entailment.toString()).hashCode();
+        return String.format("%s-%s-%s", reviewed.getEntityId(), referencedId, entailment.toString()).hashCode();
     }
 
     @Override
@@ -99,6 +116,6 @@ public class Reference extends InformizEntity implements Serializable {
         if (obj == null || ! (obj instanceof Reference)) return false;
         Reference other = (Reference) obj;
         return (this.reviewed.getEntityId().equals(other.reviewed.getEntityId()) &&
-                this.citationId.equals(other.citationId) &&
+                this.referencedId.equals(other.referencedId) &&
                 this.entailment.toString().equals(other.entailment.toString()));
     }}

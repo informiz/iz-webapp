@@ -9,16 +9,16 @@
                 <thead>
                 <tr>
                     <th>Reference</th>
-                    <th>Score</th>
                     <th>Entailment</th>
+                    <th>Degree</th>
                     <th>Comment</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="ref : ${references}">
-                    <td th:id="${ref.citationId}"/>
-                    <td th:name="@{score_{id}(id=${ref.citationId})}"/>
+                    <td th:id="${ref.referencedId}"/>
                     <td th:text="${ref.entailment.displayValue}"></td>
+                    <td th:text="${ref.degree}"/>
                     <td th:text="${ref.comment}"></td>
                 </tr>
                 </tbody>
@@ -36,8 +36,6 @@
                         var ref = citations[id];
                         if (ref) {
                             $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
-                            var selector = "td[name='score_"  + id + "']";
-                            $(selector).text(ref.score.reliability);
                         }
                     });
                 }
@@ -49,8 +47,6 @@
                         var ref = claims[id];
                         if (ref) {
                             $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
-                            var selector = "td[name='score_"  + id + "']";
-                            $(selector).text(ref.score.reliability);
                         }
                     });
                 }

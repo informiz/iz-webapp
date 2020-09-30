@@ -16,7 +16,6 @@
                                 <thead>
                                 <tr>
                                     <th>Text</th>
-                                    <th>Score</th>
                                     <th>Link</th>
                                     <th>By</th>
                                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
@@ -28,7 +27,6 @@
                                     <td>
                                         <a th:text="${citation.text}" th:href="@{/citation/view/{id}(id=${citation.id.toString()})}"/>
                                     </td>
-                                    <td th:text="${citation.score.reliability}"></td>
                                     <td>
                                         <a th:href="${citation.link}" target="_blank"
                                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-link"/>

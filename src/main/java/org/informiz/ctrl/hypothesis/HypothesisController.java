@@ -132,11 +132,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         reference.setReviewed(hypothesis);
         Reference current = hypothesis.getReference(reference);
         if (current != null) {
-            current.setEntailment(reference.getEntailment());
             current.setComment(reference.getComment());
+            current.setDegree(reference.getDegree());
         } else {
-            hypothesis.addReference(new Reference(hypothesis, reference.getCitationId(),
-                    reference.getEntailment(), reference.getComment()));
+            hypothesis.addReference(new Reference(hypothesis, reference));
         }
         return hypothesis;
     }
