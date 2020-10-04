@@ -15,6 +15,7 @@
                     <th>Description</th>
                     <th>Score</th>
                     <th>By</th>
+                    <th>Last Updated</th>
                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                 </tr>
@@ -27,7 +28,8 @@
                     </td>
                     <td th:text="${informi.description}"></td>
                     <td th:text="${informi.score.reliability}"></td>
-                    <td th:name="${informi.ownerId}"></td>
+                    <td th:text="${informi.ownerId}" th:name="${informi.ownerId}"></td>
+                    <td th:text="${informi.updatedTs}"></td>
                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                         <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
@@ -43,16 +45,35 @@
             <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
                class="my-5"><a href="/informi/upload" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
             <script>
-                    checkersCallbacks.push(function() {
-                        $.each(checkers, function(id, checker) {
-                            $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
-                        });
+                var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
+
+                checkersCallbacks.push(function() {
+                    var table = $('#informizTable').DataTable({
+                        columnDefs: [
+                        {
+                            render: function ( data, type, row ) {
+                                var checker = checkers[data];
+                                if (checker) {
+                                    return '<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>';
+                                }
+                                return data;
+                            },
+                            targets: 3
+                        },
+                        {
+                            render: function ( data, type, row ) {
+                                var d = new Date();
+                                d.setTime(data);
+                                return d.toLocaleString(locale);
+                            },
+                            targets: 4
+                        } ],
+                        order: [ [ 4, "desc" ] ]
                     });
-                    $(document).ready(function () {
-                        $('#informizTable').DataTable();
-                        $('.dataTables_length').addClass('bs-select');
-                    });
-                </script>
+
+                    $('.dataTables_length').addClass('bs-select');
+                });
+            </script>
         </div>
     </body>
 </html>
