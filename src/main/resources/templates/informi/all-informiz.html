@@ -53,7 +53,7 @@
                         {
                             render: function ( data, type, row ) {
                                 var checker = checkers[data];
-                                if (checker) {
+                                if (checker && type === 'display') {
                                     return '<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>';
                                 }
                                 return data;
@@ -62,9 +62,12 @@
                         },
                         {
                             render: function ( data, type, row ) {
-                                var d = new Date();
-                                d.setTime(data);
-                                return d.toLocaleString(locale);
+                                if ( type === 'display' || type === 'filter' ) {
+                                    var d = new Date();
+                                    d.setTime(data);
+                                    return d.toLocaleString(locale);
+                                }
+                                return data;
                             },
                             targets: 4
                         } ],
