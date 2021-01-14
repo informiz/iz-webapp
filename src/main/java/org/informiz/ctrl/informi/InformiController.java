@@ -132,12 +132,10 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                                    BindingResult result, Authentication authentication, Model model) {
 
         InformiBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-            model.addAttribute(INFORMI_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
         prepareEditModel(model, current, review, new Reference());
         return String.format("%s/update-informi.html", PREFIX);
@@ -148,30 +146,32 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Model model) {
+                                BindingResult result, Authentication authentication, Model model) {
+
+        return handleReference(id, reference, result, authentication, model);
+    }
+
+    @PostMapping("/reference/{id}/{refId}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
+                               @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               BindingResult result, Authentication authentication, Model model) {
+
+        return handleReference(id, reference, result, authentication, model);
+    }
+
+    private String handleReference(Long id, Reference reference, BindingResult result,
+                                     Authentication authentication, Model model) {
 
         InformiBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
 
-        if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
-            current = addReference(current, reference);
-            model.addAttribute(INFORMI_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
+        if ( ! result.hasFieldErrors() ) {
+            referenceEntity(current, reference, authentication);
         }
         prepareEditModel(model, current, new Review(), reference);
         return String.format("%s/update-informi.html", PREFIX);
-    }
-
-    protected InformiBase addReference(InformiBase informi, Reference reference) {
-        reference.setReviewed(informi);
-        Reference current = informi.getReference(reference);
-        if (current != null) {
-            current.setComment(reference.getComment());
-            current.setDegree(reference.getDegree());
-        } else {
-            informi.addReference(new Reference(informi, reference));
-        }
-        return informi;
     }
 
     private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {

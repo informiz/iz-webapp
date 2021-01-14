@@ -138,7 +138,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         }
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
-    // TODO: remove-source method
+    // TODO: remove/edit source methods
 
     // TODO: which methods need to be declared transactional?
 

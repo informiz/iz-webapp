@@ -1,80 +1,84 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="referenceForm(actionPath)">
-    <h3 class="mt-5">Add Reference</h3>
-    <div class="row">
-        <div class="col-md-8">
-            <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
-                <div class="row">
-                    <div class="form-group col-md-8">
-                        <input type="hidden" th:value="${reference.referencedId}" name="referencedId" />
-                        <label for="refSelect" class="col-form-label">Reference</label>
-                        <input type="text" id="refSelect" class="form-control" placeholder="Start typing to search..."
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
-                        <span th:if="${#fields.hasErrors('referencedId')}" th:errors="*{referencedId}" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label for="entailment">Entailment</label>
-                        <select th:field="*{entailment}" id="entailment" class="form-control custom-select"
-                                th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
-                            <option value=""> -- </option>
-                            <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
-                                    th:value="${entailmentOpt}" th:text="${entailmentOpt.displayValue}"></option>
-                        </select>
-                        <span th:if="${#fields.hasErrors('entailment')}" th:errors="*{entailment}" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="degree">Degree</label>
-                        <input type="number" min="0" max="1" step="0.05" th:value="0.5" th:field="*{degree}" class="form-control" id="degree"
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}" />
-                        <span th:if="${#fields.hasErrors('degree')}" th:errors="*{degree}" class="text-danger"></span>
-
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <label for="comment" class="col-form-label">Comment</label>
-                        <textarea th:field="*{comment}" class="form-control" id="comment" cols="30"
-                                  placeholder="Explain the reference..."/>
-                        <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
-                    </div>
-                </div>
-                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
-                    <div class="col-md-6">
-                        <input type="submit" class="btn btn-primary" value="Update"/>
-                    </div>
-                </div>
-            </form>
+    <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
+        <div class="row">
+            <div class="form-group col-md-8">
+                <!-- The id of the claim or citation being referenced (not necessarily local) -->
+                <input type="hidden" name="referencedId" id="referencedId"/>
+                <label th:for="refSelect" class="col-form-label">Reference</label>
+                <input type="text" id="refSelect" class="form-control" placeholder="Start typing to search..."
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                <span th:if="${#fields.hasErrors('referencedId')}" th:errors="*{referencedId}" class="text-danger"></span>
+            </div>
         </div>
-        <script>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label th:for="entailment">Entailment</label>
+                <select th:field="*{entailment}" class="form-control custom-select"
+                        th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                    <option value=""> -- </option>
+                    <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
+                            th:value="${entailmentOpt}" th:text="${entailmentOpt.displayValue}"></option>
+                </select>
+                <span th:if="${#fields.hasErrors('entailment')}" th:errors="*{entailment}" class="text-danger"></span>
+            </div>
+            <div class="form-group col-md-4">
+                <label th:for="degree">Degree</label>
+                <input type="number" th:field="*{degree}" min="0" max="1" step="0.01" th:value="0.5" class="form-control"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}" />
+                <span th:if="${#fields.hasErrors('degree')}" th:errors="*{degree}" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <label th:for="comment" class="col-form-label">Comment</label>
+                <textarea th:field="*{comment}" class="form-control" cols="30"
+                          placeholder="Explain the reference..."></textarea>
+                <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
+            </div>
+        </div>
+        <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
+            <div class="col-md-6">
+                <input type="submit" class="btn btn-primary" value="Add"/>
+            </div>
+        </div>
+    </form>
+    <script>
             // ********************** TODO: prevent entities referencing themselves **********************
-            var references = []
 
-            citationsCallbacks.push(function() {
-                $.each(citations, function(id, citation) {
-                    text = 'Citation: ' + citation.text;
-                    references.push( { id: citation.entityId, value: text } );
-                });
+        var references = []
+
+        citationsCallbacks.push(function() {
+            $.each(citations, function(id, citation) {
+                text = 'Citation: ' + citation.text;
+                references.push( { id: citation.entityId, value: text } );
             });
+        });
 
-            claimsCallbacks.push(function() {
-                $.each(claims, function(id, hypothesis) {
-                    text = 'Claim: ' + hypothesis.claim;
-                    references.push( { id: hypothesis.entityId, value: text } );
-                });
+        claimsCallbacks.push(function() {
+            $.each(claims, function(id, hypothesis) {
+                text = 'Claim: ' + hypothesis.claim;
+                references.push( { id: hypothesis.entityId, value: text } );
             });
+        });
 
-            $('#refSelect').autocomplete({
+
+        function initRefSelect(widgetLabel, inputLabel) {
+            $(widgetLabel).autocomplete({
                 source: references,
                 select: function(event, ui) {
                     $(this).val(ui.item.value);
-                    $("input[name='referencedId']").val(ui.item.id);
+                    $(inputLabel).val(ui.item.id);
                 }
             });
+        }
 
-        </script>
-    </div>
+        $('#add_ref_modal').on('shown.bs.modal', function(){
+            initRefSelect('#refSelect', '#referencedId')
+        });
+
+    </script>
 </div>
 </html>

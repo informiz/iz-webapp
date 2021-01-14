@@ -20,9 +20,9 @@ sed -i "s/<PROFILE>/test/g" deploy-test/iz-deployment.yaml
 sed -i "s/<CHANNEL_NAME>/demo-channel/g" deploy-test/*.yaml
 
 
-kubectl apply -f iz-deployment.yaml
+kubectl apply -f iz-deployment.yaml -n iz-beta-namespace
 
-kubectl apply -f iz-webapp-service.yaml
+kubectl apply -f iz-webapp-service.yaml -n iz-beta-namespace
 
-kubectl apply -f iz-webapp-ingress.yaml
+kubectl apply -f iz-webapp-ingress.yaml -n iz-beta-namespace
 

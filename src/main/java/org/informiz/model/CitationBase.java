@@ -3,11 +3,9 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -19,6 +17,8 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
     static final long serialVersionUID = 1L;
 
     @NotBlank(message = "Text is mandatory")
+    @Column(length = 500)
+    @Size(max = 500)
     private String text;
 
     @NotBlank(message = "Citations must be sourced")

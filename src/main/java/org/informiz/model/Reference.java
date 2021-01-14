@@ -56,10 +56,12 @@ public class Reference extends InformizEntity implements Serializable {
     @Column
     private String comment;
 
+    public static Reference create() { return new Reference(); }
+
     public Reference() {}
 
     public Reference(ChainCodeEntity reviewed, Reference other) {
-        this.reviewed = other.reviewed;
+        this.reviewed = reviewed;
         this.referencedId = other.referencedId;
         this.entailment = other.entailment;
         this.degree = other.degree;
@@ -108,14 +110,19 @@ public class Reference extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", reviewed.getEntityId(), referencedId, entailment.toString()).hashCode();
+        return String.format("%s-%s-%s", reviewed.getEntityId(), referencedId, creatorId).hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) return true;
         if (obj == null || ! (obj instanceof Reference)) return false;
         Reference other = (Reference) obj;
+
+        // considered equal if same entity, claim/citation and creator
         return (this.reviewed.getEntityId().equals(other.reviewed.getEntityId()) &&
                 this.referencedId.equals(other.referencedId) &&
-                this.entailment.toString().equals(other.entailment.toString()));
+                // creatorId is only set when persisting the reference to db. TODO: is this an issue?
+                ( (this.creatorId == null && other.creatorId == null) ||
+                        this.creatorId.equals(other.creatorId)));
     }}

@@ -2,6 +2,7 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
+import org.informiz.ctrl.entity.EntityWithReferences;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -22,7 +23,7 @@ import java.util.Set;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="informi")
 @Entity
-public final class InformiBase extends ChainCodeEntity implements Serializable {
+public final class InformiBase extends ChainCodeEntity implements Serializable, EntityWithReferences {
 
     static final long serialVersionUID = 1L;
 
@@ -30,8 +31,8 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
     private String name;
 
     @NotBlank(message = "Description is mandatory")
-    @Column(length = 1000)
-    @Size(max = 1000)
+    @Column(length = 1500)
+    @Size(max = 1500)
     private String description;
 
     @URL(message = "A valid link to a media file is mandatory")
@@ -70,21 +71,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable {
 
     public void setReferences(Set<Reference> references) {
         this.references = references;
-    }
-
-    public boolean addReference(Reference ref) {
-        return references.add(ref);
-    }
-
-    public boolean removeReference(Reference ref) {
-        return references.remove(ref);
-    }
-
-    public Reference getReference(@NotNull Reference ref) {
-        // TODO: more efficient way?
-        Reference found = references.stream().filter(reference ->
-                ref.equals(reference)).findFirst().orElse(null);
-        return found;
     }
 
     public void edit(InformiBase other) {

@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="referenceList(references, link)">
+<div th:fragment="referenceList(references, refsUrl)">
     <h3 class="mt-5">References</h3>
     <div class="row">
         <div class="col-md-8">
@@ -12,21 +12,77 @@
                     <th>Entailment</th>
                     <th>Degree</th>
                     <th>Comment</th>
+                    <th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
+                    <!-- th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="ref : ${references}">
-                    <td th:id="${ref.referencedId}"/>
-                    <td th:text="${ref.entailment.displayValue}"></td>
-                    <td th:text="${ref.degree}"/>
-                    <td th:text="${ref.comment}"></td>
+                <tr th:each="reference : ${references}">
+                    <td th:id="${reference.referencedId}"/>
+                    <td th:text="${reference.entailment.displayValue}"></td>
+                    <td th:text="${reference.degree}"/>
+                    <td th:text="${reference.comment}"></td>
+                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                        <div th:id="'modal_' + ${reference.id}" class="modal fade" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Edit Reference</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div th:replace="fragments/edit-reference-form :: editRefForm(
+                                            @{{prefix}/{refId}(prefix=${refsUrl}, refId=${reference.id.toString()})})"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <td>
+                            <button type="button" th:id="'edit_' + ${reference.id}" data-toggle="modal"
+                                    th:attr="data-target='#modal_' + ${reference.id}"
+                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                        </td>
+                    </th:block>
+                    <!--td th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                        <a th:href="@{/source/delete/{id}(id=${source.id.toString()})}"
+                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                    </td-->
                 </tr>
                 </tbody>
             </table>
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(link)}">
-                <div th:replace="fragments/reference-form :: referenceForm(${link})"></div>
+
+            <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+
+                <div id="add_ref_modal" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add Reference</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body ui-front">
+                                <div th:replace="fragments/reference-form :: referenceForm(${refsUrl})"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" th:id="add_ref" data-toggle="modal" data-target='#add_ref_modal'
+                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+
             </th:block>
+
         </div>
         <script>
             citationsCallbacks.push(function() {

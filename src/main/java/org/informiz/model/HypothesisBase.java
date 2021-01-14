@@ -1,6 +1,7 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.informiz.ctrl.entity.EntityWithReferences;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -14,7 +15,7 @@ import java.util.Set;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="hypothesis")
 @Entity
-public final class HypothesisBase extends ChainCodeEntity implements Serializable {
+public final class HypothesisBase extends ChainCodeEntity implements Serializable, EntityWithReferences {
 
     static final long serialVersionUID = 1L;
 
@@ -42,21 +43,6 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     public Set<Reference> getReferences() {
         return references;
-    }
-
-    public boolean addReference(Reference ref) {
-        return references.add(ref);
-    }
-
-    public boolean removeReference(Reference ref) {
-        return references.remove(ref);
-    }
-
-    public Reference getReference(@NotNull Reference ref) {
-        // TODO: more efficient way?
-        Reference found = references.stream().filter(reference ->
-                ref.equals(reference)).findFirst().orElse(null);
-        return found;
     }
 
     public Set<SourceRef> getSources() {

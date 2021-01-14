@@ -116,28 +116,19 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                               BindingResult result, Model model) {
+                               BindingResult result,Authentication authentication, Model model) {
 
-        HypothesisBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
-
-        if ( ! (result.hasFieldErrors("citationId") || result.hasFieldErrors("entailment"))) {
-            current = addReference(current, reference);
-        }
-        prepareEditModel(model, current, new Review(), reference);
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return handleReference(id, reference, result, authentication, model);
     }
 
-    protected HypothesisBase addReference(HypothesisBase hypothesis, Reference reference) {
-        reference.setReviewed(hypothesis);
-        Reference current = hypothesis.getReference(reference);
-        if (current != null) {
-            current.setComment(reference.getComment());
-            current.setDegree(reference.getDegree());
-        } else {
-            hypothesis.addReference(new Reference(hypothesis, reference));
-        }
-        return hypothesis;
+    @PostMapping("/reference/{id}/{refId}")
+    @Secured("ROLE_USER")
+    @Transactional
+    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
+                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                BindingResult result, Authentication authentication, Model model) {
+
+        return handleReference(id, reference, result, authentication, model);
     }
 
     @PostMapping("/source/{id}")
@@ -147,7 +138,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                             BindingResult result, Model model) {
 
         HypothesisBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
 
         try {
             SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
@@ -159,6 +150,20 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                     "Please provide either a link, a source or both"));
         }
         prepareEditModel(model, current, new Review(), new Reference());
+        return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
+    private String handleReference(Long id, Reference reference, BindingResult result,
+                                   Authentication authentication, Model model) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
+
+        if ( ! result.hasFieldErrors() ) {
+            referenceEntity(current, reference, authentication);
+        }
+        // TODO: error handling in modal? Where will the error be visible?
+        prepareEditModel(model, current, new Review(), reference);
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 

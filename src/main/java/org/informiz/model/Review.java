@@ -15,7 +15,7 @@ public class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
-    // TODO: available in the "ownerId" field after persistence...
+    // TODO: Remove this, controller ignores validation errors for this field, already available as "creatorId"
     // The fact-checker's id on the ledger (may be from a different channel, so not necessarily in the local db)
     @Column
     @NotBlank

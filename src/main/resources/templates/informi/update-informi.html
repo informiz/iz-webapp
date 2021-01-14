@@ -9,7 +9,7 @@
             <div class="container my-5">
                 <h2 class="mb-5">Update Informi</h2>
                 <form action="#" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
-                    <input type="hidden" class="form-control" id="id" name="id" th:value="${informi.id}"/>
+                    <input type="hidden" name="id" th:value="${informi.id}"/>
                     <div th:replace="fragments/informi :: informi('write')"></div>
                     <div class="row">
                         <div class="col-md-6 mt-5">
