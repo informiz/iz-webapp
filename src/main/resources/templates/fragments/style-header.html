@@ -1,34 +1,67 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <div th:fragment="header">
-
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-
-        <a class="navbar-brand" href="/home.html">Informiz</a>
-
-        <!-- TODO: collapsed menu aligns left because of the login/out button, fix this -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse flex-grow-0" id="collapsibleNavbar">
-            <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
-                <li class="nav-item"><a class="nav-link" href="/source/">Sources</a></li>
-                <li class="nav-item"><a class="nav-link" href="/hypothesis/">Claims</a></li>
-                <li class="nav-item"><a class="nav-link" href="/citation/">Citations</a></li>
-                <li class="nav-item"><a class="nav-link" href="/informi/">Informiz</a></li>
-            </ul>
+    <div class="container">
+        <div class="row my-5">
+            <div class="col-4">
+                <img class="img-fluid" th:src="@{/logo-sm.jpg}" alt="">
+            </div>
+            <div class="col-6"></div>
+            <div class="col-2 align-self-center">
+                <div class="float-right">
+                    <button th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="btn btn-outline-success">
+                        <a href="/oauth_login" style="text-decoration: none; color: inherit;" onclick="signIn();">Sign in</a>
+                    </button>
+                    <button th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="btn btn-outline-success">
+                        <a href="/logout" style="text-decoration: none; color: inherit;">Sign out</a>
+                    </button>
+                </div>
+            </div>
         </div>
+        <div class="row">
+            <div class="col">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-success font-weight-bold">
 
-        <button th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="btn btn-info ml-auto mr-1 align-right">
-            <a href="/oauth_login" style="text-decoration: none; color: inherit;" onclick="signIn();">Sign in</a>
-        </button>
-        <button th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="btn btn-info ml-auto mr-1 align-right">
-            <a href="/logout" style="text-decoration: none; color: inherit;">Sign out</a>
-        </button>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-    </nav>
+                    <div class="collapse navbar-collapse flex-grow-0" id="collapsibleNavbar">
+                        <ul class="nav navbar-nav">
+                            <li id="nav-checkers"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
+                            <li id="nav-sources"><a class="nav-link" href="/source/">Sources</a></li>
+                            <li id="nav-claims"><a class="nav-link" href="/hypothesis/">Claims</a></li>
+                            <li id="nav-citations"><a class="nav-link" href="/citation/">Citations</a></li>
+                            <li id="nav-informiz"><a class="nav-link" href="/informi/">Informiz</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                var url = window.location.pathname;
+                switch (url) {
+                    case "/factchecker/":
+                       $("#nav-checkers").toggleClass("active");
+                       break;
+                    case "/source/":
+                       $("#nav-sources").toggleClass("active");
+                       break;
+                    case "/hypothesis/":
+                       $("#nav-claims").toggleClass("active");
+                       break;
+                    case "/citation/":
+                       $("#nav-citations").toggleClass("active");
+                       break;
+                    case "/informi/":
+                       $("#nav-informiz").toggleClass("active");
+                       break;
+                 }
+            });
+        </script>
+    </div>
+
     <div class="container my-5">
         <h4>
             Welcome <small class="text-muted"> to the Demo-Channel of

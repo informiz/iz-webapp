@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
     <head>
 
+        <link rel="shortcut icon" type="image/png" th:href="@{/favicon.png}"/>
+
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css"/>
 
         <link rel="stylesheet" type="text/css" th:href="@{/style/autocomplete.css}">
@@ -57,15 +59,6 @@
                 max-height:200%;
             }
         </style>
-    </head>
-    <body>
-
-        <div th:replace="fragments/style-header :: header"></div>
-
-        <div layout:fragment="content"></div>
-
-        <div th:replace="fragments/style-footer :: footer"></div>
-
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
               integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -76,6 +69,16 @@
                 integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
                 integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    </head>
+    <body>
+
+        <div th:replace="fragments/style-header :: header"></div>
+
+        <div layout:fragment="content"></div>
+
+        <div th:replace="fragments/style-footer :: footer"></div>
+
 
     </body>
 </html>
