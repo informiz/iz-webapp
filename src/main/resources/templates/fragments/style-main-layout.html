@@ -54,14 +54,6 @@
         <meta th:if="${informi != null}" name="twitter:description" th:content="${informi.description}"/>
         <meta th:if="${informi != null}" name="twitter:image" th:content="${informi.getMediaPath()}"/>
 
-        <!-- TODO: Unable to set informi's image size directly in tag - fix this -->
-        <style>
-            img {
-                max-width:200%;
-                max-height:200%;
-            }
-        </style>
-
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
               integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
