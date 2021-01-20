@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Source Details</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <h2 class="mb-5">Source Details</h2>
-                <div class="row" th:object="${source}">
-                    <div class="col-md-6">
-                        <div class="row pb-3">
-                            <h4 class="pr-2" th:text="*{name}"/>
-                            <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
-                        </div>
-                        <p><span class="text-muted" th:text="${source.srcType.displayValue}"/></p>
-                        <p><span th:text="${source.description}"/></p>
-                        <span class="text-muted">
-                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
-                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
-                        </span>
+
+    <div layout:fragment="content">
+        <div class="my-5">
+            <h2 class="mb-5">Source Details</h2>
+            <div class="row" th:object="${source}">
+                <div class="col">
+                    <div class="row pb-3">
+                        <h4 class="pr-2" th:text="*{name}"/>
+                        <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
                     </div>
+                    <p><span class="text-muted" th:text="${source.srcType.displayValue}"/></p>
+                    <p><span th:text="${source.description}"/></p>
+                    <span class="text-muted">
+                        <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                        <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                    </span>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${source.reviews}, '')"></div>
             </div>
+            <div th:replace="fragments/review-list :: reviewList(${source.reviews}, '')"></div>
         </div>
-    </body>
+    </div>
 </html>

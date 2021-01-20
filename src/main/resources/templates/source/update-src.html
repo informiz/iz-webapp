@@ -1,28 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Update Source</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <h2 class="mb-5">Update Source</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <form action="#" th:action="@{/source/details/{id}(id=${source.id.toString()})}" th:object="${source}" method="post">
-                            <input type="hidden" name="id" th:value="${source.id}"/>
-                            <div th:replace="fragments/source :: source('write')"></div>
-                            <div class="row">
-                                <div class="col-md-6 mt-5">
-                                    <input type="submit" class="btn btn-primary" value="Update"/>
-                                </div>
+
+    <div layout:fragment="content">
+        <div class="my-5">
+            <h2 class="mb-5">Update Source</h2>
+            <div class="row">
+                <div class="col">
+                    <form action="#" th:action="@{/source/details/{id}(id=${source.id.toString()})}" th:object="${source}" method="post">
+                        <input type="hidden" name="id" th:value="${source.id}"/>
+                        <div th:replace="fragments/source :: source('write')"></div>
+                        <div class="row">
+                            <div class="col mt-5">
+                                <input type="submit" class="btn btn-primary" value="Update"/>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
-                <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/review/' + ${source.id}})"></div>
             </div>
+            <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/review/' + ${source.id}})"></div>
         </div>
-    </body>
+    </div>
 </html>

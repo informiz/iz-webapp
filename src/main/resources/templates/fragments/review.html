@@ -3,16 +3,16 @@
 <div th:fragment="reviewForm(actionPath)">
     <h3 class="mt-5">Add Review</h3>
     <div class="row">
-        <div class="col-md-9">
+        <div class="col">
             <form action="#" th:action="@{${actionPath}}" th:object="${review}" method="post">
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label for="rating" class="col-form-label">Reliability</label>
                         <input type="number" th:field="*{rating}"  min="0" max="1" step="0.01"
                                class="form-control" id="rating" placeholder="0.9"/>
                         <span th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}" class="text-danger"></span>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <label for="comment" class="col-form-label">Comment</label>
                         <textarea th:field="*{comment}" class="form-control" id="comment" cols="30"
                                   placeholder="Explain your review..."/>
@@ -21,7 +21,7 @@
 
                 </div>
                 <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
-                    <div class="col-md-6">
+                    <div class="col">
                         <input type="submit" class="btn btn-primary" value="Update"/>
                     </div>
                 </div>

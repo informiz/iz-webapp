@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Update Fact-Checker</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <h2 class="mb-5">Update Fact-Checker</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <form action="#" th:action="@{/factchecker/details/{id}(id=${checker.id.toString()})}" th:object="${checker}" method="post">
-                            <input type="hidden" name="id" th:value="${checker.id}"/>
-                            <div th:replace="fragments/checker :: checker('write')"></div>
-                            <div class="row">
-                                <div class="col-md-6 mt-5">
-                                    <input type="submit" class="btn btn-primary" value="Update"/>
-                                </div>
+
+    <div layout:fragment="content">
+        <div class="my-5">
+            <h2 class="mb-5">Update Fact-Checker</h2>
+            <div class="row">
+                <div class="col">
+                    <form action="#" th:action="@{/factchecker/details/{id}(id=${checker.id.toString()})}" th:object="${checker}" method="post">
+                        <input type="hidden" name="id" th:value="${checker.id}"/>
+                        <div th:replace="fragments/checker :: checker('write')"></div>
+                        <div class="row">
+                            <div class="col mt-5">
+                                <input type="submit" class="btn btn-primary" value="Update"/>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </body>
+    </div>
 </html>

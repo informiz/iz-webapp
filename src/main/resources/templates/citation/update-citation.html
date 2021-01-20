@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Update Citation</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <h2 class="mb-5">Update Citation</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <form action="#" th:action="@{/citation/details/{id}(id=${citation.id.toString()})}" th:object="${citation}" method="post">
-                            <input type="hidden" name="id" th:value="${citation.id}"/>
-                            <div th:replace="fragments/citation :: citation('write')"></div>
-                            <div th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}" class="row">
-                                <div class="col-md-6 mt-2">
-                                    <input type="submit" class="btn btn-primary" value="Update"/>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})"></div>
 
-                <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/review/' + ${citation.id}})"></div>
+    <div layout:fragment="content">
+        <div class="my-5">
+            <h2 class="mb-5">Update Citation</h2>
+            <div class="row">
+                <div class="col">
+                    <form action="#" th:action="@{/citation/details/{id}(id=${citation.id.toString()})}" th:object="${citation}" method="post">
+                        <input type="hidden" name="id" th:value="${citation.id}"/>
+                        <div th:replace="fragments/citation :: citation('write')"></div>
+                        <div th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}" class="row">
+                            <div class="col-md-6 mt-2">
+                                <input type="submit" class="btn btn-primary" value="Update"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
+            <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})"></div>
+
+            <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/review/' + ${citation.id}})"></div>
         </div>
-    </body>
+    </div>
 </html>

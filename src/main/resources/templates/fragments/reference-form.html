@@ -65,20 +65,19 @@
         });
 
 
-        function initRefSelect(widgetLabel, inputLabel) {
-            $(widgetLabel).autocomplete({
+        loadCompleteCallbacks.push(function() {
+            $('#refSelect').autocomplete({
                 source: references,
                 select: function(event, ui) {
                     $(this).val(ui.item.value);
-                    $(inputLabel).val(ui.item.id);
+                    $('#referencedId').val(ui.item.id);
                 }
             });
-        }
-
-        $('#add_ref_modal').on('shown.bs.modal', function(){
-            initRefSelect('#refSelect', '#referencedId')
         });
 
+//            $('#add_ref_modal').on('shown.bs.modal', function(){
+//                initRefSelect('#refSelect', '#referencedId')
+//            });
     </script>
 </div>
 </html>

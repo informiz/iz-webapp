@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Informi</title>
-    </head>
-    <body>
-        <div layout:fragment="content" th:object="${informiz}" class="container my-5">
-            <h2 class="my-5">Informiz</h2>
-            <div class="row table-responsive">
+    <div layout:fragment="content" th:object="${informiz}">
+        <h2 class="my-5">Informiz</h2>
+        <div class="table-responsive">
             <table id="informizTable" class="table table-striped btn-table">
                 <thead class="black white-text">
                 <tr>
@@ -41,42 +37,41 @@
                 </tr>
                 </tbody>
             </table>
-            </div>
-            <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
-               class="my-5"><a href="/informi/upload" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a></p>
-            <script>
-                var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
-
-                checkersCallbacks.push(function() {
-                    var table = $('#informizTable').DataTable({
-                        columnDefs: [
-                        {
-                            render: function ( data, type, row ) {
-                                var checker = checkers[data];
-                                if (checker && type === 'display') {
-                                    return '<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>';
-                                }
-                                return data;
-                            },
-                            targets: 3
-                        },
-                        {
-                            render: function ( data, type, row ) {
-                                if ( type === 'display' || type === 'filter' ) {
-                                    var d = new Date();
-                                    d.setTime(data);
-                                    return d.toLocaleString(locale);
-                                }
-                                return data;
-                            },
-                            targets: 4
-                        } ],
-                        order: [ [ 4, "desc" ] ]
-                    });
-
-                    $('.dataTables_length').addClass('bs-select');
-                });
-            </script>
         </div>
-    </body>
+        <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
+           class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
+        <script>
+            var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
+
+            checkersCallbacks.push(function() {
+                var table = $('#informizTable').DataTable({
+                    columnDefs: [
+                    {
+                        render: function ( data, type, row ) {
+                            var checker = checkers[data];
+                            if (checker && type === 'display') {
+                                return '<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>';
+                            }
+                            return data;
+                        },
+                        targets: 3
+                    },
+                    {
+                        render: function ( data, type, row ) {
+                            if ( type === 'display' || type === 'filter' ) {
+                                var d = new Date();
+                                d.setTime(data);
+                                return d.toLocaleString(locale);
+                            }
+                            return data;
+                        },
+                        targets: 4
+                    } ],
+                    order: [ [ 4, "desc" ] ]
+                });
+
+                $('.dataTables_length').addClass('bs-select');
+            });
+        </script>
+    </div>
 </html>

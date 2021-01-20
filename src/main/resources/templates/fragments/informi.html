@@ -2,7 +2,7 @@
 
     <div th:fragment="informi(mode)">
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="name" class="col-form-label">Title</label>
                 <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="The meaning of life"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="description" class="col-form-label">Description</label>
                 <textarea rows="5" th:field="*{description}" class="form-control" id="description"
                        placeholder="The answer to the ultimate question of life, the universe, and everything"
@@ -19,7 +19,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="locale" class="col-form-label">Locale</label>
                 <select th:field="*{locale}" class="form-control custom-select" id="locale"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
@@ -30,12 +30,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <span class="col-form-label text-muted">Media</span>
                 <!-- TODO: verify input, allow other media types -->
                 <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath"
                        placeholder="No file uploaded" readonly="readonly"/>
-                <div class="form-group col-md-6">
+                <div class="form-group">
                     <img id="media" class="mw-100 mh-100" th:src="${informi.getMediaPath()}"/>
                 </div>
                 <span id="mediaPathErr" th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>

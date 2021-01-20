@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org"  prefix="og: https://ogp.me/ns#">
-    <head>
-        <title>Informi Details</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <div class="row" th:object="${informi}">
-                    <div class="col-md-6">
-                        <h2 id="title" class="mb-3" th:text="*{name}"/>
-                        <p><span id="description" class="text-muted" th:text="*{description}"></span></p>
 
-                        <span class="text-muted">
-                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
-                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
-                        </span>
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                <img id="media" th:src="${informi.getMediaPath()}">
-                            </div>
-                        </div>
-                    </div>
+    <div layout:fragment="content">
+        <div class="my-5" th:object="${informi}">
+            <div class="row">
+                <div class="col">
+                    <h2 id="title" class="mb-3" th:text="*{name}"/>
+                    <p><span id="description" class="text-muted" th:text="*{description}"></span></p>
+
+                    <span class="text-muted">
+                        <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                        <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                    </span>
                 </div>
-
-                <div th:replace="fragments/ref-list :: referenceList(${informi.references}, '')"></div>
-
-                <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, '')"></div>
-
             </div>
+            <div class="row">
+                <div class="form-group col">
+                    <img id="media" th:src="${informi.getMediaPath()}">
+                </div>
+            </div>
+
+            <div th:replace="fragments/ref-list :: referenceList(${informi.references}, '')"></div>
+
+            <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, '')"></div>
+
         </div>
-    </body>
+    </div>
 </html>

@@ -1,59 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Fact-Checkers</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div th:object="${checkers}" class="container my-5">
-                <h2 class="my-5">Fact Checkers</h2>
-                <div class="row">
-                    <table id="checkersTable" class="table table-striped table-responsive btn-table">
-                        <thead class="black white-text">
-                        <tr>
-                            <th>Name</th>
-                            <th>Score</th>
-                            <th>Profile</th>
-                            <th th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">Delete</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="checker : ${checkers}">
-                            <td>
-                                <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
-                                   th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}"
-                                   th:text="${checker.name}"/>
-                                <a th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
-                                   th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}"
-                                   th:text="${checker.name}"/>
-                            </td>
-                            <td th:text="${checker.score.reliability}"></td>
-                            <td>
-                                <a th:href="${checker.link}" target="_blank"
-                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-check ml-2"/>
-                            </td>
-                            <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                                <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}"
-                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-times ml-2"/>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row">
-                    <p th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" class="my-3">
-                        <a href="/factchecker/add" class="btn btn-primary"><i class="fas fa-user-plus ml-2"></i></a>
-                    </p>
-                </div>
-            </div>
-            <script>
+
+    <div layout:fragment="content" th:object="${checkers}">
+        <h2 class="my-5">Fact Checkers</h2>
+        <table id="checkersTable" class="table table-striped table-responsive btn-table">
+            <thead class="black white-text">
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Profile</th>
+                <th th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="checker : ${checkers}">
+                <td>
+                    <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                       th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}"
+                       th:text="${checker.name}"/>
+                    <a th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                       th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}"
+                       th:text="${checker.name}"/>
+                </td>
+                <td th:text="${checker.score.reliability}"></td>
+                <td>
+                    <a th:href="${checker.link}" target="_blank"
+                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-check ml-2"/>
+                </td>
+                <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                    <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}"
+                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-times ml-2"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" class="my-3">
+            <a href="/factchecker/add" class="btn btn-primary"><i class="fas fa-user-plus ml-2"></i></a>
+        </p>
+        <script>
 //                $(document).ready(function () {
 //                    $('#checkersTable').DataTable({
 //                        "autoWidth": false});
 //                    $('.dataTables_length').addClass('bs-select');
 //                });
-            </script>
-        </div>
-    </body>
+        </script>
+    </div>
 </html>

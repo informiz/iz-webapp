@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Claim Details</title>
-    </head>
-    <body>
-        <div layout:fragment="content">
-            <div class="container my-5">
-                <div class="row" th:object="${hypothesis}">
-                    <div class="col-md-6">
-                        <h4 class="mb-3" th:text="*{claim}"/>
-                        <span class="text-muted">
-                            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
-                            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
-                        </span>
-                    </div>
+
+    <div layout:fragment="content">
+        <div class="my-5">
+            <div class="row" th:object="${hypothesis}">
+                <div class="col">
+                    <h4 class="mb-3" th:text="*{claim}"/>
+                    <span class="text-muted">
+                                <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+                                <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+                            </span>
                 </div>
-                <div th:replace="fragments/src-ref-list :: sourceList(${hypothesis.sources}, '')"></div>
-
-                <div th:replace="fragments/ref-list :: referenceList(${hypothesis.references}, '')"></div>
-
-                <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews}, '')"></div>
             </div>
+            <div th:replace="fragments/src-ref-list :: sourceList(${hypothesis.sources}, '')"></div>
+
+            <div th:replace="fragments/ref-list :: referenceList(${hypothesis.references}, '')"></div>
+
+            <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews}, '')"></div>
         </div>
-    </body>
+    </div>
 </html>

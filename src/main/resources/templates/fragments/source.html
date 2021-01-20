@@ -2,7 +2,7 @@
 
     <div th:fragment="source(mode)">
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="name" class="col-form-label">Name</label>
                 <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Nasa"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="srcType" class="col-form-label">Type</label>
                 <select th:field="*{srcType}" id="srcType"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="link" class="col-form-label">Link</label>
                 <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="description" class="col-form-label">Description</label>
                 <textarea rows="5" th:field="*{description}" class="form-control" id="description"
                           placeholder="US space agency"

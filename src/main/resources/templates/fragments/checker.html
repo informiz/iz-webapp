@@ -2,7 +2,7 @@
 
     <div th:fragment="checker(mode)">
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="name" class="col-form-label">Name</label>
                 <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Chuck Fecter"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')') or mode == 'read'}"/>
@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="row" th:unless="${mode == 'read'}">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="email" class="col-form-label">Email</label>
                 <input type="email" th:field="*{email}" class="form-control" id="email" placeholder="chuck@university.ac"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')') or mode == 'read'}" />
@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="link" class="col-form-label">Profile link</label>
                 <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.linkedin.com/in/chuckfecter/"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')') or mode == 'read'}" />
@@ -26,7 +26,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col">
                 <label for="reliability" class="col-form-label">Reliability</label>
                 <input type="number" min="0" max="1" step="0.1" th:value="0.9" th:field="*{score.reliability}" class="form-control" id="reliability"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')') or mode == 'read'}" />

@@ -3,7 +3,7 @@
     <div th:fragment="editRefForm(actionPath)">
         <form action="#" th:action="@{${actionPath}}" th:object="${reference}" method="post">
             <!-- The id of the claim or citation being referenced (not necessarily local) -->
-            <input type="hidden" name="referencedId" th:value="${reference.referencedId}"/>
+            <input type="hidden" th:value="${reference.referencedId}" name="referencedId"/>
             <div class="form-row">
                 <div class="form-group col-md-4">
                     <label th:for="entailment">Entailment</label>

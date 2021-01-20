@@ -30,6 +30,8 @@
 
             var informiz = {};
             var informizCallbacks = []
+
+            var loadCompleteCallbacks = []
         </script>
         <script type="text/javascript" th:src="@{/js/load_data.js}"></script>
 
@@ -70,15 +72,54 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
                 integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+        <link rel="stylesheet" type="text/css" th:href="@{/style/bootstrap-overrides.css}">
+
     </head>
     <body>
+        <div class="container">
 
-        <div th:replace="fragments/style-header :: header"></div>
+            <div th:replace="fragments/style-header :: header"></div>
 
-        <div layout:fragment="content"></div>
+            <div class="my-5" style="background-image: linear-gradient(#d7d9db, white);">
 
-        <div th:replace="fragments/style-footer :: footer"></div>
+                <div class="row mx-auto">
+                    <div class="col-8">
+                        <h3 class="mt-5">
+                            Welcome to the Demo-Channel of
+                            <a href="https://informiz.org/about" target="_blank">Informiz</a>,<br/>
+                            the collaborative fact-checking platform!
+                        </h3>
+                    </div>
+                    <div class="col-4 align-self-end">
+                        <div class="float-right">
+                            <button class="btn btn-success">
+                                <a href="https://www.gofundme.com/f/informiz-collaborative-factchecking" target="_blank"
+                                   style="text-decoration: none; color: inherit;">Donate</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
+                <div calss="row mx-auto">
+                    <div class="col-8">
+                        <h6 class="mt-2 mb-5">This open-source project promotes fact-based public discussion by making reliable information easily accessible.
+                        </h6>
+                    </div>
+                </div>
 
+                <div calss="row mx-auto">
+                    <div class="col">
+                        <div layout:fragment="content"></div>
+                    </div>
+                </div>
+
+                <div calss="row mx-auto">
+                    <div class="col">
+                        <div th:replace="fragments/style-footer :: footer"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </body>
 </html>

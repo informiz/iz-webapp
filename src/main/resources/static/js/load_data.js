@@ -39,4 +39,10 @@ $(document).ready(function() {
     processClaims();
     processCitations();
     processInformiz();
+
+    if (loadCompleteCallbacks.length > 0) {
+            $.each(loadCompleteCallbacks, function(i, func) {
+                func.apply();
+            });
+    }
 });

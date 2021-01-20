@@ -1,9 +1,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="referenceList(references, refsUrl)">
-    <h3 class="mt-5">References</h3>
+    <h2 class="mt-5">References</h2>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col">
 
             <table id="references-table" class="table table-striped table-responsive-md">
                 <thead>
@@ -83,31 +83,31 @@
 
             </th:block>
 
+            <script>
+                citationsCallbacks.push(function() {
+                    if ($('#references-table tr').length > 0) {
+                        $('#references-table td[id]').val(function(){
+                            var id = $(this).attr('id');
+                            var ref = citations[id];
+                            if (ref) {
+                                $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
+                            }
+                        });
+                    }
+                });
+                claimsCallbacks.push(function() {
+                    if ($('#references-table tr').length > 0) {
+                        $('#references-table td[id]').val(function(){
+                            var id = $(this).attr('id');
+                            var ref = claims[id];
+                            if (ref) {
+                                $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
+                            }
+                        });
+                    }
+                });
+            </script>
         </div>
-        <script>
-            citationsCallbacks.push(function() {
-                if ($('#references-table tr').length > 0) {
-                    $('#references-table td[id]').val(function(){
-                        var id = $(this).attr('id');
-                        var ref = citations[id];
-                        if (ref) {
-                            $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
-                        }
-                    });
-                }
-            });
-            claimsCallbacks.push(function() {
-                if ($('#references-table tr').length > 0) {
-                    $('#references-table td[id]').val(function(){
-                        var id = $(this).attr('id');
-                        var ref = claims[id];
-                        if (ref) {
-                            $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
-                        }
-                    });
-                }
-            });
-        </script>
     </div>
 </div>
 </html>
