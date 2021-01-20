@@ -35,9 +35,7 @@
                 <!-- TODO: verify input, allow other media types -->
                 <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath"
                        placeholder="No file uploaded" readonly="readonly"/>
-                <div class="form-group">
-                    <img id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
-                </div>
+                <img id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
                 <span id="mediaPathErr" th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
             </div>
         </div>
