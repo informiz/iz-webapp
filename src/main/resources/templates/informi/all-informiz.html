@@ -2,16 +2,19 @@
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
     <div layout:fragment="content" th:object="${informiz}">
-        <h2 class="my-5">Informiz</h2>
+        <h1 class="mt-5">Informiz</h1>
+        <p class="mb-3">Graphical snippets of information, ranked for reliability</p>
         <div class="table-responsive">
-            <table id="informizTable" class="table table-striped btn-table">
-                <thead class="black white-text">
+            <table id="informizTable" data-toggle="table" data-header-style="tableHeaderStyle"
+                   data-sort-name="date" data-sort-order="desc"
+                   data-buttons-class="primary" data-pagination="true" data-search="true">
+                <thead>
                 <tr>
-                    <th>Name</th>
+                    <th data-field="name" data-sortable="true">Name</th>
                     <th>Description</th>
-                    <th>Score</th>
-                    <th>By</th>
-                    <th>Last Updated</th>
+                    <th data-field="score" data-sortable="true">Score</th>
+                    <th data-field="by" data-sortable="true">By</th>
+                    <th data-field="date" data-sortable="true">Last Updated</th>
                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
                     <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                 </tr>
@@ -24,8 +27,8 @@
                     </td>
                     <td th:text="${informi.description}"></td>
                     <td th:text="${informi.score.reliability}"></td>
-                    <td th:text="${informi.ownerId}" th:name="${informi.ownerId}"></td>
-                    <td th:text="${informi.updatedTs}"></td>
+                    <td th:title="${informi.ownerId}"></td>
+                    <td title="timestamp" th:text="${informi.updatedTs}"></td>
                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                         <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
@@ -41,36 +44,14 @@
         <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
            class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
         <script>
-            var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
-
             checkersCallbacks.push(function() {
-                var table = $('#informizTable').DataTable({
-                    columnDefs: [
-                    {
-                        render: function ( data, type, row ) {
-                            var checker = checkers[data];
-                            if (checker && type === 'display') {
-                                return '<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>';
-                            }
-                            return data;
-                        },
-                        targets: 3
-                    },
-                    {
-                        render: function ( data, type, row ) {
-                            if ( type === 'display' || type === 'filter' ) {
-                                var d = new Date();
-                                d.setTime(data);
-                                return d.toLocaleString(locale);
-                            }
-                            return data;
-                        },
-                        targets: 4
-                    } ],
-                    order: [ [ 4, "desc" ] ]
+                $.each(checkers, function(id, checker) {
+                    $('td[title="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                 });
+            });
 
-                $('.dataTables_length').addClass('bs-select');
+            $(document).ready(function() {
+                timestampsToStrings($('td[title="timestamp"]'));
             });
         </script>
     </div>

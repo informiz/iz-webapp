@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col">
+            <div class="form-group col-4">
                 <label for="locale" class="col-form-label">Locale</label>
                 <select th:field="*{locale}" class="form-control custom-select" id="locale"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">

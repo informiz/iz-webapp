@@ -4,7 +4,7 @@
 
     <div layout:fragment="content">
         <div class="my-5">
-            <h2 class="mb-5">Update Informi</h2>
+            <h1 class="mb-5">Update Informi</h1>
             <form action="#" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
                 <input type="hidden" name="id" th:value="${informi.id}"/>
                 <div th:replace="fragments/informi :: informi('write')"></div>

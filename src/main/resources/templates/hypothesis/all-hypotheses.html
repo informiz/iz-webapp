@@ -5,34 +5,38 @@
     <div layout:fragment="content" th:object="${hypotheses}">
         <div>
             <div>
-                <h2 class="my-3">Claims</h2>
-                <p class="mb-5">Factual claims, ranked for reliability</p>
-                <table id="hypothesisTable" class="table table-striped table-responsive btn-table">
+                <h1 class="mt-5">Claims</h1>
+                <p class="mb-3">Factual claims, ranked for reliability</p>
+                <table id="hypothesisTable" data-toggle="table" data-header-style="tableHeaderStyle"
+                       data-sort-name="date" data-sort-order="desc"
+                       data-buttons-class="primary" data-pagination="true" data-search="true">
                     <thead>
-                    <tr>
-                        <th>Text</th>
-                        <th>Score</th>
-                        <th>By</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
-                    </tr>
+                        <tr>
+                            <th data-field="text" data-sortable="true">Text</th>
+                            <th data-field="score" data-sortable="true">Score</th>
+                            <th data-field="by" data-sortable="true">By</th>
+                            <th data-field="date" data-sortable="true">Last Updated</th>
+                            <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                            <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="hypothesis : ${hypotheses}">
-                        <td>
-                            <a th:text="${hypothesis.claim}" th:href="@{/hypothesis/view/{id}(id=${hypothesis.id.toString()})}"/>
-                        </td>
-                        <td th:text="${hypothesis.score.reliability}"></td>
-                        <td th:name="${hypothesis.ownerId}"></td>
-                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                            <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
-                        </td>
-                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                            <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
-                        </td>
-                    </tr>
+                        <tr th:each="hypothesis : ${hypotheses}">
+                            <td>
+                                <a th:text="${hypothesis.claim}" th:href="@{/hypothesis/view/{id}(id=${hypothesis.id.toString()})}"/>
+                            </td>
+                            <td th:text="${hypothesis.score.reliability}"></td>
+                            <td th:title="${hypothesis.ownerId}"></td>
+                            <td title="timestamp" th:text="${hypothesis.updatedTs}"></td>
+                            <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
+                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                            </td>
+                            <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
+                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -42,13 +46,12 @@
             <script>
                 checkersCallbacks.push(function() {
                     $.each(checkers, function(id, checker) {
-                        $('td[name="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
+                        $('td[title="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                     });
                 });
 
-                $(document).ready(function () {
-                    $('#hypothesisTable').DataTable();
-                    $('.dataTables_length').addClass('bs-select');
+                $(document).ready(function() {
+                    timestampsToStrings($('td[title="timestamp"]'));
                 });
             </script>
         </div>

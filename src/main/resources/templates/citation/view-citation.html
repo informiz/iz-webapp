@@ -3,21 +3,15 @@
       xmlns:th="http://www.thymeleaf.org">
 
     <div layout:fragment="content" th:object="${citation}">
-        <div class="my-5">
-            <h2 class="mb-5">Citation Details</h2>
-            <div class="row" >
-                <div class="col">
-                    <h4 class="pr-2" th:text="*{text}"/>
-                    <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
-                    <span class="text-muted">
-                        <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
-                        <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
-                    </span>
-                </div>
-            </div>
-            <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, '')"></div>
+        <h1 class="mb-3">Citation Details</h1>
+        <h4 class="pr-2" th:text="*{text}"/>
+        <a target="_blank" class="btn btn-primary fas fa-link pull-left" th:href="*{link}"></a>
+        <span class="text-muted">
+            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
+            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+        </span>
+        <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, '')"></div>
 
-            <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, '')"></div>
-        </div>
+        <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, '')"></div>
     </div>
 </html>
