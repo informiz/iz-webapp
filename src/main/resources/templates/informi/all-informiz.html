@@ -27,7 +27,7 @@
                     </td>
                     <td th:text="${informi.description}"></td>
                     <td th:text="${informi.score.reliability}"></td>
-                    <td th:title="${informi.ownerId}"></td>
+                    <td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td>
                     <td title="timestamp" th:text="${informi.updatedTs}"></td>
                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                         <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
@@ -44,15 +44,14 @@
         <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
            class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
         <script>
+            // TODO: on first table rendering the checkers are not loaded yet. Find a better solution
             checkersCallbacks.push(function() {
                 $.each(checkers, function(id, checker) {
-                    $('td[title="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
+                    $('td[data-checker-id="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                 });
             });
 
-            $(document).ready(function() {
-                timestampsToStrings($('td[title="timestamp"]'));
-            });
+            handleTableRender($('#informizTable'));
         </script>
     </div>
 </html>

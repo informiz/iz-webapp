@@ -28,7 +28,7 @@
                         <a th:href="${citation.link}" target="_blank"
                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-link"/>
                     </td>
-                    <td th:title="${citation.ownerId}"></td>
+                    <td title="fact-checker" th:data-checker-id="${citation.ownerId}"></td>
                     <td title="timestamp" th:text="${citation.updatedTs}"></td>
                     <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                         <a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}"
@@ -47,13 +47,11 @@
             <script>
                     checkersCallbacks.push(function() {
                         $.each(checkers, function(id, checker) {
-                            $('td[title="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
+                            $('td[data-checker-id="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
                         });
                     });
 
-                    $(document).ready(function() {
-                        timestampsToStrings($('td[title="timestamp"]'));
-                    });
+                    handleTableRender($('#citationsTable'));
                 </script>
         </div>
     </div>
