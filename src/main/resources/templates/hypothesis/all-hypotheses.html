@@ -22,8 +22,11 @@
                     </thead>
                     <tbody>
                         <tr th:each="hypothesis : ${hypotheses}">
-                            <td>
-                                <a th:text="${hypothesis.claim}" th:href="@{/hypothesis/view/{id}(id=${hypothesis.id.toString()})}"/>
+                            <td class="column-text">
+                                <div class="table-text">
+                                    <a th:text="${hypothesis.claim}"
+                                       th:href="@{/hypothesis/view/{id}(id=${hypothesis.id.toString()})}"/>
+                                </div>
                             </td>
                             <td th:text="${hypothesis.score.reliability}"></td>
                             <td title="fact-checker" th:data-checker-id="${hypothesis.ownerId}"></td>
@@ -44,12 +47,6 @@
                class="my-5"><a href="/hypothesis/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a>
             </p>
             <script>
-                checkersCallbacks.push(function() {
-                    $.each(checkers, function(id, checker) {
-                        $('td[data-checker-id="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
-                    });
-                });
-
                 handleTableRender($('#hypothesisTable'));
             </script>
         </div>

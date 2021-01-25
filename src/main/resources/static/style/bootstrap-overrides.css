@@ -18,6 +18,20 @@ a:active {
   color: #1B72A1;
 }
 
+/* TODO: is there a better way to make text truncate after a few lines? */
+.table-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* TODO: is there a better way to make certain columns wide enough on small screens? */
+.column-text {
+    /* 35% of portrait phone, only two fit in a row */
+    min-width: 200px;
+}
 
 .btn-primary {
      color: white !important;

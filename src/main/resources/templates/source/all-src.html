@@ -27,7 +27,9 @@
                         </td>
                         <td th:text="${source.srcType.displayValue}"></td>
                         <td th:text="${source.score.reliability}"></td>
-                        <td th:text="${source.description}"></td>
+                        <td class="column-text">
+                            <span class="table-text" th:text="${source.description}"/>
+                        </td>
                         <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                             <a th:href="@{/source/details/{id}(id=${source.id.toString()})}"
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>

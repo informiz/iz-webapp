@@ -21,8 +21,10 @@
                 </thead>
                 <tbody>
                 <tr th:each="citation : ${citations}">
-                    <td>
-                        <a th:text="${citation.text}" th:href="@{/citation/view/{id}(id=${citation.id.toString()})}"/>
+                    <td class="column-text">
+                        <div class="table-text">
+                            <a th:text="${citation.text}" th:href="@{/citation/view/{id}(id=${citation.id.toString()})}"/>
+                        </div>
                     </td>
                     <td>
                         <a th:href="${citation.link}" target="_blank"
@@ -45,14 +47,8 @@
                class="my-5"><a href="/citation/add" class="btn btn-primary"><i class="fas fa-plus ml-2"></i> Add</a>
             </p>
             <script>
-                    checkersCallbacks.push(function() {
-                        $.each(checkers, function(id, checker) {
-                            $('td[data-checker-id="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
-                        });
-                    });
-
-                    handleTableRender($('#citationsTable'));
-                </script>
+                handleTableRender($('#citationsTable'));
+            </script>
         </div>
     </div>
 </html>

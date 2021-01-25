@@ -9,48 +9,45 @@
                    data-sort-name="date" data-sort-order="desc"
                    data-buttons-class="primary" data-pagination="true" data-search="true">
                 <thead>
-                <tr>
-                    <th data-field="name" data-sortable="true">Name</th>
-                    <th>Description</th>
-                    <th data-field="score" data-sortable="true">Score</th>
-                    <th data-field="by" data-sortable="true">By</th>
-                    <th data-field="date" data-sortable="true">Last Updated</th>
-                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
-                    <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
-                </tr>
+                    <tr>
+                        <th data-field="name" data-sortable="true">Name</th>
+                        <th>Description</th>
+                        <th data-field="score" data-sortable="true">Score</th>
+                        <th data-field="by" data-sortable="true">By</th>
+                        <th data-field="date" data-sortable="true">Last Updated</th>
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr th:each="informi : ${informiz}">
-                    <td>
-                        <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
-                           th:text="${informi.name}"/>
-                    </td>
-                    <td th:text="${informi.description}"></td>
-                    <td th:text="${informi.score.reliability}"></td>
-                    <td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td>
-                    <td title="timestamp" th:text="${informi.updatedTs}"></td>
-                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                        <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
-                    </td>
-                    <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                        <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
-                    </td>
-                </tr>
+                    <tr th:each="informi : ${informiz}">
+                        <td class="column-text">
+                            <div class="table-text">
+                                <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
+                                   th:text="${informi.name}"/>
+                            </div>
+                        </td>
+                        <td class="column-text">
+                            <span class="table-text" th:text="${informi.description}"/>
+                        </td>
+                        <td th:text="${informi.score.reliability}"></td>
+                        <td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td>
+                        <td title="timestamp" th:text="${informi.updatedTs}"></td>
+                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                            <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                        </td>
+                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                            <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
            class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
         <script>
-            // TODO: on first table rendering the checkers are not loaded yet. Find a better solution
-            checkersCallbacks.push(function() {
-                $.each(checkers, function(id, checker) {
-                    $('td[data-checker-id="'+checker.entityId+'"]').append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
-                });
-            });
-
             handleTableRender($('#informizTable'));
         </script>
     </div>

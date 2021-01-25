@@ -3,11 +3,11 @@
 <div th:fragment="header">
     <div>
         <div class="row my-5">
-            <div class="col-4">
+            <div class="col-sm-4">
                 <img class="img-fluid" th:src="@{/logo-sm.jpg}" alt="">
             </div>
             <div class="col-6"></div>
-            <div class="col-2 align-self-center">
+            <div class="col-md-2 align-self-center">
                 <div class="float-right">
                     <button th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="btn btn-outline-success">
                         <a href="/oauth_login" style="text-decoration: none; color: inherit;" onclick="signIn();">Sign in</a>

@@ -18,10 +18,12 @@
                 </thead>
                 <tbody>
                 <tr th:each="reference : ${references}">
-                    <td th:id="${reference.referencedId}"/>
+                    <td class="column-text" th:data-reference="${reference.referencedId}"/>
                     <td th:text="${reference.entailment.displayValue}"></td>
                     <td th:text="${reference.degree}"/>
-                    <td th:text="${reference.comment}"></td>
+                    <td class="column-text">
+                        <span class="table-text" th:text="${reference.comment}"/>
+                    </td>
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <div th:id="'modal_' + ${reference.id}" class="modal fade" role="dialog">
                             <div class="modal-dialog">
@@ -84,28 +86,7 @@
             </th:block>
 
             <script>
-                citationsCallbacks.push(function() {
-                    if ($('#references-table tr').length > 0) {
-                        $('#references-table td[id]').val(function(){
-                            var id = $(this).attr('id');
-                            var ref = citations[id];
-                            if (ref) {
-                                $(this).append('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
-                            }
-                        });
-                    }
-                });
-                claimsCallbacks.push(function() {
-                    if ($('#references-table tr').length > 0) {
-                        $('#references-table td[id]').val(function(){
-                            var id = $(this).attr('id');
-                            var ref = claims[id];
-                            if (ref) {
-                                $(this).append('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
-                            }
-                        });
-                    }
-                });
+                handleReferencesRender($('#references-table'));
             </script>
         </div>
     </div>

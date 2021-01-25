@@ -52,14 +52,14 @@
 
         citationsCallbacks.push(function() {
             $.each(citations, function(id, citation) {
-                text = 'Citation: ' + citation.text;
+                text = citation.text + ' [Citation]';
                 references.push( { id: citation.entityId, value: text } );
             });
         });
 
         claimsCallbacks.push(function() {
             $.each(claims, function(id, hypothesis) {
-                text = 'Claim: ' + hypothesis.claim;
+                text = hypothesis.claim + ' [Claim]';
                 references.push( { id: hypothesis.entityId, value: text } );
             });
         });

@@ -1,7 +1,8 @@
 
 function processEntities(callbacks, endpoint, map) {
+
     if (callbacks.length > 0) {
-        $.getJSON(endpoint, function(data) {
+        promise = $.getJSON(endpoint, function(data) {
             $.each(data, function(i, entity) {
                 map[entity.entityId] = entity;
             });
@@ -9,40 +10,43 @@ function processEntities(callbacks, endpoint, map) {
                 func.apply();
             });
         });
+        return promise;
     }
 }
 
 function processCheckers() {
-    processEntities(checkersCallbacks, "/checker-api/all", checkers)
+    return processEntities(checkersCallbacks, "/checker-api/all", checkers)
 }
 
 function processSources() {
-    processEntities(sourcesCallbacks, "/source-api/all", sources)
+    return processEntities(sourcesCallbacks, "/source-api/all", sources)
 }
 
 function processClaims() {
-    processEntities(claimsCallbacks, "/claim-api/all", claims)
+    return processEntities(claimsCallbacks, "/claim-api/all", claims)
 }
 
 function processCitations() {
-    processEntities(citationsCallbacks, "/citation-api/all", citations)
+    return processEntities(citationsCallbacks, "/citation-api/all", citations)
 }
 
 function processInformiz() {
-    processEntities(informizCallbacks, "/informi-api/all", informiz)
+    return processEntities(informizCallbacks, "/informi-api/all", informiz)
 }
 
 
 $(document).ready(function() {
-    processCheckers();
-    processSources();
-    processClaims();
-    processCitations();
-    processInformiz();
+    p1 = processCheckers();
+    p2 = processSources();
+    p3 = processClaims();
+    p4 = processCitations();
+    p5 = processInformiz();
 
     if (loadCompleteCallbacks.length > 0) {
+        $.when( p1, p2, p3, p4, p5 ).done(function ( res1, res2, res3, res4, res5 ) {
             $.each(loadCompleteCallbacks, function(i, func) {
                 func.apply();
             });
+        });
     }
 });

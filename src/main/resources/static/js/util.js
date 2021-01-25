@@ -7,8 +7,9 @@ function tableHeaderStyle(column) {
 
 const options = {year: 'numeric', month: 'numeric', day: 'numeric' };
 
+var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
+
 function timestampsToStrings(elements) {
-    var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
     elements.each(function() {
         d = new Date();
         ts = parseInt($(this).text());
@@ -18,7 +19,6 @@ function timestampsToStrings(elements) {
 }
 
 function checkersToLinks(elements) {
-    var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
     elements.each(function() {
         entityId = $(this).attr('data-checker-id');
         checker = checkers[entityId];
@@ -27,10 +27,46 @@ function checkersToLinks(elements) {
     });
 }
 
-// TODO: similar issue for source/reference/review lists
 function handleTableRender(table) {
+    // TODO: on first table rendering the checkers are not loaded yet. Find a better solution
+    checkersCallbacks.push(function() {
+        checkersToLinks($('td[title="fact-checker"]'));
+    });
+
     table.on('post-body.bs.table', function (e, data) {
         timestampsToStrings($('td[title="timestamp"]'));
         checkersToLinks($('td[title="fact-checker"]'));
     });
 }
+
+function renderReferences() {
+    $('td[data-reference]').val(function() {
+        refId = $(this).attr('data-reference');
+
+        if (citations[refId]) {
+            ref = citations[refId];
+            $(this).html('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
+        }
+        else if (claims[refId]) {
+            ref = claims[refId];
+            $(this).html('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
+        }
+    });
+}
+
+function handleReferencesRender(table) {
+    // TODO: Dummy function to trigger claims and citations loading. Temporary solution while loading from local channel
+    claimsCallbacks.push(function() {});
+    citationsCallbacks.push(function() {});
+
+    // TODO: on first table rendering the claims and citations are not loaded yet. Better solution?
+    loadCompleteCallbacks.push(function() {
+        renderReferences();
+    });
+
+    table.on('post-body.bs.table', function (e, data) {
+        renderReferences();
+    });
+}
+
+

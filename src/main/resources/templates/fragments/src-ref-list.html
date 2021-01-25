@@ -15,9 +15,11 @@
                 </thead>
                 <tbody>
                 <tr th:each="src : ${sources}">
-                    <td th:id="${src.srcEntityId}"/>
-                    <td th:id="${src.link}"/>
-                    <td th:text="${src.description}"/>
+                    <td th:data-entity-id="${src.srcEntityId}"/>
+                    <td th:data-link="${src.link}"/>
+                    <td class="column-text">
+                        <span class="table-text" th:text="${src.description}"/>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -29,14 +31,14 @@
                 sourcesCallbacks.push(function() {
                     if ($('#sources-table tr').length > 0) {
                         $('tbody tr td:nth-child(1)').val(function(){
-                            var source = sources[$(this).attr('id')];
+                            var source = sources[$(this).attr('data-entity-id')];
                             if (source) {
-                                $(this).append('<a href="/source/details/' + source.id + '">' + source.name + '</a>')
+                                $(this).html('<a href="/source/details/' + source.id + '">' + source.name + '</a>')
                             }
                         });
                         $('tbody tr td:nth-child(2)').val(function(){
-                            if ($(this).attr('id')) {
-                                $(this).append('<a href="' + $(this).attr('id') +
+                            if ($(this).attr('data-link')) {
+                                $(this).html('<a href="' + $(this).attr('data-link') +
                                      '" target="_blank" class="btn btn-primary fas fa-link"/>')
                             }
                         });
