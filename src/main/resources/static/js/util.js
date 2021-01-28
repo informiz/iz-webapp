@@ -11,7 +11,7 @@ function tableHeaderHide(column) {
     }
 }
 
-const options = {year: 'numeric', month: 'numeric', day: 'numeric' };
+const options = {year: 'numeric', month: 'long', day: 'numeric' };
 
 var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
 
@@ -29,14 +29,14 @@ function checkersToLinks(elements) {
         entityId = $(this).attr('data-checker-id');
         checker = checkers[entityId];
         if (checker)
-            $(this).append('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
+            $(this).html('<a href = "/factchecker/view/' + checker.id + '">' + checker.name + '</a>')
     });
 }
 
 function handleTableRender(table) {
     // TODO: on first table rendering the checkers are not loaded yet. Find a better solution
     checkersCallbacks.push(function() {
-        checkersToLinks($('td[title="fact-checker"]'));
+        checkersToLinks($('[title="fact-checker"]'));
     });
 
     table.on('post-body.bs.table', function (e, data) {

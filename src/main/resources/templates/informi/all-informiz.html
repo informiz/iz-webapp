@@ -12,28 +12,36 @@
                     <tr>
                         <th data-field="date" data-sortable="true">Updated</th>
                         <th data-field="informi" data-sortable="false">Informi</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
-                        <td class="align-text-top">
-                            <div class="date-box rounded mt-3">
-                                <div class="date">
-                                    <small title="timestamp" th:text="${informi.updatedTs}"></small>
-                                </div>
-                            </div>
-                        </td>
+                        <td style="display: none;" th:text="${informi.updatedTs}"/>
                         <td>
                             <div class="lead mt-2">
                                 <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
                                    th:text="${informi.name}"/>
                             </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <span class="info-box mr-2 info-text">
+                                        <i class="fas fa-history mr-1"></i>
+                                        <small><strong title="timestamp" th:text="${informi.updatedTs}"></strong></small>
+                                    </span>
+                                    <span class="info-box info-text">
+                                        <i class="fas fa-user mr-1"></i>
+                                        <small><strong title="fact-checker" th:data-checker-id="${informi.ownerId}"></strong></small>
+                                    </span>
+                                    <span class="info-box info-text">
+                                        <i class="fas fa-comments mr-1"></i>
+                                        <small><strong th:text="${informi.reviews.size()} + ' reviews'"></strong></small>
+                                    </span>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-md">
                                     <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}">
-                                        <img class="img-fluid rounded mt-2" height="200" th:src="${informi.getMediaPath()}">
+                                        <img class="img-fluid rounded mt-2" th:src="${informi.getMediaPath()}">
                                     </a>
                                     <div><small class="text-muted">
                                         <b>Reliability:</b> <span th:text="${informi.score.reliability}"/>
@@ -41,18 +49,21 @@
                                     </small></div>
                                 </div>
                                 <div class="col-md mt-2">
-                                    <span class="table-text table-text-long" th:text="${informi.description}"/>
+                                    <div>
+                                        <span class="table-text table-text-long" th:text="${informi.description}"/>
+                                    </div>
+                                    <div class="mt-3 buttons-container">
+                                        <th:block th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                            <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
+                                               class="btn btn-outline-primary mr-2 fas fa-pencil-alt"/>
+                                            <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
+                                               class="btn btn-outline-primary mr-2 waves-effect fas fa-times"/>
+                                        </th:block>
+                                        <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
+                                           class="btn btn-primary btn-sm mr-2">Read more...</a>
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                        <!-- td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td-->
-                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                            <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
-                        </td>
-                        <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                            <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                         </td>
                     </tr>
                 </tbody>
