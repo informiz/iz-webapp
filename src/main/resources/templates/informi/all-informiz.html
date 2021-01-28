@@ -4,35 +4,48 @@
     <div layout:fragment="content" th:object="${informiz}">
         <h1 class="mt-5">Informiz</h1>
         <p class="mb-3">Graphical snippets of information, ranked for reliability</p>
-        <div class="table-responsive">
-            <table id="informizTable" data-toggle="table" data-header-style="tableHeaderStyle"
-                   data-sort-name="date" data-sort-order="desc"
+        <div>
+            <table class="table table-borderless" id="informizTable" data-toggle="table" data-header-style="tableHeaderHide"
+                   data-sort-name="date" data-sort-order="desc" data-custom-search="customSearch"
                    data-buttons-class="primary" data-pagination="true" data-search="true">
                 <thead>
                     <tr>
-                        <th data-field="name" data-sortable="true">Name</th>
-                        <th>Description</th>
-                        <th data-field="score" data-sortable="true">Score</th>
-                        <th data-field="by" data-sortable="true">By</th>
-                        <th data-field="date" data-sortable="true">Last Updated</th>
+                        <th data-field="date" data-sortable="true">Updated</th>
+                        <th data-field="informi" data-sortable="false">Informi</th>
                         <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Edit</th>
                         <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
-                        <td class="column-text">
-                            <div class="table-text">
-                                <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
-                                   th:text="${informi.name}"/>
+                        <td class="align-text-top">
+                            <div class="date-box rounded mt-3">
+                                <div class="date">
+                                    <small title="timestamp" th:text="${informi.updatedTs}"></small>
+                                </div>
                             </div>
                         </td>
-                        <td class="column-text">
-                            <span class="table-text" th:text="${informi.description}"/>
+                        <td>
+                            <div class="lead mt-2">
+                                <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
+                                   th:text="${informi.name}"/>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}">
+                                        <img class="img-fluid rounded mt-2" height="200" th:src="${informi.getMediaPath()}">
+                                    </a>
+                                    <div><small class="text-muted">
+                                        <b>Reliability:</b> <span th:text="${informi.score.reliability}"/>
+                                        <b>Confidence:</b> <span th:text="${informi.score.confidence}"/>
+                                    </small></div>
+                                </div>
+                                <div class="col-md mt-2">
+                                    <span class="table-text table-text-long" th:text="${informi.description}"/>
+                                </div>
+                            </div>
                         </td>
-                        <td th:text="${informi.score.reliability}"></td>
-                        <td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td>
-                        <td title="timestamp" th:text="${informi.updatedTs}"></td>
+                        <!-- td title="fact-checker" th:data-checker-id="${informi.ownerId}"></td-->
                         <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                             <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
@@ -49,6 +62,13 @@
            class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
         <script>
             handleTableRender($('#informizTable'));
+
+            function customSearch(data, text) {
+                return data.filter(function (row) {
+                    // TODO: is it worth it to parseHTML and search only title and description?
+                    return row.informi.indexOf(text) > -1;
+                })
+            }
         </script>
     </div>
 </html>

@@ -11,7 +11,7 @@
                         <input type="hidden" name="id" th:value="${citation.id}"/>
                         <div th:replace="fragments/citation :: citation('write')"></div>
                         <div th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}" class="row">
-                            <div class="col-md-6 mt-2">
+                            <div class="col-6 mt-2">
                                 <input type="submit" class="btn btn-primary" value="Update"/>
                             </div>
                         </div>

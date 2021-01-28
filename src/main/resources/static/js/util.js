@@ -5,6 +5,12 @@ function tableHeaderStyle(column) {
     }
 }
 
+function tableHeaderHide(column) {
+    return {
+      css: { 'display': 'none' }
+    }
+}
+
 const options = {year: 'numeric', month: 'numeric', day: 'numeric' };
 
 var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
@@ -34,8 +40,8 @@ function handleTableRender(table) {
     });
 
     table.on('post-body.bs.table', function (e, data) {
-        timestampsToStrings($('td[title="timestamp"]'));
-        checkersToLinks($('td[title="fact-checker"]'));
+        timestampsToStrings($('[title="timestamp"]'));
+        checkersToLinks($('[title="fact-checker"]'));
     });
 }
 
@@ -45,11 +51,11 @@ function renderReferences() {
 
         if (citations[refId]) {
             ref = citations[refId];
-            $(this).html('<a href = "/citation/view/' + ref.id + '">' + ref.text + '</a>')
+            $(this).html('<span class="table-text"><a href = "/citation/view/' + ref.id + '" title="' + ref.text + '">' + ref.text + '</a></span>')
         }
         else if (claims[refId]) {
             ref = claims[refId];
-            $(this).html('<a href = "/hypothesis/view/' + ref.id + '">' + ref.claim + '</a>')
+            $(this).html('<span class="table-text"><a href = "/hypothesis/view/' + ref.id + '" title="' + ref.claim + '">' + ref.claim + '</a></span>')
         }
     });
 }
