@@ -5,16 +5,22 @@
     <div th:fragment="referenceList(references, refsUrl)">
         <h2 class="mt-5">References</h2>
         <div>
-            <table id="references-table" class="table table-striped">
+            <table id="references-table"
+                   class="table table-striped"
+                   data-toggle="table"
+                   data-detail-view="true"
+                   data-detail-view-by-click="true"
+                   data-detail-view-icon="false"
+                   data-detail-formatter="referenceFormatter">
                 <thead>
-                <tr>
-                    <th>Reference</th>
-                    <th>Entailment</th>
-                    <th>Degree</th>
-                    <th>Comment</th>
-                    <th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
-                    <!-- th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
-                </tr>
+                    <tr>
+                        <th data-field="reference">Reference</th>
+                        <th data-field="entailment">Entailment</th>
+                        <th data-field="degree">Degree</th>
+                        <th data-field="comment">Comment</th>
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
+                        <!-- th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
+                    </tr>
                 </thead>
                 <tbody>
                 <tr th:each="reference : ${references}">
@@ -80,13 +86,19 @@
                     </div>
                 </div>
 
-                <button type="button" th:id="add_ref" data-toggle="modal" data-target='#add_ref_modal'
-                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                <div class="mt-2">
+                    <button type="button" th:id="add_ref" data-toggle="modal" data-target='#add_ref_modal'
+                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                </div>
 
             </th:block>
 
             <script>
                 handleReferencesRender($('#references-table'));
+
+                function referenceFormatter(index, row) {
+                    return '<div>' + row.comment + '</div>';
+                }
             </script>
         </div>
     </div>

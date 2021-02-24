@@ -3,22 +3,28 @@
     <div th:fragment="reviewList(reviews, link)">
         <h3 class="mt-5">Reviews</h3>
         <div>
-            <table id="reviewsTable" class="table table-striped">
+            <table id="reviewsTable"
+                   class="table table-striped"
+                   data-toggle="table"
+                   data-detail-view="true"
+                   data-detail-view-by-click="true"
+                   data-detail-view-icon="false"
+                   data-detail-formatter="reviewFormatter">
                 <thead>
-                <tr>
-                    <th>Reviewer</th>
-                    <th>Score</th>
-                    <th>Comment</th>
-                </tr>
+                    <tr>
+                        <th data-field="reviewer">Reviewer</th>
+                        <th data-field="score">Score</th>
+                        <th data-field="comment">Comment</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr th:each="review : ${reviews}">
-                    <td title="fact-checker" th:data-checker-id="${review.checker}"/>
-                    <td th:text="${review.rating}"></td>
-                    <td>
-                        <span class="table-text" th:text="${review.comment}"/>
-                    </td>
-                </tr>
+                    <tr th:each="review : ${reviews}">
+                        <td title="fact-checker" th:data-checker-id="${review.checker}"/>
+                        <td th:text="${review.rating}"></td>
+                        <td>
+                            <span class="table-text" th:text="${review.comment}"/>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -30,6 +36,11 @@
                 if ($('#reviewsTable tr').length > 0) {
                     handleTableRender($('#reviewsTable'));
                 }
+
+                function reviewFormatter(index, row) {
+                    return '<div>' + row.comment + '</div>';
+                }
+
             </script>
         </div>
     </div>
