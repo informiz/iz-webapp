@@ -46,3 +46,6 @@ src/main/resources/test-crypto/*
 !src/main/resources/test-crypto/devCA.pem
 !src/main/resources/test-crypto/iz-app-dev.p12
 !src/main/resources/test-crypto/iz.truststore
+
+# TODO: remove this
+deploy/k8s/deployment.sh

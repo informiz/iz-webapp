@@ -31,25 +31,12 @@
                         <span class="table-text" th:text="${reference.comment}"/>
                     </td>
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
-                        <div th:id="'modal_' + ${reference.id}" class="modal fade" role="dialog">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Edit Reference</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div th:replace="fragments/edit-reference-form :: editRefForm(
+                        <div style="display:none;">
+                            <div id="${reference.id}" th:insert="fragments/edit-reference-form :: editRefForm(
                                                 @{{prefix}/{refId}(prefix=${refsUrl}, refId=${reference.id.toString()})})"></div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
+                        <div th:replace="fragments/modal :: customModal('modal_' + ${reference.id}, 'Edit Reference', ~{::__${reference.id}__})"></div>
                         <td>
                             <button type="button" th:id="'edit_' + ${reference.id}" data-toggle="modal"
                                     th:attr="data-target='#modal_' + ${reference.id}"
@@ -67,11 +54,11 @@
 
             <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
 
-                <div id="add_ref_modal" class="modal fade" role="dialog">
+                <div id="ref_modal" class="modal fade" role="dialog">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Add Reference</h5>
+                                <h5 class="modal-title">Reference</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -87,7 +74,7 @@
                 </div>
 
                 <div class="mt-2">
-                    <button type="button" th:id="add_ref" data-toggle="modal" data-target='#add_ref_modal'
+                    <button type="button" th:id="add_ref" data-toggle="modal" data-target='#ref_modal'
                             class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
                 </div>
 

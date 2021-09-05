@@ -121,8 +121,6 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
             jsonGenerator.writeStringField("authorizationRequestUri", authRequest.getAuthorizationRequestUri());
             String params = hashMapWithObjectsMapper.writeValueAsString(authRequest.getAdditionalParameters());
             jsonGenerator.writeStringField("additionalParameters", params);
-            String attrs = hashMapWithObjectsMapper.writeValueAsString(authRequest.getAttributes());
-            jsonGenerator.writeStringField("attributes", attrs);
             jsonGenerator.writeEndObject();
 
         }
@@ -144,7 +142,6 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
             }
 
             return builder
-                    .attributes(request.getAttributesMap())
                     .redirectUri(request.getRedirectUri())
                     .additionalParameters(request.getAdditionalParametersMap())
                     .authorizationRequestUri(request.getAuthorizationRequestUri())
