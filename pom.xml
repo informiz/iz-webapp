@@ -23,7 +23,7 @@
 		<java.version>1.8</java.version>
         <spring.version>5.1.19.RELEASE</spring.version> <!-- spring version compatible with the spring-boot version -->
         <spring.client.version>5.1.13.RELEASE</spring.client.version> <!-- spring version compatible with the spring-boot version -->
-        <jackson.version>2.10.5.1</jackson.version> <!-- non-vulnerable version compatible with spring -->
+        <jackson.version>2.10.5</jackson.version> <!-- non-vulnerable version compatible with spring -->
 		<junit.version>4.13.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
 		<thymeleaf.version>3.0.10.RELEASE</thymeleaf.version>
@@ -209,18 +209,6 @@
 			<version>${jmockit.version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
