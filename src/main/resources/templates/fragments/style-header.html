@@ -9,12 +9,17 @@
             <div class="col-sm-6"></div>
             <div class="col-sm-2 align-self-center">
                 <div class="float-right">
-                    <button th:if="${#authorization.expression('isAnonymous()')}" id="signinButton" class="btn btn-outline-success btn-sm">
-                        <a href="/oauth_login" style="text-decoration: none; color: inherit;" onclick="signIn();">Sign in</a>
-                    </button>
-                    <button th:unless="${#authorization.expression('isAnonymous()')}" id="signoutButton" class="btn btn-outline-success btn-sm">
-                        <a href="/logout" style="text-decoration: none; color: inherit;">Sign out</a>
-                    </button>
+                    <div sec:authorize="isFullyAuthenticated()">
+                        <button id="signoutButton" class="btn btn-outline-success btn-sm" onclick="signOut();">
+                            Sign Out
+                        </button>
+                    </div>
+                    <div sec:authorize="isAnonymous() or isRememberMe()">
+                        <button id="signinButton" class="btn btn-outline-success btn-sm">
+                            <a href="/oauth2/authorization/google"
+                               style="text-decoration: none; color: inherit;">Sign in</a>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,6 +45,10 @@
         </div>
         <script>
             $(document).ready(function () {
+                gapi.load('auth2', function() {
+                    gapi.auth2.init();
+                });
+
                 var url = window.location.pathname;
                 switch (url) {
                     case "/factchecker/":
@@ -59,6 +68,12 @@
                        break;
                  }
             });
+
+            function signOut() {
+                gapi.auth2.getAuthInstance().signOut().then(function () {
+                    gapi.auth2.getAuthInstance().disconnect();
+                });
+            }
         </script>
     </div>
 

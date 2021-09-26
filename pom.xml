@@ -5,9 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<!-- Spring and Thymeleaf versions must be compatible.
-		     E.g thymeleaf-extras-springsecurity5 3.0.x requires Spring 5.1.x and hence spring-boot 2.1.x-->
-		<version>2.1.18.RELEASE</version>
+		<version>2.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.informiz</groupId>
@@ -21,11 +19,13 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
-        <spring.version>5.1.19.RELEASE</spring.version> <!-- spring version compatible with the spring-boot version -->
-        <spring.client.version>5.1.13.RELEASE</spring.client.version> <!-- spring version compatible with the spring-boot version -->
-        <jackson.version>2.10.5</jackson.version> <!-- non-vulnerable version compatible with spring -->
+        <spring.version>5.3.9</spring.version> <!-- spring version compatible with the spring-boot version -->
+        <spring.security.version>5.5.2</spring.security.version>
+        <jackson.version>2.12.4</jackson.version> <!-- jackson version compatible with spring -->
 		<junit.version>4.13.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
+        <!-- Spring and Thymeleaf versions must be compatible.
+             E.g thymeleaf-extras-springsecurity5 3.0.x requires Spring 5.x -->
 		<thymeleaf.version>3.0.10.RELEASE</thymeleaf.version>
 		<thymeleaf.sec.version>3.0.4.RELEASE</thymeleaf.sec.version>
 	</properties>
@@ -97,7 +97,12 @@
             <version>${jackson.version}</version>
         </dependency>
 
-		<dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
@@ -109,12 +114,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-		<!-- TODO: check why spring security 5 dialect ("sec:authorize") doesn't work -->
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf-spring5</artifactId>
 			<version>${thymeleaf.version}</version>
 		</dependency>
+        <!-- TODO: Is it really necessary to use the thymeleaf dialect with spring security? -->
 		<dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity5</artifactId>
@@ -129,23 +134,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-client</artifactId>
-            <version>${spring.client.version}</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
-            <version>${spring.client.version}</version>
+            <version>${spring.security.version}</version>
         </dependency>
 
         <dependency>
@@ -166,7 +164,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.10.3</version>
+			<version>3.18.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -200,7 +198,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>${spring.client.version}</version>
+            <version>${spring.security.version}</version>
             <scope>test</scope>
         </dependency>
 		<dependency>

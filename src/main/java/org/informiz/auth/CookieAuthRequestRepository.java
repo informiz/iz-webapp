@@ -121,6 +121,8 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
             jsonGenerator.writeStringField("authorizationRequestUri", authRequest.getAuthorizationRequestUri());
             String params = hashMapWithObjectsMapper.writeValueAsString(authRequest.getAdditionalParameters());
             jsonGenerator.writeStringField("additionalParameters", params);
+            String attrs = hashMapWithObjectsMapper.writeValueAsString(authRequest.getAttributes());
+            jsonGenerator.writeStringField("attributes", attrs);
             jsonGenerator.writeEndObject();
 
         }
@@ -149,6 +151,7 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
                     .clientId(request.getClientId())
                     .scopes(request.getScopesSet())
                     .state(request.getState())
+                    .attributes(request.getAttributesMap())
                     .build();
         }
     }
@@ -210,9 +213,7 @@ public class CookieAuthRequestRepository implements AuthorizationRequestReposito
         public OAuth2AuthorizationResponseType getResponseTypeObject() {
             if (OAuth2AuthorizationResponseType.CODE.getValue().equals(authorizationGrantType))
                 return OAuth2AuthorizationResponseType.CODE;
-            else if (OAuth2AuthorizationResponseType.TOKEN.getValue().equals(authorizationGrantType))
-                return OAuth2AuthorizationResponseType.TOKEN;
-            throw new IllegalStateException(String.format("Authorization response type %s is neither CODE nor TOKEN",
+            throw new IllegalStateException(String.format("Authorization response type %s is not CODE",
                     authorizationGrantType));
         }
 
