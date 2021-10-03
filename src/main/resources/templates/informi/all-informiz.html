@@ -11,12 +11,14 @@
                 <thead>
                     <tr>
                         <th data-field="date" data-sortable="true">Updated</th>
+                        <th data-field="id" data-visible="false" data-sortable="false"></th>
                         <th data-field="informi" data-sortable="false">Informi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
                         <td style="display: none;" th:text="${informi.updatedTs}"/>
+                        <td th:text="${informi.entityId}"/>
                         <td>
                             <div class="lead mt-2">
                                 <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
@@ -74,10 +76,20 @@
         <script>
             handleTableRender($('#informizTable'));
 
+            const texts = new Map();
+
+            informizCallbacks.push(function() {
+                $.each(informiz, function(id, informi) {
+                    text = informi.name.toLowerCase() + ' ' + informi.description.toLowerCase();
+                    texts.set(informi.entityId, text);
+                });
+            });
+
+
             function customSearch(data, text) {
+                lower = text.toLowerCase();
                 return data.filter(function (row) {
-                    // TODO: is it worth it to parseHTML and search only title and description?
-                    return row.informi.indexOf(text) > -1;
+                    return texts.get(row.id).indexOf(lower) > -1;
                 })
             }
         </script>

@@ -20,7 +20,7 @@ public class CitationRestController {
     private CitationRepository citationRepo;
 
     @GetMapping(path = {"/", "/all"})
-    public List<CitationBase> getAllClaims() {
+    public List<CitationBase> getAllCitations() {
         return StreamSupport
                 .stream(citationRepo.findAll().spliterator(), false)
                 .collect(Collectors.toList());
