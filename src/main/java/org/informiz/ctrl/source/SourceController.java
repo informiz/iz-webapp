@@ -14,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = SourceController.PREFIX)
@@ -27,6 +29,10 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @GetMapping(path = {"/", "/all"})
     public String getAllSources(Model model) {
         model.addAttribute(SOURCES_ATTR, entityRepo.findAll());
+        ((ArrayList) entityRepo.findAll()).stream().forEach(src -> {
+            if (((SourceBase) src).getSrcType() == null)
+            ((SourceBase) src).setSrcType(SourceBase.SourceType.NEWS);
+        });
         return String.format("%s/all-src.html", PREFIX);
     }
 

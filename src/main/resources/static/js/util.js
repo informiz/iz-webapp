@@ -11,7 +11,7 @@ function tableHeaderHide(column) {
     }
 }
 
-const options = {year: 'numeric', month: 'long', day: 'numeric' };
+options = {year: 'numeric', month: 'long', day: 'numeric' };
 
 var locale = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
 
