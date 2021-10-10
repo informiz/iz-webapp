@@ -163,7 +163,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
             referenceEntity(current, reference, authentication);
         }
         // TODO: error handling in modal? Where will the error be visible?
-        prepareEditModel(model, current, new Review(), reference);
+        prepareEditModel(model, current, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
 

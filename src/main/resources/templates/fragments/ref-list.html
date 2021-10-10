@@ -32,18 +32,21 @@
                     </td>
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <div style="display:none;">
-                            <div id="${reference.id}" th:insert="fragments/edit-reference-form :: editRefForm(
+                            <div th:id="'ref_' + ${reference.id}">
+                                <div th:replace="fragments/edit-reference-form :: editRefForm(
                                                 @{{prefix}/{refId}(prefix=${refsUrl}, refId=${reference.id.toString()})})"></div>
 
+                            </div>
                         </div>
-                        <div th:replace="fragments/modal :: customModal('modal_' + ${reference.id}, 'Edit Reference', ~{::__${reference.id}__})"></div>
+                        <div th:replace="fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})"></div>
                         <td>
-                            <button type="button" th:id="'edit_' + ${reference.id}" data-toggle="modal"
-                                    th:attr="data-target='#modal_' + ${reference.id}"
+                            <button type="button" th:id="'edit_ref_' + ${reference.id}" data-toggle="modal"
+                                    th:attr="data-target='#modal_ref_' + ${reference.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                         </td>
                     </th:block>
-                    <!--td th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                    <!--td
+                    th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <a th:href="@{/source/delete/{id}(id=${source.id.toString()})}"
                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                     </td-->
