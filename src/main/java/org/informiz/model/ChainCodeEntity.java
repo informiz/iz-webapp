@@ -7,6 +7,8 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -71,21 +73,33 @@ public abstract class ChainCodeEntity extends InformizEntity {
     }
 
     public void addReview(Review review) {
-        reviews.add(review);
+        synchronized (reviews) {
+            reviews.add(review);
+        }
     }
 
     public void removeReview(Review review) {
-        reviews.remove(review);
+        synchronized (reviews) {
+            reviews.remove(review);
+        }
     }
 
     public Review getCheckerReview(String fcid) {
         // TODO: more efficient way?
-        Review byChecker = reviews.stream().filter(review ->
+        List<Review> snapshot = new ArrayList(reviews);
+        Review byChecker = snapshot.stream().filter(review ->
                 fcid.equals(review.getChecker())).findFirst().orElse(null);
         return byChecker;
     }
 
     public Score getScore() {
+        List<Review> snapshot = new ArrayList(reviews);
+        int numReviews = snapshot.size();
+        if (numReviews > 0) {
+            Double sumRatings = snapshot.stream().mapToDouble(review -> review.getRating()).sum();
+            score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, 0.15f * numReviews));
+        }
+
         return score;
     }
 

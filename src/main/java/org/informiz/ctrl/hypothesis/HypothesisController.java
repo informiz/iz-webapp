@@ -95,7 +95,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/review/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewHypothesis(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
@@ -112,7 +112,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/reference/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
@@ -122,7 +122,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/reference/{id}/{refId}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
@@ -132,7 +132,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/source/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
                             BindingResult result, Model model) {

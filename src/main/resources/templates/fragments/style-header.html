@@ -34,9 +34,11 @@
                     <div class="collapse navbar-collapse flex-grow-0" id="collapsibleNavbar">
                         <ul class="nav navbar-nav">
                             <li id="nav-checkers"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
-                            <li id="nav-sources"><a class="nav-link" href="/source/">Sources</a></li>
-                            <li id="nav-claims"><a class="nav-link" href="/hypothesis/">Claims</a></li>
-                            <li id="nav-citations"><a class="nav-link" href="/citation/">Citations</a></li>
+                            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">
+                                <li id="nav-sources"><a class="nav-link" href="/source/">Sources</a></li>
+                                <li id="nav-claims"><a class="nav-link" href="/hypothesis/">Claims</a></li>
+                                <li id="nav-citations"><a class="nav-link" href="/citation/">Citations</a></li>
+                            </th:block>
                             <li id="nav-informiz"><a class="nav-link" href="/informi/">Informiz</a></li>
                         </ul>
                     </div>

@@ -6,11 +6,13 @@
         <h1 class="mb-3">Informi Details</h1>
         <h2 id="title" class="mb-3" th:text="*{name}"/>
         <p><span id="description" class="text-muted" th:text="*{description}"></span></p>
-        <span class="text-muted">
-            <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
-            <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
+        <span class="text-muted" style="font-weight: bold;">
+            <span style="color: #14ABCF;">Reliability:</span> <span style="" th:text="@{ {value}, (value=*{score.reliability})}"/>
+            <span style="color: #14ABCF;">Confidence:</span> <span th:text="@{ {value}(value=*{score.confidence})}"/>
         </span>
-        <img id="media" class="img-fluid rounded mt-2" th:src="${informi.getMediaPath()}">
+        <div>
+            <img id="media" class="img-fluid rounded mt-2" th:src="${informi.getMediaPath()}">
+        </div>
 
         <div th:replace="fragments/ref-list :: referenceList(${informi.references}, '')"></div>
 

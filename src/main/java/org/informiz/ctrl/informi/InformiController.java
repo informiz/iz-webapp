@@ -125,7 +125,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/review/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewInformi(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
@@ -142,7 +142,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/reference/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
@@ -152,7 +152,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/reference/{id}/{refId}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,

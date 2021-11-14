@@ -8,7 +8,7 @@
                 <div class="form-group col-6">
                     <label th:for="entailment">Entailment</label>
                     <select id="entailment" name="entailment" class="form-control custom-select"
-                            th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                            th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                         <option value=""> -- </option>
                         <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
                                 th:value="${entailmentOpt}" th:text="${entailmentOpt.getDisplayValue()}"
@@ -31,7 +31,7 @@
                           th:text="${reference.comment}"></textarea>
                 <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
             </div>
-            <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
+            <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
                 <div class="col-4">
                     <input type="submit" class="btn btn-primary" value="Update"/>
                 </div>

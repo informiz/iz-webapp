@@ -22,7 +22,7 @@
                 </tbody>
             </table>
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(link)}">
+            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
                 <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
             </th:block>
             <script>

@@ -18,8 +18,8 @@
                         <th data-field="entailment">Entailment</th>
                         <th data-field="degree">Degree</th>
                         <th data-field="comment">Comment</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
-                        <!-- th th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
+                        <!-- th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
                     </tr>
                 </thead>
                 <tbody>
@@ -30,7 +30,7 @@
                     <td>
                         <span class="table-text" th:text="${reference.comment}"/>
                     </td>
-                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <div style="display:none;">
                             <div th:id="'ref_' + ${reference.id}">
                                 <div th:replace="fragments/edit-reference-form :: editRefForm(
@@ -46,7 +46,7 @@
                         </td>
                     </th:block>
                     <!--td
-                    th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                    th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <a th:href="@{/source/delete/{id}(id=${source.id.toString()})}"
                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                     </td-->
@@ -55,7 +55,7 @@
             </table>
 
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} and not ${#strings.isEmpty(refsUrl)}">
+            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
 
                 <div id="ref_modal" class="modal fade" role="dialog">
                     <div class="modal-dialog">

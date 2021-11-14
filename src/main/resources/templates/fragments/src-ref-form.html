@@ -10,7 +10,7 @@
                         <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
                         <label for="srcSelect" class="col-form-label">Source</label>
                         <input type="text" id="srcSelect" class="form-control" placeholder="Start typing to search..."
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}">
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                         <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
                     </div>
                 </div>
@@ -18,7 +18,7 @@
                     <div class="col">
                         <label for="link" class="col-form-label">Link</label>
                         <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.com/some/article"
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}" />
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
                         <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
                     </div>
                 </div>
@@ -26,11 +26,11 @@
                     <div class="col">
                         <label for="description" class="col-form-label">Description</label>
                         <textarea th:field="*{description}" class="form-control" id="description" cols="30" placeholder="Describe the source..."
-                                  th:disabled="${!#authorization.expression('hasRole(''ROLE_USER'')') or mode == 'read'}"/>
+                                  th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"/>
                         <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
                     </div>
                 </div>
-                <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')}" class="row mt-2">
+                <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
                     <div class="col">
                         <input type="submit" class="btn btn-primary" value="Update"/>
                     </div>

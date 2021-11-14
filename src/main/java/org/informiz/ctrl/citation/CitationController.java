@@ -100,7 +100,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/review/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewCitation(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
@@ -119,7 +119,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/source/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
                             BindingResult result, Model model) {

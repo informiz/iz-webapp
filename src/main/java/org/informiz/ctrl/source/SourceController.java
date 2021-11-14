@@ -102,7 +102,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/review/{id}")
-    @Secured("ROLE_USER")
+    @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewReference(@PathVariable("id") @Valid Long id,
                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
