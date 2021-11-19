@@ -7,10 +7,7 @@ import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -32,7 +29,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     private Locale locale = Locale.ENGLISH; // Default to English
 
     @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
-    protected Set<Review> reviews;
+    protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
     @AttributeOverrides({

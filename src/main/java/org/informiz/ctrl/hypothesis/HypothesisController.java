@@ -65,16 +65,21 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @GetMapping("/view/{id}")
     public String viewHypothesis(@PathVariable("id") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.findById(id)
-                .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
+                .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
+        if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
+
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
         return String.format("%s/view-hypothesis.html", PREFIX);
     }
 
+    // TODO: Remove references to deleted hypothesis
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getHypothesis(@PathVariable("id") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.findById(id)
-                .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
+                .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
+        if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
+
         prepareEditModel(model, hypothesis, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
