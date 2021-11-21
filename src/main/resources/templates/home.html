@@ -1,8 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/style-main-layout}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/style-main-layout}"
+      xmlns:th="http://www.thymeleaf.org">
 <div layout:fragment="content">
-    <div class="my-5">
-        <h4>Take a look at our <a href="/informi/">informiz</a></h4>
+
+    <div class="my-5" style="text-align: center;">
+        <h2>Informiz - The Collaborative Fact-Checking Platform</h2>
+        <p>Found an error in our content? Be the first one to let us know at
+            <a th:href="'mailto:contact@informiz.org'">contact@informiz.org</a> and get 20$ from us!</p>
+        <div class="my-4">
+            <iframe width="560" height="315" th:src="@{https://www.youtube.com/embed/vi0rdK4oSuE?origin=https://informiz.org}"
+                    frameborder="0" allowfullscreen="1">
+        </div>
     </div>
 </div>
 </html>
