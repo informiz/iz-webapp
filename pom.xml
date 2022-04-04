@@ -24,6 +24,7 @@
         <jackson.version>2.12.6.1</jackson.version> <!-- jackson version compatible with spring -->
 		<junit.version>4.13.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
+        <h2.version>2.1.210</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible.
              E.g thymeleaf-extras-springsecurity5 3.0.x requires Spring 5.x -->
 		<thymeleaf.version>3.0.10.RELEASE</thymeleaf.version>
@@ -43,7 +44,7 @@
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>
-					<version>2.1.210</version> <!-- TODO: test -->
+					<version>${h2.version}</version> <!-- TODO: test -->
 				</dependency>
 			</dependencies>
 		</profile>
@@ -69,7 +70,7 @@
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>
-					<version>1.4.200</version>
+					<version>${h2.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -211,7 +212,7 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
-            <version>1.4.200</version>
+            <version>${h2.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
