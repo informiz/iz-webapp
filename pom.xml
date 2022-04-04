@@ -21,7 +21,7 @@
 		<java.version>1.8</java.version>
         <spring.version>5.3.9</spring.version> <!-- spring version compatible with the spring-boot version -->
         <spring.security.version>5.5.2</spring.security.version>
-        <jackson.version>2.12.4</jackson.version> <!-- jackson version compatible with spring -->
+        <jackson.version>2.12.6.1</jackson.version> <!-- jackson version compatible with spring -->
 		<junit.version>4.13.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
         <!-- Spring and Thymeleaf versions must be compatible.
