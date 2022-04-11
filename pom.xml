@@ -27,7 +27,7 @@
         <h2.version>2.1.210</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible.
              E.g thymeleaf-extras-springsecurity5 3.0.x requires Spring 5.x -->
-		<thymeleaf.version>3.0.10.RELEASE</thymeleaf.version>
+		<thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
 		<thymeleaf.sec.version>3.0.4.RELEASE</thymeleaf.sec.version>
 	</properties>
 
