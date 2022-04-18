@@ -50,9 +50,11 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     private String name;
 
     @URL(message = "Please provide a valid link")
+    @NotBlank(message = "Link is mandatory")
     private String link;
 
     @Enumerated(EnumType.ORDINAL)
+    @NotBlank(message = "Type is mandatory")
     private SourceType srcType;
 
     private String description;

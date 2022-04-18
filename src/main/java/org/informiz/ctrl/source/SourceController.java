@@ -29,11 +29,6 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @GetMapping(path = {"/", "/all"})
     public String getAllSources(Model model) {
         model.addAttribute(SOURCES_ATTR, entityRepo.findAll());
-        // TODO: why source created w/o type? Fix in DB
-        ((ArrayList) entityRepo.findAll()).stream().forEach(src -> {
-            if (((SourceBase) src).getSrcType() == null)
-            ((SourceBase) src).setSrcType(SourceBase.SourceType.NEWS);
-        });
         return String.format("%s/all-src.html", PREFIX);
     }
 
