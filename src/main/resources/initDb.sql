@@ -31,22 +31,21 @@ DROP TABLE IF EXISTS citation;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE citation (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  entity_id varchar(255) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  entity_id varchar(255) UNIQUE NOT NULL,
   locale varchar(255) NOT NULL,
-  score_confidence float DEFAULT NULL,
-  reliability float DEFAULT NULL,
-  link varchar(255) DEFAULT NULL,
-  text varchar(500) DEFAULT NULL,
-  active tinyint(1) DEFAULT '1',
-  PRIMARY KEY (id),
-  UNIQUE KEY UK_sqeooisdxuidnruq78dc09nmn (entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  score_confidence float,
+  reliability float,
+  link varchar(255),
+  text varchar(500),
+  active TINYINT DEFAULT 1,
+  PRIMARY KEY (id)
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -261,23 +260,22 @@ DROP TABLE IF EXISTS fact_checker;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE fact_checker (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  entity_id varchar(255) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  entity_id varchar(255) UNIQUE NOT NULL,
   locale varchar(255) NOT NULL,
-  score_confidence float DEFAULT NULL,
-  reliability float DEFAULT NULL,
-  active tinyint(1) DEFAULT '1',
-  email varchar(255) DEFAULT NULL,
-  link varchar(255) DEFAULT NULL,
-  name varchar(255) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY UK_ntn431gv0smpudvexhyh8bb25 (entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  score_confidence float,
+  reliability float,
+  active TINYINT DEFAULT 1,
+  email varchar(255),
+  link varchar(255),
+  name varchar(255),
+  PRIMARY KEY (id)
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -298,7 +296,7 @@ INSERT INTO fact_checker VALUES (1,1599473756057,'anonymous','anonymous',NULL,15
 (10,1631975799,'anonymous','anonymous',NULL,1631975799,'FACT_CHECKER_demo-channel_kw7345v6l-8246-10','en',0.5,0.9,1,'jnyabor@gmail.com','https://www.linkedin.com/in/jnyabor/','Jonas'),
 (11,1631975799,'anonymous','anonymous',NULL,1631975799,'FACT_CHECKER_demo-channel_pksu4t5e8-9362-38','en',0.5,0.9,1,'etsey.atisu14@gmail.com','https://www.linkedin.com/in/etsey-atisu-3ba5b448','Etsey'),
 (12,1631975799,'anonymous','anonymous',NULL,1631975799,'FACT_CHECKER_demo-channel_re67ut487-0429-46','en',0.5,0.9,1,'jerry.mordy@gmail.com','https://www.linkedin.com/in/jerry-mordy-29831a17','Jerry'),
-(13,1631975799,'anonymous','anonymous',NULL,1631975799,'FACT_CHECKER_demo-channel_w7eu57we4-2406-34','en',0.5,0.9,1,'husseinalhassanhh@gmail.com','https://www.linkedin.com/','Hussein');
+(13,1631975799,'anonymous','anonymous',NULL,1631975799,'FACT_CHECKER_demo-channel_w7eu57we4-2406-34','en',0.5,0.9,1,'sharonwaszink@gmail.com','https://www.linkedin.com/','Sharon');
 /*!40000 ALTER TABLE fact_checker ENABLE KEYS */;
 
 
@@ -310,8 +308,8 @@ DROP TABLE IF EXISTS hibernate_sequence;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE hibernate_sequence (
-  next_val bigint(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  next_val BIGINT
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -332,21 +330,20 @@ DROP TABLE IF EXISTS hypothesis;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE hypothesis (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  entity_id varchar(255) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  entity_id varchar(255) UNIQUE NOT NULL,
   locale varchar(255) NOT NULL,
-  score_confidence float DEFAULT NULL,
-  reliability float DEFAULT NULL,
-  claim varchar(255) DEFAULT NULL,
-  active tinyint(1) DEFAULT '1',
-  PRIMARY KEY (id),
-  UNIQUE KEY UK_n6rw3p28ffcxupe464f35d40 (entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  score_confidence float,
+  reliability float,
+  claim varchar(255),
+  active TINYINT DEFAULT 1,
+  PRIMARY KEY (id)
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -451,23 +448,22 @@ DROP TABLE IF EXISTS informi;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE informi (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  entity_id varchar(255) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  entity_id varchar(255) UNIQUE NOT NULL,
   locale varchar(255) NOT NULL,
-  score_confidence float DEFAULT NULL,
-  reliability float DEFAULT NULL,
-  description varchar(1500) DEFAULT NULL,
-  media_path varchar(255) DEFAULT NULL,
-  name varchar(255) DEFAULT NULL,
-  active tinyint(1) DEFAULT '1',
-  PRIMARY KEY (id),
-  UNIQUE KEY UK_h74nd8kgxjui18a2huc2d94i (entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  score_confidence float,
+  reliability float,
+  description varchar(1500),
+  media_path varchar(255),
+  name varchar(255),
+  active TINYINT DEFAULT 1,
+  PRIMARY KEY (id)
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -532,14 +528,14 @@ DROP TABLE IF EXISTS informiz_entity;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE informiz_entity (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -559,19 +555,19 @@ DROP TABLE IF EXISTS reference;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE reference (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  citation_entity_id varchar(255) DEFAULT NULL,
-  comment varchar(255) DEFAULT NULL,
-  entailment int(11) NOT NULL,
-  reviewed_entity_id bigint(20) DEFAULT NULL,
-  degree float DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  citation_entity_id varchar(255),
+  comment varchar(255),
+  entailment INT NOT NULL,
+  reviewed_entity_id BIGINT,
+  degree float,
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -880,18 +876,18 @@ DROP TABLE IF EXISTS review;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE review (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  checker varchar(255) DEFAULT NULL,
-  comment varchar(255) DEFAULT NULL,
-  rating float DEFAULT NULL,
-  fk_entity_id bigint(20) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  checker varchar(255),
+  comment varchar(255),
+  rating float,
+  fk_entity_id BIGINT,
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -981,24 +977,23 @@ DROP TABLE IF EXISTS source;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE source (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  entity_id varchar(255) DEFAULT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  entity_id varchar(255) UNIQUE NOT NULL,
   locale varchar(255) NOT NULL,
-  score_confidence float DEFAULT NULL,
-  reliability float DEFAULT NULL,
-  link varchar(255) DEFAULT NULL,
-  name varchar(255) DEFAULT NULL,
-  src_type int(11) DEFAULT NULL,
-  active tinyint(1) DEFAULT '1',
-  description varchar(255) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY UK_ps5wm42vj6lg6h04fy2tknku5 (entity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  score_confidence float,
+  reliability float,
+  link varchar(255),
+  name varchar(255),
+  src_type INT,
+  active TINYINT DEFAULT 1,
+  description varchar(255),
+  PRIMARY KEY (id)
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1087,18 +1082,18 @@ DROP TABLE IF EXISTS source_ref;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE source_ref (
-  id bigint(20) NOT NULL,
-  created bigint(20) NOT NULL,
-  creator_entity_id varchar(255) DEFAULT NULL,
-  owner_entity_id varchar(255) DEFAULT NULL,
-  removed bigint(20) DEFAULT NULL,
-  last_updated bigint(20) NOT NULL,
-  description varchar(255) DEFAULT NULL,
-  link varchar(255) DEFAULT NULL,
-  src_entity_id varchar(255) DEFAULT NULL,
-  fk_sourced_entity_id bigint(20) NOT NULL,
+  id INT NOT NULL,
+  created BIGINT NOT NULL,
+  creator_entity_id varchar(255),
+  owner_entity_id varchar(255),
+  removed BIGINT,
+  last_updated BIGINT NOT NULL,
+  description varchar(255),
+  link varchar(255),
+  src_entity_id varchar(255),
+  fk_sourced_entity_id INT NOT NULL,
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
