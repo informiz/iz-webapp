@@ -39,7 +39,7 @@ deploy-test/
 ### Local dev config ###
 application-dev.properties
 application.properties*
-# initDb.sql
+initDb.sql
 
 ### Test crypto material ###
 src/main/resources/test-crypto/*
