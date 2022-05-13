@@ -23,7 +23,23 @@
             </table>
 
             <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
-                <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
+
+
+
+                <div style="display:none;">
+                    <div th:id="add_src_ref">
+                        <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
+                    </div>
+                </div>
+                <div th:replace="fragments/modal :: customModal('Add Source', 'add_src_ref')"></div>
+
+                <div class="mt-2">
+                    <button type="button" th:id="add_rev" data-toggle="modal"
+                            th:attr="data-target='#modal_add_src_ref'"
+                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                </div>
+
+
             </th:block>
             <script>
                     sourcesCallbacks.push(function() {
