@@ -1,7 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="sourceForm(actionPath)">
-    <h2 class="mt-5">Add Source</h2>
     <div class="row">
         <div class="col">
             <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">

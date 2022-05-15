@@ -9,6 +9,8 @@
                     <th>Source</th>
                     <th>Link</th>
                     <th>Description</th>
+                    <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">Edit</th>
+
                 </tr>
                 </thead>
                 <tbody>
@@ -18,6 +20,23 @@
                     <td>
                         <span class="table-text" th:text="${src.description}"/>
                     </td>
+                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+                        <div style="display:none;">
+                            <div th:id="'src_' + ${src.id}">
+                                <!-- div th:replace="fragments/edit-review-form :: editRevForm(
+                                            @{{prefix}/{refId}(prefix=${refsUrl}, refId=${review.id.toString()})})"></div -->
+                                <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
+
+                            </div>
+                        </div>
+                        <div th:replace="fragments/modal :: customModal('Edit Source Reference', 'src_' + ${src.id})"></div>
+                        <td>
+                            <button type="button" th:id="'edit_src_' + ${src.id}" data-toggle="modal"
+                                    th:attr="data-target='#modal_src_' + ${src.id}"
+                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                        </td>
+                    </th:block>
+
                 </tr>
                 </tbody>
             </table>

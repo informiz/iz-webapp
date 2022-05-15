@@ -15,6 +15,8 @@
                         <th data-field="reviewer">Reviewer</th>
                         <th data-field="score">Score</th>
                         <th data-field="comment">Comment</th>
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">Edit</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -24,6 +26,24 @@
                         <td>
                             <span class="table-text" th:text="${review.comment}"/>
                         </td>
+
+                        <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+                            <div style="display:none;">
+                                <div th:id="'rev_' + ${review.id}">
+                                    <!-- div th:replace="fragments/edit-review-form :: editRevForm(
+                                                @{{prefix}/{refId}(prefix=${refsUrl}, refId=${review.id.toString()})})"></div -->
+                                    <div th:replace="fragments/review :: reviewForm(${link})"></div>
+
+                                </div>
+                            </div>
+                            <div th:replace="fragments/modal :: customModal('Edit Review', 'rev_' + ${review.id})"></div>
+                            <td>
+                                <button type="button" th:id="'edit_rev_' + ${review.id}" data-toggle="modal"
+                                        th:attr="data-target='#modal_rev_' + ${review.id}"
+                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                            </td>
+                        </th:block>
+
                     </tr>
                 </tbody>
             </table>

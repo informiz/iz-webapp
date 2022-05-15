@@ -1,7 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
     <div th:fragment="reviewForm(actionPath)">
-        <h3 class="mt-5">Add Review</h3>
         <form action="#" th:action="@{${actionPath}}" th:object="${review}" method="post">
             <div class="row">
                 <div class="col-4">
