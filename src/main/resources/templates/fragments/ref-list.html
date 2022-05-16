@@ -33,7 +33,7 @@
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
                         <div style="display:none;">
                             <div th:id="'ref_' + ${reference.id}">
-                                <div th:replace="fragments/edit-reference-form :: editRefForm(
+                                <div th:replace="fragments/reference :: editRefForm(
                                                 @{{prefix}/{refId}(prefix=${refsUrl}, refId=${reference.id.toString()})})"></div>
 
                             </div>
@@ -58,7 +58,7 @@
             <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
                 <div style="display:none;">
                     <div th:id="add_ref_form">
-                        <div th:replace="fragments/reference-form :: referenceForm(${refsUrl})"></div>
+                        <div th:replace="fragments/reference :: referenceForm(${refsUrl})"></div>
                     </div>
                 </div>
                 <div th:replace="fragments/modal :: customModal('Add Reference', 'add_ref_form')"></div>
