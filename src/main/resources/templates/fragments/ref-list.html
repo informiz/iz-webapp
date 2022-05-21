@@ -19,7 +19,7 @@
                         <th data-field="degree">Degree</th>
                         <th data-field="comment">Comment</th>
                         <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
-                        <!-- th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th -->
+                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,6 +44,11 @@
                                     th:attr="data-target='#modal_ref_' + ${reference.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                         </td>
+                        <td>
+                            <a href="#"
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                        </td>
+
                     </th:block>
                     <!--td
                     th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">

@@ -10,6 +10,8 @@
                     <th>Link</th>
                     <th>Description</th>
                     <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">Edit</th>
+                    <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">Delete</th>
+
 
                 </tr>
                 </thead>
@@ -34,6 +36,10 @@
                             <button type="button" th:id="'edit_src_' + ${src.id}" data-toggle="modal"
                                     th:attr="data-target='#modal_src_' + ${src.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                        </td>
+                        <td>
+                            <a href="#"
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                         </td>
                     </th:block>
 
