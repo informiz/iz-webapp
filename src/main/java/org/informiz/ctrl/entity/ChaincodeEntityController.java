@@ -31,6 +31,16 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
         return entity;
     }
 
+    protected void deleteReview(T entity, Long revId, Authentication authentication) {
+        String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+
+        Review current = entity.getCheckerReview(checker);
+        if (current != null && current.getId().equals(revId)) {
+            entity.removeReview(current);
+        } // TODO: warn if no review or different id
+    }
+
+
     protected <S extends ChainCodeEntity & EntityWithReferences> void referenceEntity(S entity, Reference reference,
                                                                                       Authentication authentication) {
 

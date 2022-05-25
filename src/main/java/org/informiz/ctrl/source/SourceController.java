@@ -1,6 +1,8 @@
 package org.informiz.ctrl.source;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
+import org.informiz.model.InformiBase;
+import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
@@ -115,4 +117,17 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @org.springframework.transaction.annotation.Transactional
+    public String unReviewSours(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication, Model model) {
+
+        SourceBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Sours id"));
+
+        deleteReview(current, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+    }
 }

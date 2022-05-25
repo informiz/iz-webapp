@@ -45,7 +45,7 @@
                                         class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                             </td>
                             <td>
-                                <a href="#"
+                                <a th:href="@{${link}+'/del/'+${review.id.toString()}}"
                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                             </td>
                         </th:block>

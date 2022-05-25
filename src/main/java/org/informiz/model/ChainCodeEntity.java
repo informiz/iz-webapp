@@ -28,7 +28,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @NotNull(message = "Locale is mandatory")
     private Locale locale = Locale.ENGLISH; // Default to English
 
-    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL, orphanRemoval=true)
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -71,14 +71,16 @@ public abstract class ChainCodeEntity extends InformizEntity {
 
     public void addReview(Review review) {
         synchronized (reviews) {
-            reviews.add(review);
+            getReviews().add(review);
         }
+        getScore();
     }
 
     public void removeReview(Review review) {
         synchronized (reviews) {
-            reviews.remove(review);
+            getReviews().remove(review);
         }
+        getScore();
     }
 
     public Review getCheckerReview(String fcid) {
@@ -89,7 +91,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
         return byChecker;
     }
 
-    public Score getScore() {
+    public Score getScore() { // TODO: Don't save to DB, calc on the fly
         List<Review> snapshot = new ArrayList(reviews);
         int numReviews = snapshot.size();
         if (numReviews > 0) {

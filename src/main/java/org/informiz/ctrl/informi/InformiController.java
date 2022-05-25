@@ -141,6 +141,22 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/update-informi.html", PREFIX);
     }
 
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReviewInformi(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication, Model model) {
+
+        InformiBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
+
+        deleteReview(current, revId, authentication);
+        prepareEditModel(model, current, new Review(), new Reference());
+        return String.format("%s/update-informi.html", PREFIX);
+    }
+
+
     @PostMapping("/reference/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional

@@ -1,10 +1,7 @@
 package org.informiz.ctrl.hypothesis;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.HypothesisBase;
-import org.informiz.model.Reference;
-import org.informiz.model.Review;
-import org.informiz.model.SourceRef;
+import org.informiz.model.*;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -115,6 +112,23 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         prepareEditModel(model, current, review, new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
     }
+
+
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReviewHypothesis (@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication, Model model) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
+
+        deleteReview(current, revId, authentication);
+        prepareEditModel(model, current, new Review(), new Reference());
+        return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
 
     @PostMapping("/reference/{id}")
     @Secured("ROLE_CHECKER")

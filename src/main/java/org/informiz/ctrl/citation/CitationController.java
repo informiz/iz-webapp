@@ -1,9 +1,7 @@
 package org.informiz.ctrl.citation;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.CitationBase;
-import org.informiz.model.Review;
-import org.informiz.model.SourceRef;
+import org.informiz.model.*;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -117,6 +115,23 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
+
+
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReviewInformi(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication, Model model) {
+
+        CitationBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
+
+        deleteReview(current, revId, authentication);
+        model.addAttribute(CITATION_ATTR, current);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+    }
+
 
     @PostMapping("/source/{id}")
     @Secured("ROLE_CHECKER")
