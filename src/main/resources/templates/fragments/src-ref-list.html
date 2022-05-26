@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 
 <div th:fragment="sourceList(sources, link)">
     <h3 class="mt-5">Sources</h3>
@@ -9,8 +10,10 @@
                     <th>Source</th>
                     <th>Link</th>
                     <th>Description</th>
-                    <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">Edit</th>
-                    <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">Delete</th>
+                    <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </th:block>
 
 
                 </tr>
@@ -47,7 +50,7 @@
                 </tbody>
             </table>
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+                <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
 
 
 

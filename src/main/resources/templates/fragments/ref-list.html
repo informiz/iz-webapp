@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- TODO: reference-list overflows the container a bit on small screens. Fix this -->
 
@@ -18,8 +18,10 @@
                         <th data-field="entailment">Entailment</th>
                         <th data-field="degree">Degree</th>
                         <th data-field="comment">Comment</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Edit</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">Delete</th>
+                        <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </th:block>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,7 +32,7 @@
                     <td>
                         <span class="table-text" th:text="${reference.comment}"/>
                     </td>
-                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
+                    <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
                         <div style="display:none;">
                             <div th:id="'ref_' + ${reference.id}">
                                 <div th:replace="fragments/reference :: editRefForm(
@@ -45,6 +47,7 @@
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                         </td>
                         <td>
+<!--                            <a th:href="@{${refsUrl}+'/del/'+${reference.id.toString()}}"-->
                             <a href="#"
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                         </td>
@@ -60,7 +63,7 @@
             </table>
 
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(refsUrl)}">
+            <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
                 <div style="display:none;">
                     <div th:id="add_ref_form">
                         <div th:replace="fragments/reference :: referenceForm(${refsUrl})"></div>

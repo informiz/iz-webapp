@@ -1,4 +1,4 @@
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     <div th:fragment="reviewList(reviews, link)">
         <h3 class="mt-5">Reviews</h3>
@@ -15,8 +15,10 @@
                         <th data-field="reviewer">Reviewer</th>
                         <th data-field="score">Score</th>
                         <th data-field="comment">Comment</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">Edit</th>
-                        <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">Delete</th>
+                        <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </th:block>
 
                     </tr>
 
@@ -29,7 +31,7 @@
                             <span class="table-text" th:text="${review.comment}"/>
                         </td>
 
-                        <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+                        <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                             <div style="display:none;">
                                 <div th:id="'rev_' + ${review.id}">
                                     <!-- div th:replace="fragments/edit-review-form :: editRevForm(
@@ -54,7 +56,7 @@
                 </tbody>
             </table>
 
-            <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+            <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                 <div style="display:none;">
                     <div th:id="add_rev_form">
                         <div th:replace="fragments/review :: reviewForm(${link})"></div>
