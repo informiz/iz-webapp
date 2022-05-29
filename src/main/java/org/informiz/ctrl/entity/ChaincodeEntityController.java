@@ -3,6 +3,7 @@ package org.informiz.ctrl.entity;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.Reference;
+import org.informiz.model.ReferencedEntity;
 import org.informiz.model.Review;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,8 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
     }
 
 
-    protected <S extends ChainCodeEntity & EntityWithReferences> void referenceEntity(S entity, Reference reference,
-                                                                                      Authentication authentication) {
+    protected <S extends ReferencedEntity> void referenceEntity(S entity, Reference reference,
+                                                                Authentication authentication) {
 
         Set<Reference> references = entity.getReferences();
         String creator = AuthUtils.getUserEntityId(authentication.getAuthorities());

@@ -2,14 +2,13 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.validator.constraints.URL;
-import org.informiz.ctrl.entity.EntityWithReferences;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Set;
 
 /**
  * A data-type managed by the informi contract, representing a media file (e.g an infographics):
@@ -23,7 +22,7 @@ import java.util.Set;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="informi")
 @Entity
-public final class InformiBase extends ChainCodeEntity implements Serializable, EntityWithReferences {
+public final class InformiBase extends ReferencedEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
@@ -37,9 +36,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable, 
 
     @URL(message = "A valid link to a media file is mandatory")
     private String mediaPath;
-
-    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
-    protected Set<Reference> references;
 
     public String getName() {
         return name;
@@ -63,14 +59,6 @@ public final class InformiBase extends ChainCodeEntity implements Serializable, 
 
     public void setMediaPath(String link) {
         this.mediaPath = link;
-    }
-
-    public Set<Reference> getReferences() {
-        return references;
-    }
-
-    public void setReferences(Set<Reference> references) {
-        this.references = references;
     }
 
     public void edit(InformiBase other) {

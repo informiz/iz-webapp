@@ -195,4 +195,21 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(REVIEW_ATTR, review);
         model.addAttribute(REFERENCE_ATTR, ref);
     }
+
+    @GetMapping("/reference/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReferenceInformi(@PathVariable("id") @Valid Long id,
+                                     @PathVariable("refId") @Valid Long refId,
+                                     Authentication authentication) {
+
+        InformiBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
+
+        current.removeReference(refId);
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
 }
+

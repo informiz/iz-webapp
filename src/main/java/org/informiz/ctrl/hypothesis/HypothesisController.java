@@ -150,6 +150,23 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return handleReference(id, reference, result, authentication, model);
     }
 
+    @GetMapping("/reference/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReferenceHypothesis(@PathVariable("id") @Valid Long id,
+                                     @PathVariable("refId") @Valid Long refId,
+                                     Authentication authentication) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+
+        current.removeReference(refId);
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+
+
     @PostMapping("/source/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
