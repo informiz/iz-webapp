@@ -111,17 +111,14 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Secured("ROLE_MEMBER")
     public String updateInformi(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
-                                    BindingResult result, Model model) {
+                                    BindingResult result) {
         if (! result.hasErrors()) {
             InformiBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
-            model.addAttribute(INFORMI_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
-        prepareEditModel(model, informi, new Review(), new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     @PostMapping("/review/{id}")
@@ -129,16 +126,15 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String reviewInformi(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication, Model model) {
+                                   BindingResult result, Authentication authentication) {
 
         InformiBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
 
         if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
+            reviewEntity(current, review, authentication);
         }
-        prepareEditModel(model, current, review, new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     @GetMapping("/review/{id}/del/{revId}")
@@ -146,14 +142,13 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String unReviewInformi(@PathVariable("id") @Valid Long id,
                                   @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication, Model model) {
+                                  Authentication authentication) {
 
         InformiBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
 
         deleteReview(current, revId, authentication);
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
 
@@ -162,9 +157,9 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Authentication authentication, Model model) {
+                                BindingResult result, Authentication authentication) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return handleReference(id, reference, result, authentication);
     }
 
     @PostMapping("/reference/{id}/{refId}")
@@ -172,13 +167,13 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                               BindingResult result, Authentication authentication, Model model) {
+                               BindingResult result, Authentication authentication) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return handleReference(id, reference, result, authentication);
     }
 
     private String handleReference(Long id, Reference reference, BindingResult result,
-                                     Authentication authentication, Model model) {
+                                     Authentication authentication) {
 
         InformiBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
@@ -186,8 +181,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         if ( ! result.hasFieldErrors() ) {
             referenceEntity(current, reference, authentication);
         }
-        prepareEditModel(model, current, new Review(), reference);
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {

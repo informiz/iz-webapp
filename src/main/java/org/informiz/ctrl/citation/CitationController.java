@@ -39,17 +39,14 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
     public String addCitation(@Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
-                              BindingResult result, Model model) {
+                              BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-citation.html", PREFIX);
         }
+        entityRepo.save(citation);
 
-        CitationBase created = entityRepo.save(citation);
+        return String.format("redirect:%s/all", PREFIX);
 
-        model.addAttribute(CITATION_ATTR, created);
-        model.addAttribute(REVIEW_ATTR, new Review());
-        model.addAttribute(SOURCE_ATTR, new SourceRef());
-        return String.format("%s/update-citation.html", PREFIX);
     }
 
     @GetMapping("/delete/{id}")
@@ -86,15 +83,17 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public String updateCitation(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                     BindingResult result, Model model) {
-        if (! result.hasErrors()) {
-            CitationBase current = entityRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
-            current.edit(citation);
-            entityRepo.save(current);
-            model.addAttribute(CITATION_ATTR, current);
-            return String.format("redirect:%s/all", PREFIX);
+        if (result.hasErrors()) {
+            model.addAttribute(REVIEW_ATTR, new Review());
+            model.addAttribute(SOURCE_ATTR, new SourceRef());
+            return String.format("%s/update-citation.html", PREFIX);
         }
-        return String.format("%s/update-citation.html", PREFIX);
+
+        CitationBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+        current.edit(citation);
+        entityRepo.save(current);
+        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
     @PostMapping("/review/{id}")
@@ -102,17 +101,14 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Transactional
     public String reviewCitation(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication, Model model) {
+                                   BindingResult result, Authentication authentication) {
 
         CitationBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-            model.addAttribute(CITATION_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
         }
-
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
@@ -122,13 +118,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Transactional
     public String unReviewInformi(@PathVariable("id") @Valid Long id,
                                   @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication, Model model) {
+                                  Authentication authentication) {
 
         CitationBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
 
         deleteReview(current, revId, authentication);
-        model.addAttribute(CITATION_ATTR, current);
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
@@ -137,7 +132,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Secured("ROLE_CHECKER")
     @Transactional
     public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
-                            BindingResult result, Model model) {
+                            BindingResult result) {
 
         CitationBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
@@ -145,8 +140,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         try {
             SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
             current.addSource(toAdd);
-            model.addAttribute(CITATION_ATTR, current);
-            model.addAttribute(SOURCE_ATTR, new SourceRef());
+
         } catch (IllegalArgumentException e) {
             result.addError(new ObjectError("link",
                     "Please provide either a link, a source or both"));

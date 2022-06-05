@@ -93,7 +93,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
             current.edit(source);
             entityRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
-            return String.format("redirect:%s/all", PREFIX);
+            return String.format("redirect:%s/details/%s", PREFIX, current.getId());
         }
         return String.format("%s/update-src.html", PREFIX);
     }
@@ -101,17 +101,16 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/review/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String reviewReference(@PathVariable("id") @Valid Long id,
+    public String reviewSource(@PathVariable("id") @Valid Long id,
                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                  BindingResult result, Authentication authentication, Model model) {
+                                  BindingResult result, Authentication authentication) {
 
         SourceBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
 
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
-            model.addAttribute(SOURCE_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
+
         }
 
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
@@ -120,12 +119,12 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @GetMapping("/review/{id}/del/{revId}")
     @Secured("ROLE_CHECKER")
     @org.springframework.transaction.annotation.Transactional
-    public String unReviewSours(@PathVariable("id") @Valid Long id,
+    public String unReviewSource(@PathVariable("id") @Valid Long id,
                                   @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication, Model model) {
+                                  Authentication authentication) {
 
         SourceBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Sours id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Source id"));
 
         deleteReview(current, revId, authentication);
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());

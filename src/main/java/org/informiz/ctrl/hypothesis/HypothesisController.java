@@ -86,14 +86,18 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public String updateHypothesis(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            prepareEditModel(model, hypothesis, new Review(), new Reference());
+            return String.format("%s/update-hypothesis.html", PREFIX);
+        }
+
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
-        if (! result.hasErrors()) {
-            current.edit(hypothesis);
-            entityRepo.save(current);
-        }
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        current.edit(hypothesis);
+        entityRepo.save(current);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+
+
     }
 
     @PostMapping("/review/{id}")
@@ -101,7 +105,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @Transactional
     public String reviewHypothesis(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication, Model model) {
+                                   BindingResult result, Authentication authentication) {
 
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
@@ -109,8 +113,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         if ( ! result.hasFieldErrors("rating")) {
             current = reviewEntity(current, review, authentication);
         }
-        prepareEditModel(model, current, review, new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+
+
     }
 
 
@@ -119,14 +124,15 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @Transactional
     public String unReviewHypothesis (@PathVariable("id") @Valid Long id,
                                   @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication, Model model) {
+                                  Authentication authentication) {
 
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
 
         deleteReview(current, revId, authentication);
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+
+
     }
 
 
