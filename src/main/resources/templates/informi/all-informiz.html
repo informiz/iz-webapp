@@ -1,23 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
       xmlns:th="http://www.thymeleaf.org">
+
     <div layout:fragment="content" th:object="${informiz}">
         <h1 class="mt-5">Informiz</h1>
         <p class="mb-3">Graphical snippets of information, ranked for reliability</p>
+
+        <script>
+            texts = {};
+
+            informizCallbacks.push(function() {
+                $.each(informiz, function(i, informi) {
+                    text = informi.name.toLowerCase() + ' ' + informi.description.toLowerCase();
+                    texts[informi.entityId] = text;
+                });
+            });
+
+            function izCustomSearch(data, text) {
+                lower = text.toLowerCase();
+                return data.filter(function (row) {
+                    return texts[row.id].indexOf(lower) > -1;
+                })
+            }
+        </script>
+
         <div>
-            <table class="table table-borderless" id="informizTable" data-toggle="table" data-header-style="tableHeaderHide"
-                   data-sort-name="date" data-sort-order="desc" data-custom-search="customSearch"
-                   data-buttons-class="primary" data-pagination="true" data-search="true">
+            <table id="informiz-table" class="table table-striped table-bordered"
+                   data-toggle="table"
+                   data-detail-view-by-click="false"
+                   data-show-header="false"
+                   data-custom-search="izCustomSearch"
+                   data-pagination="true"
+                   data-sort-name="date"
+                   data-sort-order="desc"
+                   data-search="true">
                 <thead>
                     <tr>
-                        <th data-field="date" data-sortable="true">Updated</th>
-                        <th data-field="id" data-visible="false" data-sortable="false"></th>
-                        <th data-field="informi" data-sortable="false">Informi</th>
+                        <th data-field="date" data-class='hidden-column' data-sortable="true" data-searchable="false"></th>
+                        <th data-field="id" data-class='hidden-column' data-sortable="false" data-searchable="false"></th>
+                        <th data-field="informi" data-sortable="false" data-searchable="true"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
-                        <td style="display: none;" th:text="${informi.updatedTs}"/>
+                        <td th:text="${informi.updatedTs}"/>
                         <td th:text="${informi.entityId}"/>
                         <td>
                             <div class="lead mt-2">
@@ -28,7 +54,7 @@
                                 <div class="col">
                                     <span class="info-box mr-2 info-text">
                                         <i class="fas fa-history mr-1"></i>
-                                        <small><strong title="timestamp" th:text="${informi.updatedTs}"></strong></small>
+                                        <small><strong title="timestamp" th:attr="data-iz-ts=${informi.updatedTs}"></strong></small>
                                     </span>
                                     <span class="info-box info-text">
                                         <i class="fas fa-user mr-1"></i>
@@ -54,15 +80,15 @@
                                     <div>
                                         <span class="table-text table-text-long" th:text="${informi.description}"/>
                                     </div>
-                                    <div class="mt-3 buttons-container">
+                                    <div class="mt-3 d-flex align-items-end justify-content-end">
                                         <th:block th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                             <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary mr-2 fas fa-pencil-alt"/>
+                                               class="btn btn-outline-primary me-1 fas fa-pencil-alt"/>
                                             <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary mr-2 waves-effect fas fa-times"/>
+                                               class="btn btn-outline-primary me-1 waves-effect fas fa-times"/>
                                         </th:block>
                                         <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
-                                           class="btn btn-primary btn-sm mr-2">Read more...</a>
+                                           class="btn btn-primary btn-sm">Read more...</a>
                                     </div>
                                 </div>
                             </div>
@@ -72,26 +98,20 @@
             </table>
         </div>
         <p th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
-           class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a></p>
+           class="my-5"><a href="/informi/upload" class="btn btn-primary">Add</a>
+        </p>
+
         <script>
-            handleTableRender($('#informizTable'));
-
-            texts = new Map();
-
-            informizCallbacks.push(function() {
-                $.each(informiz, function(id, informi) {
-                    text = informi.name.toLowerCase() + ' ' + informi.description.toLowerCase();
-                    texts.set(informi.entityId, text);
-                });
+            $('#informiz-table').on('post-body.bs.table', function (e, data) {
+                timestampsToStrings($('[title="timestamp"]', this));
+                checkersToLinks($('[title="fact-checker"]', this));
             });
 
-
-            function customSearch(data, text) {
-                lower = text.toLowerCase();
-                return data.filter(function (row) {
-                    return texts.get(row.id).indexOf(lower) > -1;
-                })
-            }
+            checkersCallbacks.push(function() {});
+            loadCompleteCallbacks.push(function() {
+                $('#informiz-table').trigger('post-body.bs.table')
+            });
         </script>
+
     </div>
 </html>

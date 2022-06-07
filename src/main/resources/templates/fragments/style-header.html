@@ -1,52 +1,48 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<div th:fragment="header">
-    <div>
-        <div class="row my-5">
-            <div class="col-sm-4">
-                <img class="img-fluid" th:src="@{/logo-sm.jpg}" alt="">
-            </div>
-            <div class="col-sm-6"></div>
-            <div class="col-sm-2 align-self-center">
-                <div class="float-right">
-                    <div sec:authorize="isFullyAuthenticated()">
-                        <button id="signoutButton" class="btn btn-outline-success btn-sm" onclick="signOut();">
-                            Sign Out
-                        </button>
-                    </div>
-                    <div sec:authorize="isAnonymous() or isRememberMe()">
-                        <button id="signinButton" class="btn btn-outline-success btn-sm">
-                            <a href="/oauth2/authorization/google"
-                               style="text-decoration: none; color: inherit;">Sign in</a>
-                        </button>
-                    </div>
-                </div>
-            </div>
+<div class="mw-100" th:fragment="header">
+    <div class="row my-5">
+        <div class="col">
+            <img class="img-fluid float-left" th:src="@{/logo-sm.jpg}" alt="">
         </div>
-        <div class="row">
-            <div class="col">
-                <nav class="navbar navbar-expand-lg navbar-dark bg-success font-weight-bold">
+        <div class="col d-flex align-items-end justify-content-end">
+            <button sec:authorize="isFullyAuthenticated()" id="signoutButton" class="btn btn-outline-success btn-sm" onclick="signOut();">
+                Sign Out
+            </button>
+            <button sec:authorize="isAnonymous() or isRememberMe()" id="signinButton" class="btn btn-outline-success btn-sm">
+                <a href="/oauth2/authorization/google"
+                   style="text-decoration: none; color: inherit;">Sign in</a>
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #28A745;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Informiz</a>
 
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar"
+                            aria-controls="collapsibleNavbar" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="collapse navbar-collapse flex-grow-0" id="collapsibleNavbar">
-                        <ul class="nav navbar-nav">
-                            <li id="nav-home"><a class="nav-link" href="/">Home</a></li>
-                            <li id="nav-checkers"><a class="nav-link" href="/factchecker/">Fact Checkers</a></li>
+                    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item" id="nav-home"><a class="nav-link fw-bold" href="/">Home</a></li>
+                            <li class="nav-item" id="nav-checkers"><a class="nav-link fw-bold" href="/factchecker/">Fact Checkers</a></li>
                             <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">
-                                <li id="nav-sources"><a class="nav-link" href="/source/">Sources</a></li>
-                                <li id="nav-claims"><a class="nav-link" href="/hypothesis/">Claims</a></li>
-                                <li id="nav-citations"><a class="nav-link" href="/citation/">Citations</a></li>
+                                <li class="nav-item" id="nav-sources"><a class="nav-link fw-bold" href="/source/">Sources</a></li>
+                                <li class="nav-item" id="nav-claims"><a class="nav-link fw-bold" href="/hypothesis/">Claims</a></li>
+                                <li class="nav-item" id="nav-citations"><a class="nav-link fw-bold" href="/citation/">Citations</a></li>
                             </th:block>
-                            <li id="nav-informiz"><a class="nav-link" href="/informi/">Informiz</a></li>
+                            <li class="nav-item" id="nav-informiz"><a class="nav-link fw-bold" href="/informi/">Informiz</a></li>
                         </ul>
                     </div>
-                </nav>
-            </div>
+                </div>
+            </nav>
         </div>
-        <script>
+    </div>
+    <script>
             $(document).ready(function () {
                 gapi.load('auth2', function() {
                     gapi.auth2.init();
@@ -78,7 +74,6 @@
                 });
             }
         </script>
-    </div>
 
 </div>
 

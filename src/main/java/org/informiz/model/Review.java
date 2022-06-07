@@ -34,6 +34,8 @@ public class Review extends InformizEntity implements Serializable {
     @Column
     private String comment;
 
+    public static Review create() { return new Review(); }
+
     public Review() {}
 
     public Review(String fcid, ChainCodeEntity reviewed, Float rating, String comment) {

@@ -1,7 +1,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <div th:fragment="reviewForm(actionPath)">
-        <form action="#" th:action="@{${actionPath}}" th:object="${review}" method="post">
+    <div th:fragment="reviewForm(action_path)">
+        <form th:action="${action_path}" th:object="${review}" method="post">
             <div class="row">
                 <div class="col-4">
                     <label for="rating" class="col-form-label">Reliability</label>
