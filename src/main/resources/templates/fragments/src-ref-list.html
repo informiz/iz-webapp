@@ -15,7 +15,6 @@
                         <th>Delete</th>
                     </th:block>
 
-
                 </tr>
                 </thead>
                 <tbody>
@@ -40,7 +39,7 @@
                                     th:attr="data-bs-target='#modal_src_' + ${src.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                         </td>
-                        <td>
+                        <td> <!-- TODO: Implement delete  -->
                             <a href="#"
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
                         </td>
@@ -50,10 +49,7 @@
                 </tbody>
             </table>
 
-                <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-
-
-
+            <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                 <div style="display:none;">
                     <div th:id="add_src_ref">
                         <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>

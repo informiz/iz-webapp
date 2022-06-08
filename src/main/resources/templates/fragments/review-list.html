@@ -29,7 +29,6 @@
                         <td>
                             <span class="table-text" th:text="${review.comment}"/>
                         </td>
-
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                             <div style="display:none;">
                                 <div th:id="'rev_' + ${review.id}">
