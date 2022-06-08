@@ -1,4 +1,3 @@
-
 function processEntities(callbacks, endpoint, map) {
 
     if (callbacks.length > 0) {
@@ -42,11 +41,15 @@ $(document).ready(function() {
     p4 = processCitations();
     p5 = processInformiz();
 
-    if (loadCompleteCallbacks.length > 0) {
-        $.when( p1, p2, p3, p4, p5 ).done(function ( res1, res2, res3, res4, res5 ) {
-            $.each(loadCompleteCallbacks, function(i, func) {
-                func.apply();
-            });
+    deferred = $.when( p1, p2, p3, p4, p5 ).done(function ( res1, res2, res3, res4, res5 ) {
+        $.each(loadCompleteCallbacks, function(i, func) {
+            func.apply();
+        });
+    });
+
+    if (autoSearchCallbacks.length > 0) {
+        $.when(deferred).done(function (res) {
+            $.each(autoSearchCallbacks, function(i, func) { func.apply(); })
         });
     }
 });

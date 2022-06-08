@@ -1,7 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="sourceForm(actionPath)">
-    <h2 class="mt-5">Add Source</h2>
     <div class="row">
         <div class="col">
             <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
@@ -9,7 +8,7 @@
                     <div class="form-group col">
                         <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
                         <label for="srcSelect" class="col-form-label">Source</label>
-                        <input type="text" id="srcSelect" class="form-control" placeholder="Start typing to search..."
+                        <input type="text" id="srcSelect" class="form-control src-auto-select" placeholder="Start typing to search..."
                                th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                         <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
                     </div>
@@ -40,21 +39,25 @@
 
                 var sources_info = []
 
-                sourcesCallbacks.push(function() {
+                autoSearchCallbacks.push(function() {
                     $.each(sources, function(id, source) {
                         sources_info.push( { id: source.entityId, value: source.name } );
                     });
+
+                    $('.src-auto-select').autocomplete({
+                        source: sources_info,
+                    });
+
+                    $( ".src-auto-select" ).on( "autocompleteselect", function( event, ui ) {
+                        src_id = ui.item.id;
+                        src = sources[src_id];
+                        $( "input[name='srcEntityId']", "#modal_add_src_ref" ).val(src_id);
+                        $( "input[name='link']", "#modal_add_src_ref" ).val(src.link);
+                        $( "textarea[name='description']", "#modal_add_src_ref" ).val(src.description);
+                    });
+
                 });
 
-                loadCompleteCallbacks.push(function() {
-                    $('#srcSelect').autocomplete({
-                        source: sources_info,
-                        select: function(event, ui) {
-                            $(this).val(ui.item.value);
-                            $("input[name='srcEntityId']").val(ui.item.id);
-                        }
-                    });
-                });
 
             </script>
         </div>

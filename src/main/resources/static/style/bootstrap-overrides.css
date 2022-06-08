@@ -26,10 +26,6 @@ strong > a:visited {
     color: #999;
 }
 
-.bg-gradient {
-    background-image: linear-gradient(#e6e7e8, white);">
-}
-
 .info-box {
     background: #ecebeb;
     margin-right: 5px;
@@ -42,12 +38,6 @@ strong > a:visited {
     text-align: center;
     color: #999;
 }
-
-.buttons-container {
-    float:right;
-    text-align: right;
-}
-
 
 /* TODO: is there a better way to make text truncate after a few lines? */
 .table-text {
@@ -64,6 +54,12 @@ strong > a:visited {
 
 .table-text-long {
     -webkit-line-clamp: 8;
+}
+
+
+.hidden-column {
+    display: none;
+    visibility: hidden;
 }
 
 /* TODO: is there a better way to make certain columns wide enough on small screens? */

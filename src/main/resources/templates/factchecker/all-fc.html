@@ -5,37 +5,42 @@
     <div layout:fragment="content" th:object="${checkers}">
         <h1 class="mt-5">Fact Checkers</h1>
         <p class="mb-3">Member fact-checkers in this channel</p>
-        <table id="checkersTable" data-toggle="table" data-header-style="tableHeaderStyle"
-               data-sort-name="name" data-sort-order="desc"
-               data-buttons-class="primary" data-pagination="true" data-search="true">
+        <table id="checkers-table" class="table table-bordered table-striped"
+               data-toggle="table"
+               data-header-style="tableHeaderStyle"
+               data-sort-name="name"
+               data-sort-order="desc"
+               data-pagination="true"
+               data-search="true">
             <thead>
-            <tr>
-                <th data-field="name" data-sortable="true">Name</th>
-                <th data-field="score" data-sortable="true">Score</th>
-                <th data-field="profile">Profile</th>
-                <th th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">Delete</th>
-            </tr>
+                <tr>
+                    <th data-field="name" data-sortable="true" data-searchable="true">Name</th>
+                    <th data-field="score" data-sortable="true" data-searchable="false">Score</th>
+                    <th data-field="profile" data-sortable="false" data-searchable="false">Profile</th>
+                    <th th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                        data-sortable="false" data-searchable="false">Delete</th>
+                </tr>
             </thead>
             <tbody>
-            <tr th:each="checker : ${checkers}">
-                <td>
-                    <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
-                       th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}"
-                       th:text="${checker.name}"/>
-                    <a th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
-                       th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}"
-                       th:text="${checker.name}"/>
-                </td>
-                <td th:text="${checker.score.reliability}"></td>
-                <td>
-                    <a th:href="${checker.link}" target="_blank"
-                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-check ml-2"/>
-                </td>
-                <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-                    <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}"
-                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-times ml-2"/>
-                </td>
-            </tr>
+                <tr th:each="checker : ${checkers}">
+                    <td>
+                        <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                           th:href="@{/factchecker/details/{id}(id=${checker.id.toString()})}"
+                           th:text="${checker.name}"/>
+                        <a th:unless="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                           th:href="@{/factchecker/view/{id}(id=${checker.id.toString()})}"
+                           th:text="${checker.name}"/>
+                    </td>
+                    <td th:text="${checker.score.reliability}"></td>
+                    <td>
+                        <a th:href="${checker.link}" target="_blank"
+                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-check ml-2"/>
+                    </td>
+                    <td th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                        <a th:href="@{/factchecker/delete/{id}(id=${checker.id.toString()})}"
+                           class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-user-times ml-2"/>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <p th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" class="my-3">
