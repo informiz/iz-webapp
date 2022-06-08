@@ -104,16 +104,8 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     public String reviewSource(@PathVariable("id") @Valid Long id,
                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                   BindingResult result, Authentication authentication) {
-
-        SourceBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-
-        }
-
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     @GetMapping("/review/{id}/del/{revId}")

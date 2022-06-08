@@ -127,13 +127,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public String reviewInformi(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication) {
-
-        InformiBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            reviewEntity(current, review, authentication);
-        }
+        reviewEntity(id, review, authentication, result);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 

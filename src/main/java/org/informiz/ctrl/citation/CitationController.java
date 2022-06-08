@@ -102,14 +102,8 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public String reviewCitation(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication) {
-
-        CitationBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-        }
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
 

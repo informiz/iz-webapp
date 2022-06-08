@@ -107,15 +107,8 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication) {
 
-        HypothesisBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-        }
+        reviewEntity(id, review, authentication, result);
         return String.format("redirect:%s/details/%s", PREFIX, id);
-
-
     }
 
 

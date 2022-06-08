@@ -8,6 +8,7 @@ import org.informiz.model.Review;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.BindingResult;
 
 import java.util.Set;
 
@@ -19,15 +20,20 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
     protected ChaincodeEntityRepo<T> entityRepo;
     // TODO: chaincode DAO
 
-    protected T reviewEntity(T entity, Review review, Authentication authentication) {
-        String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+    protected T reviewEntity(Long id, Review review, Authentication authentication, BindingResult result) {
+        T entity = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
 
-        Review current = entity.getCheckerReview(checker);
-        if (current != null) {
-            current.setRating(review.getRating());
-            current.setComment(review.getComment());
-        } else {
-            entity.addReview(new Review(checker, entity, review.getRating(), review.getComment()));
+        if (! result.hasFieldErrors("rating")) {
+            String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+
+            Review current = entity.getCheckerReview(checker);
+            if (current != null) {
+                current.setRating(review.getRating());
+                current.setComment(review.getComment());
+            } else {
+                entity.addReview(new Review(checker, entity, review.getRating(), review.getComment()));
+            }
         }
         return entity;
     }
