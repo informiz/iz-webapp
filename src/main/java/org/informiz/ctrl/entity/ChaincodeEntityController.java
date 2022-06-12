@@ -38,8 +38,13 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
         return entity;
     }
 
-    protected void deleteReview(T entity, Long revId, Authentication authentication) {
+    protected void deleteReview(long id, Long revId, Authentication authentication) {
+        T entity = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
+
         String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+
+
 
         Review current = entity.getCheckerReview(checker);
         if (current != null && current.getId().equals(revId)) {

@@ -115,10 +115,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
                                   @PathVariable("revId") @Valid Long revId,
                                   Authentication authentication) {
 
-        SourceBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Source id"));
-
-        deleteReview(current, revId, authentication);
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        deleteReview(id, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX,  id);
     }
 }

@@ -138,10 +138,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                                   @PathVariable("revId") @Valid Long revId,
                                   Authentication authentication) {
 
-        InformiBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
-
-        deleteReview(current, revId, authentication);
+        deleteReview(id, revId, authentication);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 

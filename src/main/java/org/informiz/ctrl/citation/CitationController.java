@@ -114,11 +114,8 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                                   @PathVariable("revId") @Valid Long revId,
                                   Authentication authentication) {
 
-        CitationBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
-
-        deleteReview(current, revId, authentication);
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        deleteReview(id, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX,  id);
     }
 
 

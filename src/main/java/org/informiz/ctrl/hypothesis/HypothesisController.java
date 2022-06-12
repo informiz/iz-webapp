@@ -119,10 +119,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                                   @PathVariable("revId") @Valid Long revId,
                                   Authentication authentication) {
 
-        HypothesisBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
-
-        deleteReview(current, revId, authentication);
+        deleteReview(id, revId, authentication);
         return String.format("redirect:%s/details/%s", PREFIX, id);
 
 
