@@ -5,7 +5,7 @@
             <div class="form-group col">
                 <label for="name" class="col-form-label">Title</label>
                 <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="The meaning of life"
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                       th:disabled="${ ! @sUtils.isOwner(#authentication.getPrincipal(), informi) or mode == 'read'}"/>
                 <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
             </div>
         </div>
@@ -14,7 +14,7 @@
                 <label for="description" class="col-form-label">Description</label>
                 <textarea rows="5" th:field="*{description}" class="form-control" id="description"
                        placeholder="The answer to the ultimate question of life, the universe, and everything"
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                       th:disabled="${ ! @sUtils.isOwner(#authentication.getPrincipal(), informi) or mode == 'read'}"/>
                 <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
             </div>
         </div>

@@ -2,6 +2,7 @@ package org.informiz.conf;
 
 import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.informiz.auth.*;
+import org.informiz.model.ChainCodeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
@@ -121,5 +123,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 CookieUtils.setCookie(response, CACHE_REQUEST_COOKIE_NAME, 0, "");
             }
         };
+    }
+
+    public static class SecUtils {
+
+        public static boolean isOwner(DefaultOAuth2User principal, ChainCodeEntity entity) {
+            return entity.getOwnerId() == principal.getAttributes().get("eid");
+        }
+    }
+
+    @Bean(name = "sUtils")
+    public SecUtils sUtilsBean() {
+        return new SecUtils();
     }
 }

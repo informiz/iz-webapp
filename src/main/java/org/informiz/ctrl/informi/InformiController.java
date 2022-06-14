@@ -6,6 +6,7 @@ import org.informiz.model.InformiBase;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +110,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
+    @PreAuthorize("#informi.getOwnerId() == principal.getAttributes().get('eid')")
     public String updateInformi(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result) {
