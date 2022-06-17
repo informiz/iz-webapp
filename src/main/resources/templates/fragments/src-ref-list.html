@@ -19,17 +19,17 @@
                 </thead>
                 <tbody>
                 <tr th:each="src : ${sources}">
-                    <td th:data-entity-id="${src.srcEntityId}"/>
-                    <td th:data-link="${src.link}"/>
+                    <td th:data-entity-id="${src.srcEntityId}"></td>
+                    <td th:data-link="${src.link}"></td>
                     <td>
-                        <span class="table-text" th:text="${src.description}"/>
+                        <span class="table-text" th:text="${src.description}"></span>
                     </td>
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
-                        <div style="display:none;">
+                        <div class="d-none">
                             <div th:id="'src_' + ${src.id}">
                                 <!-- div th:replace="fragments/edit-review-form :: editRevForm(
                                             @{{prefix}/{refId}(prefix=${refsUrl}, refId=${review.id.toString()})})"></div -->
-                                <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
+                                <div th:replace="fragments/src-ref-form :: editSourceForm(${link}, ${src})"></div>
 
                             </div>
                         </div>
@@ -37,11 +37,11 @@
                         <td>
                             <button type="button" th:id="'edit_src_' + ${src.id}" data-bs-toggle="modal"
                                     th:attr="data-bs-target='#modal_src_' + ${src.id}"
-                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td> <!-- TODO: Implement delete  -->
                             <a href="#"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
                         </td>
                     </th:block>
 
@@ -50,9 +50,11 @@
             </table>
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                <div style="display:none;">
+                <div class="d-none">
                     <div th:id="add_src_ref">
-                        <div th:replace="fragments/src-ref-form :: sourceForm(${link})"></div>
+                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
+                             TODO: Any creation statement actually assigns null to the variable) -->
+                        <div th:replace="fragments/src-ref-form :: addSourceForm(${link}, ${source})"></div>
                     </div>
                 </div>
                 <div th:replace="fragments/modal :: customModal('Add Source', 'add_src_ref')"></div>
@@ -60,7 +62,7 @@
                 <div class="mt-2">
                     <button type="button" th:id="add_rev" data-bs-toggle="modal"
                             th:attr="data-bs-target='#modal_add_src_ref'"
-                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
 
 

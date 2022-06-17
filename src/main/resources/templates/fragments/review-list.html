@@ -24,26 +24,26 @@
                 </thead>
                 <tbody>
                     <tr th:each="review : ${reviews}">
-                        <td th:text="${review.checker}"/>
+                        <td th:text="${review.checker}"></td>
                         <td th:text="${review.rating}"></td>
                         <td>
-                            <span class="table-text" th:text="${review.comment}"/>
+                            <span class="table-text" th:text="${review.comment}"></span>
                         </td>
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                            <div style="display:none;">
+                            <div class="d-none">
                                 <div th:id="'rev_' + ${review.id}">
-                                    <div th:replace="fragments/review :: reviewForm(${link})"></div>
+                                    <div th:replace="fragments/review :: reviewForm(${link}, ${review})"></div>
                                 </div>
                             </div>
                             <div th:replace="fragments/modal :: customModal('Edit Review', 'rev_' + ${review.id})"></div>
                             <td>
                                 <button type="button" th:id="'edit_rev_' + ${review.id}" data-bs-toggle="modal"
                                         th:attr="data-bs-target='#modal_rev_' + ${review.id}"
-                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                             </td>
                             <td>
                                 <a th:href="@{${link}+'/del/'+${review.id.toString()}}"
-                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
                             </td>
                         </th:block>
 
@@ -52,10 +52,11 @@
             </table>
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                <div style="display:none;">
+                <div class="d-none">
                     <div th:id="add_rev_form">
-                        <div th:with="review=${T(org.informiz.model.Review).create()}"
-                             th:replace="fragments/review :: reviewForm(${link})"></div>
+                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
+                             TODO: (a 'th:with="review=${new org.informiz.model.Review()}"' statement actually assigns null to the 'review' variable) -->
+                        <div th:replace="fragments/review :: reviewForm(${link}, ${review})"></div>
                     </div>
                 </div>
                 <div
@@ -65,7 +66,7 @@
                 <div class="mt-2">
                     <button type="button" th:id="add_rev" data-bs-toggle="modal"
                             th:attr="data-bs-target='#modal_add_rev_form'"
-                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
 
             </th:block>

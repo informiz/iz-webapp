@@ -1,10 +1,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="refProps">
+<div th:fragment="refProps(reference)">
+    <!-- TODO:   Thymeleaf 3.0.15 issue with binding form-objects during list-iteration: only works if there's a
+         TODO:   "reference" object in the model (even though it's not the one getting bound to the form).
+         TODO:   'th:field' syntax doesn't populate the inputs  -->
     <div class="form-row">
         <div class="form-group col-6">
-            <label th:for="entailment">Entailment</label>
-            <select name="entailment" th:value="${reference.entailment}" class="form-control"
+            <label th:for="'entailment' + ${reference.id}">Entailment</label>
+            <select name="entailment" th:value="${reference.entailment}" class="form-control" th:id="'entailment' + ${reference.id}"
                     th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                 <option value=""> -- </option>
                 <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
@@ -14,8 +17,8 @@
             <span th:if="${#fields.hasErrors('entailment')}" th:errors="*{entailment}" class="text-danger"></span>
         </div>
         <div class="form-group col-6">
-            <label th:for="degree">Degree</label>
-            <input type="number" name="degree" th:value="${reference.degree}"
+            <label th:for="'degree' + ${reference.id}">Degree</label>
+            <input type="number" name="degree" th:value="${reference.degree}" th:id="'degree' + ${reference.id}"
                    min="0" max="1" step="0.01" class="form-control"
                    th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
             <span th:if="${#fields.hasErrors('degree')}" th:errors="*{degree}" class="text-danger"></span>
@@ -23,20 +26,20 @@
         </div>
     </div>
     <div>
-        <label th:for="comment" class="col-form-label">Comment</label>
-        <textarea name="comment" th:value="${reference.comment}" class="form-control" cols="20"
+        <label th:for="'comment' + ${reference.id}" class="col-form-label">Comment</label>
+        <textarea name="comment" class="form-control" cols="20" th:id="'comment' + ${reference.id}"
                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                   th:text="${reference.comment}"></textarea>
         <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
     </div>
 </div>
 
-<div th:fragment="editRefForm(action_path)">
+<div th:fragment="editRefForm(action_path, reference)">
     <form th:action="${action_path}" th:object="${reference}" method="post">
         <!-- The id of the claim or citation being referenced (not necessarily local) -->
         <input type="hidden" name="referencedId" th:value="${reference.referencedId}"/>
 
-        <div th:replace="fragments/reference :: refProps"/>
+        <div th:replace="fragments/reference :: refProps(${reference})"></div>
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
             <div class="col-4">
@@ -46,20 +49,20 @@
     </form>
 </div>
 
-<div th:fragment="referenceForm(action_path)">
+<div th:fragment="referenceForm(action_path, reference)">
     <form action="#" th:action="${action_path}" th:object="${reference}"  method="post"
            th:data-path="${action_path}">
         <div class="row">
             <div class="form-group col">
                 <input name="reference-select" class="form-control refAutoSelect"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
-                        placeholder="Start typing to search..." ></input>
-                <input type="text" class="invisible" name="referencedId" readonly/>
+                        placeholder="Start typing to search..." />
+                <input type="text" class="d-none" name="referencedId" readonly/>
                 <span th:if="${#fields.hasErrors('referencedId')}" th:errors="*{referencedId}" class="text-danger"></span>
             </div>
         </div>
 
-        <div th:replace="fragments/reference :: refProps"/>
+        <div th:replace="fragments/reference :: refProps(${reference})"></div>
 
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">

@@ -43,12 +43,12 @@
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
-                        <td th:text="${informi.updatedTs}"/>
-                        <td th:text="${informi.entityId}"/>
+                        <td th:text="${informi.updatedTs}"></td>
+                        <td th:text="${informi.entityId}"></td>
                         <td>
                             <div class="lead mt-2">
                                 <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
-                                   th:text="${informi.name}"/>
+                                   th:text="${informi.name}"></a>
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
@@ -78,14 +78,14 @@
                                 </div>
                                 <div class="col-md mt-2">
                                     <div>
-                                        <span class="table-text table-text-long" th:text="${informi.description}"/>
+                                        <span class="table-text table-text-long" th:text="${informi.description}"></span>
                                     </div>
                                     <div class="mt-3 d-flex align-items-end justify-content-end">
                                         <th:block th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
                                             <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary me-1 fas fa-pencil-alt"/>
+                                               class="btn btn-outline-primary me-1 fas fa-pencil-alt"></a>
                                             <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary me-1 waves-effect fas fa-times"/>
+                                               class="btn btn-outline-primary me-1 waves-effect fas fa-times"></a>
                                         </th:block>
                                         <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
                                            class="btn btn-primary btn-sm">Read more...</a>

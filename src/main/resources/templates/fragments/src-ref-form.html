@@ -1,39 +1,60 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="sourceForm(actionPath)">
+
+<div th:fragment="srcRefProps(source)">
+    <div class="row">
+        <div class="col">
+            <label th:for="'link' + ${source.id}" class="col-form-label">Link</label>
+            <input type="url" name="link" th:value="${source.link}" class="form-control" th:id="'link' + ${source.id}"
+                   placeholder="https://www.nasa.com/some/article"
+                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
+            <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label th:for="'description' + ${source.id}" class="col-form-label">Description</label>
+            <textarea name="description" th:value="${source.description}" class="form-control" th:id="'description' + ${source.id}"
+                      cols="30" placeholder="Describe the source..."
+                      th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"></textarea>
+            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+        </div>
+    </div>
+    <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
+        <div class="col">
+            <input type="submit" class="btn btn-primary" value="Submit"/>
+        </div>
+    </div>
+</div>
+
+
+<div th:fragment="editSourceForm(actionPath, source)">
+    <div class="row">
+        <div class="col">
+            <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
+                <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
+                <div th:replace="fragments/src-ref-form :: srcRefProps(${source})"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div th:fragment="addSourceForm(actionPath, source)">
     <div class="row">
         <div class="col">
             <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
                 <div class="row">
                     <div class="form-group col">
-                        <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
-                        <label for="srcSelect" class="col-form-label">Source</label>
-                        <input type="text" id="srcSelect" class="form-control src-auto-select" placeholder="Start typing to search..."
+                        <input type="text" class="d-none" name="srcEntityId" readonly/>
+                        <label th:for="'srcSelect' + ${source.id}" class="col-form-label">Source</label>
+                        <input type="text" th:id="'srcSelect' + ${source.id}" class="form-control src-auto-select" placeholder="Start typing to search..."
                                th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                         <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="link" class="col-form-label">Link</label>
-                        <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.com/some/article"
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
-                        <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="description" class="col-form-label">Description</label>
-                        <textarea th:field="*{description}" class="form-control" id="description" cols="30" placeholder="Describe the source..."
-                                  th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"/>
-                        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
-                    </div>
-                </div>
-                <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
-                    <div class="col">
-                        <input type="submit" class="btn btn-primary" value="Update"/>
-                    </div>
-                </div>
+                <div th:replace="fragments/src-ref-form :: srcRefProps(${source})"></div>
             </form>
             <script>
 

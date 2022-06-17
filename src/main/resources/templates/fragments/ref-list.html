@@ -27,25 +27,25 @@
                 <tr th:each="reference : ${references}">
                     <td th:text="${reference.referencedId}"></td>
                     <td th:text="${reference.entailment.displayValue}"></td>
-                    <td th:text="${reference.degree}"/>
+                    <td th:text="${reference.degree}"></td>
                     <td>
-                        <span class="table-text" th:text="${reference.comment}"/>
+                        <span class="table-text" th:text="${reference.comment}"></span>
                     </td>
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
-                        <div th:with="action_url = ${refsUrl} + '/' + ${reference.id.toString()}" style="display:none;">
+                        <div th:with="action_url = ${refsUrl} + '/' + ${reference.id.toString()}" class="d-none">
                             <div th:id="'ref_' + ${reference.id}">
-                                <div th:replace="fragments/reference :: editRefForm(${action_url})"></div>
+                                <div th:replace="fragments/reference :: editRefForm(${action_url}, ${reference})"></div>
                             </div>
                         </div>
                         <div th:replace="fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})"></div>
                         <td>
                             <button type="button" th:id="'edit_ref_' + ${reference.id}" data-bs-toggle="modal"
                                     th:attr="data-bs-target='#modal_ref_' + ${reference.id}"
-                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                                    class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td>
                             <a th:href="@{${refsUrl}+'/del/'+${reference.id.toString()}}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
+                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
                         </td>
 
                     </th:block>
@@ -55,10 +55,11 @@
 
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
-                <div style="display:none;">
+                <div class="d-none">
                     <div th:id="add_ref_form">
-                        <div th:with="reference=${T(org.informiz.model.Reference).create()}"
-                             th:replace="fragments/reference :: referenceForm(${refsUrl})"></div>
+                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
+                             TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
+                        <div th:replace="fragments/reference :: referenceForm(${refsUrl}, ${reference})"></div>
                     </div>
                 </div>
                 <div th:replace="fragments/modal :: customModal('Add Reference', 'add_ref_form')"></div>
@@ -66,7 +67,7 @@
                 <div class="mt-2">
                     <button type="button" th:id="add_ref" data-bs-toggle="modal"
                             th:attr="data-bs-target='#modal_add_ref_form'"
-                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"/>
+                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
 
             </th:block>
