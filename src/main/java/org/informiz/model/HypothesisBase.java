@@ -8,6 +8,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -20,7 +22,7 @@ public final class HypothesisBase extends ReferencedEntity implements Serializab
     @NotBlank(message = "Claim is mandatory")
     private String claim;
 
-    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)
     protected Set<SourceRef> sources;
 
     public String getClaim() {
@@ -39,8 +41,14 @@ public final class HypothesisBase extends ReferencedEntity implements Serializab
         this.sources = sources;
     }
 
-    public boolean removeSource(SourceRef src) {
-        return sources.remove(src);
+    public boolean removeSource(Long srcRefId) {
+        List<SourceRef> snapshot = new ArrayList(sources);
+        SourceRef ref = snapshot.stream().filter(reference ->
+                srcRefId.equals(reference.getId())).findFirst().orElse(null);
+
+        if (ref != null)
+            return sources.remove(ref);
+        return false;
     }
 
     public boolean addSource(SourceRef src) {
