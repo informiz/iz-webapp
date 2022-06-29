@@ -4,7 +4,6 @@
         <meta charset="utf-8"/>
         <meta http-equiv="x-ua-compatible" content="ie=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <meta name="google-signin-client_id" th:content="${@googleOAuthService.getClientId()}">
 
         <!-- TODO: hacky, improve this -->
         <meta th:if="${informi != null}" property="og:title" th:content="${informi.name}"/>
@@ -44,8 +43,7 @@
         <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
                 integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
 
-        <!-- TODO: migrate to google-identity https://developers.google.com/identity/gsi/web/guides/migration -->
-        <script src="https://apis.google.com/js/platform.js"></script>
+        <script src="https://accounts.google.com/gsi/client"></script>
 
         <script>
             var checkers = {};

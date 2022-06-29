@@ -5,14 +5,28 @@
         <div class="col">
             <img class="img-fluid float-left" th:src="@{/logo-sm.jpg}" alt="">
         </div>
-        <div class="col d-flex align-items-end justify-content-end">
-            <button sec:authorize="isFullyAuthenticated()" id="signoutButton" class="btn btn-outline-success btn-sm" onclick="signOut();">
-                Sign Out
-            </button>
-            <button sec:authorize="isAnonymous() or isRememberMe()" id="signinButton" class="btn btn-outline-success btn-sm">
-                <a href="/oauth2/authorization/google"
-                   style="text-decoration: none; color: inherit;">Sign in</a>
-            </button>
+
+
+        <div id="sign_in_div" class="col d-flex align-items-center justify-content-end">
+            <div id="g_id_onload"
+                 th:data-client_id="${@googleOAuthService.getClientId()}"
+                 th:data-nonce="${#strings.randomAlphanumeric(10)}"
+                 data-callback="usrSignIn"
+                 data-auto_prompt="false">
+            </div>
+            <!--
+                 // TODO: need var per environment
+                 data-state_cookie_domain="informiz.org"
+            -->
+            <div class="g_id_signin"
+                 data-theme="filled_blue">
+            </div>
+            <div class="d-none">
+                <form id="login-form" th:action="@{/oauth/login}" action="#" method="post">
+                    <input name="credential" type="text" value="">
+                    <input type="submit" value="Login">
+                </form>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -44,9 +58,6 @@
     </div>
     <script>
             $(document).ready(function () {
-                gapi.load('auth2', function() {
-                    gapi.auth2.init();
-                });
 
                 var url = window.location.pathname;
                 switch (url) {
@@ -65,14 +76,18 @@
                     case "/informi/":
                        $("#nav-informiz").toggleClass("active");
                        break;
-                 }
+                }
             });
 
-            function signOut() {
-                gapi.auth2.getAuthInstance().signOut().then(function () {
-                    gapi.auth2.getAuthInstance().disconnect();
-                });
+            function usrSignIn(cred_response) {
+                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling
+                $( "input[name='credential']", "#login-form" ).val(cred_response.credential);
+                $( "#login-form" ).submit();
             }
+
+//            function signOut() {
+//                TODO: finish this
+//            }
         </script>
 
 </div>

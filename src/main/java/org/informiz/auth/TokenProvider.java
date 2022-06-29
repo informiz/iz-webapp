@@ -50,8 +50,12 @@ public class TokenProvider {
         return instance;
     }
 
+    public void verifyGoogleIdToken(String credential) {
+
+    }
+
     public String createToken(@NotNull Authentication authentication) {
-        OAuth2User user = (OAuth2User) authentication.getPrincipal();
+        DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + TOKEN_MAX_AGE);
@@ -59,9 +63,7 @@ public class TokenProvider {
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));
 
-        String entityId = authentication.getAuthorities().stream()
-                .filter(authority -> InformizGrantedAuthority.class.isInstance(authority))
-                .findFirst().map(auth -> ((InformizGrantedAuthority)auth).getEntityId()).orElse(null);
+        String entityId = user.getAttribute("eid");
 
         return JWT.create()
                 // TODO: what to use as subject? How to verify?
@@ -85,6 +87,14 @@ public class TokenProvider {
 
     public DecodedJWT validateToken(String token) {
         return getVerifier().verify(token);
+    }
+
+    public OAuth2AuthenticationToken anonymousAuth() {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("eid", "");
+        attributes.put("name", "viewer");
+        OAuth2User user = new DefaultOAuth2User(AuthUtils.anonymousAuthorities(), attributes, "name");
+        return new OAuth2AuthenticationToken(user, AuthUtils.anonymousAuthorities(), clientId);
     }
 
     public OAuth2AuthenticationToken authFromToken(String token) {

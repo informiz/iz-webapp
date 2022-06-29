@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class AccessController {
 
-    @RequestMapping(value = {"/", "/home", "/home.html", "/logout"})
+    @RequestMapping(value = {"/", "/home", "/home.html"})
     public String index() {
         return "home.html";
     }

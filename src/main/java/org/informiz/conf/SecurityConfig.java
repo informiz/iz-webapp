@@ -1,7 +1,7 @@
 package org.informiz.conf;
 
 import nz.net.ultraq.thymeleaf.LayoutDialect;
-import org.informiz.auth.*;
+import org.informiz.auth.TokenSecurityContextRepository;
 import org.informiz.model.ChainCodeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,19 +14,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import static org.informiz.auth.CookieRequestCache.CACHE_REQUEST_COOKIE_NAME;
-import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
 
@@ -38,22 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     String googleAuthClientId;
 
     @Autowired
-    InformizLoginSuccessHandler loginSuccessHandler;
-
-    @Autowired
-    CookieAuthRequestRepository authRequestRepo;
-
-    @Autowired
-    CookieRequestCache requestCache;
-
-    @Autowired
     TokenSecurityContextRepository securityContextRepo;
-
-    @Autowired
-    InformizAuthMapper userAuthoritiesMapper;
-
-    @Autowired
-    InformizOAuth2RequestRedirectFilter cachedRequestFilter;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -64,31 +39,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .securityContext().securityContextRepository(securityContextRepo)
                 .and()
                 .requiresChannel().anyRequest().requiresSecure()
+                //.and() // TODO: anonymous config doesn't seem to be working..? Setting default-auth in securityContextRepo instead
+                //.anonymous().principal("viewer").authorities(AuthUtils.anonymousAuthorities())
                 .and()
-                .anonymous().authorities(AuthUtils.anonymousAuthorities())
-                .and()
-                .csrf()
-                .csrfTokenRepository(new CookieCsrfTokenRepository())
+                .csrf().csrfTokenRepository(new CookieCsrfTokenRepository())
                 .and()
                 .authorizeRequests()
+                .antMatchers("/oauth/login").permitAll()
+                .antMatchers("/oauth/logout").permitAll()
+                .antMatchers("/js/**").permitAll()
+                .antMatchers("/style/**").permitAll()
                 .antMatchers(HttpMethod.GET).hasRole("VIEWER")
                 .antMatchers(HttpMethod.HEAD).hasRole("VIEWER")
                 .antMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
                 .antMatchers(HttpMethod.TRACE).hasRole("VIEWER")
                 .anyRequest().authenticated()
-                .and()
-                .logout()
-                .deleteCookies(JWT_COOKIE_NAME)
-                .and()
-                .addFilterBefore(cachedRequestFilter, OAuth2AuthorizationRequestRedirectFilter.class)
-                .requestCache().requestCache(requestCache)
-                .and()
-                .oauth2Login()
-                .successHandler(loginSuccessHandler)
-                .failureHandler(loginFailureHandler())
-                .authorizationEndpoint().authorizationRequestRepository(authRequestRepo)
-                .and()
-                .userInfoEndpoint().userAuthoritiesMapper(userAuthoritiesMapper)
         ;
     }
 
@@ -114,17 +79,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return roleHierarchy;
     }
 
-    @Bean
-    AuthenticationFailureHandler loginFailureHandler() {
-        return new AuthenticationFailureHandler() {
-            @Override
-            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-                CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
-                CookieUtils.setCookie(response, CACHE_REQUEST_COOKIE_NAME, 0, "");
-            }
-        };
-    }
-
     public static class SecUtils {
 
         public static boolean isOwner(DefaultOAuth2User principal, ChainCodeEntity entity) {
@@ -136,4 +90,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public SecUtils sUtilsBean() {
         return new SecUtils();
     }
+
 }

@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
 
 /**
- * A cookie-based context security repository
+ * A cookie-based security context repository
  */
 @Component
 public class TokenSecurityContextRepository implements SecurityContextRepository {
@@ -36,21 +36,23 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
             try {
                  context.setAuthentication(tokenProvider.authFromToken(cookie.getValue()));
             } catch (JWTVerificationException ex) {
-                // A new cookie will be set once the user re-authenticates
+                context.setAuthentication(tokenProvider.anonymousAuth());
             }
+        } else {
+            context.setAuthentication(tokenProvider.anonymousAuth());
         }
         return context;
     }
 
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-        // Login success-handler sets the cookie
+        // Login endpoint sets the cookie
     }
 
     @Override
     public boolean containsContext(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, JWT_COOKIE_NAME);
-        return cookie != null; // TODO: any issues if the token is invalid?
+        return cookie != null; // TODO: any issues if the token is invalid/expired?
     }
 
 }
