@@ -25,12 +25,9 @@
                         <span class="table-text" th:text="${src.description}"></span>
                     </td>
                     <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
-                        <div class="d-none">
+                        <div th:with="action_url = ${link} + '/' + ${src.id.toString()}" class="d-none">
                             <div th:id="'src_' + ${src.id}">
-                                <!-- div th:replace="fragments/edit-review-form :: editRevForm(
-                                            @{{prefix}/{refId}(prefix=${refsUrl}, refId=${review.id.toString()})})"></div -->
-                                <div th:replace="fragments/src-ref-form :: editSourceForm(${link}, ${src})"></div>
-
+                                <div th:replace="fragments/src-ref-form :: editSourceForm(${action_url}, ${src})"></div>
                             </div>
                         </div>
                         <div th:replace="fragments/modal :: customModal('Edit Source Reference', 'src_' + ${src.id})"></div>
@@ -40,7 +37,7 @@
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td> <!-- TODO: Implement delete  -->
-                            <a href="#"
+                            <a th:href="${link} + '/del/' + ${src.id}"
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
                         </td>
                     </th:block>

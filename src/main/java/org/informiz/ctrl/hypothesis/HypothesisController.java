@@ -136,16 +136,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return handleReference(id, reference, result, authentication, model);
     }
 
-    @PostMapping("/reference/{id}/{refId}")
-    @Secured("ROLE_CHECKER")
-    @Transactional
-    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
-                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Authentication authentication, Model model) {
-
-        return handleReference(id, reference, result, authentication, model);
-    }
-
     @GetMapping("/reference/{id}/del/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
@@ -159,6 +149,16 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         current.removeReference(refId);
 
         return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+    @PostMapping("/reference/{id}/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
+                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                BindingResult result, Authentication authentication, Model model) {
+
+        return handleReference(id, reference, result, authentication, model);
     }
 
 
@@ -197,6 +197,31 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         // TODO: error handling in modal? Where will the error be visible?
         prepareEditModel(model, current, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
+    @PostMapping("/source/{id}/{srcId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String editSrcRef(@PathVariable("id") @Valid Long id,
+                             @PathVariable("srcId") @Valid Long srcId,
+                             Authentication authentication) {
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+
+    @GetMapping("/source/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String removeSrcRef(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("refId") @Valid Long refId,
+                                  Authentication authentication) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+
+        current.removeSource(refId);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
