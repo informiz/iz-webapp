@@ -12,17 +12,20 @@ import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
+import static org.informiz.auth.CookieUtils.GOOGLE_STATE_COOKIE_NAME;
 import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
 import static org.informiz.auth.TokenProvider.TOKEN_MAX_AGE;
 
@@ -48,7 +51,7 @@ public class AccessRestController {
 
     @PostMapping(path = LOGIN_PATH, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}) //
     public void login(@RequestHeader("referer") Optional<String> referer,
-                        HttpServletResponse response, Authentication test,
+                        HttpServletResponse response,
                         String credential) throws IOException {
         try {
             GoogleIdToken.Payload idToken = getIdToken(credential);
@@ -87,9 +90,10 @@ public class AccessRestController {
         return idToken;
     }
 
-    @GetMapping(path = LOGOUT_PATH)
+    @PostMapping(path = LOGOUT_PATH)
     public void logout(HttpServletResponse response, @RequestHeader("referer") Optional<String> referer) throws IOException {
         CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
+        CookieUtils.setCookie(response, GOOGLE_STATE_COOKIE_NAME, 0, "");
         response.sendRedirect(referer.orElse("/"));
     }
 

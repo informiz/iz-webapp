@@ -36,10 +36,10 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
             try {
                  context.setAuthentication(tokenProvider.authFromToken(cookie.getValue()));
             } catch (JWTVerificationException ex) {
-                context.setAuthentication(tokenProvider.anonymousAuth());
+                // anonymous
             }
         } else {
-            context.setAuthentication(tokenProvider.anonymousAuth());
+            // anonymous
         }
         return context;
     }

@@ -3,7 +3,7 @@
 <div class="mw-100" th:fragment="header">
     <div class="row my-5">
         <div class="col">
-            <img class="img-fluid float-left" th:src="@{/logo-sm.jpg}" alt="">
+            <img class="img-fluid float-left" th:src="@{/style/logo-sm.jpg}" alt="">
         </div>
 
 
@@ -14,16 +14,23 @@
                  data-callback="usrSignIn"
                  data-auto_prompt="false">
             </div>
-            <!--
-                 // TODO: need var per environment
-                 data-state_cookie_domain="informiz.org"
-            -->
-            <div class="g_id_signin"
-                 data-theme="filled_blue">
+            <div class="border border-primary rounded d-flex align-items-center">
+                <div class="g_id_signin"
+                     th:data-type="${#authorization.expression('isAuthenticated()') ? 'icon' : 'standard'}"
+                     th:data-theme="${#authorization.expression('isAuthenticated()') ? 'outline' : 'filled_blue'}">
+                </div>
+                <div>
+                    <a sec:authorize="isAuthenticated()" class="small p-2" href="javascript:usrSignOut()">Sign Out</a>
+                </div>
             </div>
             <div class="d-none">
                 <form id="login-form" th:action="@{/oauth/login}" action="#" method="post">
                     <input name="credential" type="text" value="">
+                    <input type="submit" value="Login">
+                </form>
+            </div>
+            <div class="d-none">
+                <form id="logout-form" th:action="@{/oauth/logout}" action="#" method="post">
                     <input type="submit" value="Login">
                 </form>
             </div>
@@ -80,14 +87,15 @@
             });
 
             function usrSignIn(cred_response) {
-                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling
+                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
                 $( "input[name='credential']", "#login-form" ).val(cred_response.credential);
                 $( "#login-form" ).submit();
             }
 
-//            function signOut() {
-//                TODO: finish this
-//            }
+            function usrSignOut() {
+                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
+                $( "#logout-form" ).submit();
+            }
         </script>
 
 </div>

@@ -1,6 +1,7 @@
 package org.informiz.conf;
 
 import nz.net.ultraq.thymeleaf.LayoutDialect;
+import org.informiz.auth.AuthUtils;
 import org.informiz.auth.TokenSecurityContextRepository;
 import org.informiz.model.ChainCodeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
 
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
@@ -30,6 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     TokenSecurityContextRepository securityContextRepo;
 
+    @Autowired
+    CookieCsrfTokenRepository csrfTokenRepository;
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
 
@@ -39,16 +49,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .securityContext().securityContextRepository(securityContextRepo)
                 .and()
                 .requiresChannel().anyRequest().requiresSecure()
-                //.and() // TODO: anonymous config doesn't seem to be working..? Setting default-auth in securityContextRepo instead
-                //.anonymous().principal("viewer").authorities(AuthUtils.anonymousAuthorities())
                 .and()
-                .csrf().csrfTokenRepository(new CookieCsrfTokenRepository())
+                .anonymous().principal("viewer").authorities(AuthUtils.anonymousAuthorities())
+                .and()
+                .csrf()
+                .csrfTokenRepository(csrfTokenRepository)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/oauth/login").permitAll()
-                .antMatchers("/oauth/logout").permitAll()
-                .antMatchers("/js/**").permitAll()
-                .antMatchers("/style/**").permitAll()
+                .antMatchers("/oauth/login", "/oauth/logout").permitAll()
                 .antMatchers(HttpMethod.GET).hasRole("VIEWER")
                 .antMatchers(HttpMethod.HEAD).hasRole("VIEWER")
                 .antMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
@@ -70,6 +78,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public interface ClientIdService {
         String getClientId();
     }
+
+    @Bean
+    public CookieCsrfTokenRepository csrfTokenRepo() {
+        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
+        // repo.setCookieDomain(cookieDomain); // TODO: add spring property
+        repo.setParameterName("iz_csrf");
+        repo.setCookieName("IZ_CSRF_TOKEN");
+        repo.setParameterName("IZ_CSRF_TOKEN");
+        return repo;
+    }
+
 
     @Bean
     public RoleHierarchy roleHierarchy() {
