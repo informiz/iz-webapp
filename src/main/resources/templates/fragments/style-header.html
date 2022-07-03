@@ -64,28 +64,6 @@
         </div>
     </div>
     <script>
-            $(document).ready(function () {
-
-                var url = window.location.pathname;
-                switch (url) {
-                    case "/factchecker/":
-                       $("#nav-checkers").toggleClass("active");
-                       break;
-                    case "/source/":
-                       $("#nav-sources").toggleClass("active");
-                       break;
-                    case "/hypothesis/":
-                       $("#nav-claims").toggleClass("active");
-                       break;
-                    case "/citation/":
-                       $("#nav-citations").toggleClass("active");
-                       break;
-                    case "/informi/":
-                       $("#nav-informiz").toggleClass("active");
-                       break;
-                }
-            });
-
             function usrSignIn(cred_response) {
                 // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
                 $( "input[name='credential']", "#login-form" ).val(cred_response.credential);
@@ -97,7 +75,6 @@
                 $( "#logout-form" ).submit();
             }
         </script>
-
 </div>
 
 </html>
