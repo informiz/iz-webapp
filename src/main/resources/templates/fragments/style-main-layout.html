@@ -70,7 +70,7 @@
     </head>
     <body>
 
-        <div class="container flex-fill">
+        <div class="container">
 
             <div th:replace="fragments/style-header :: header"></div>
 
@@ -86,7 +86,7 @@
                             reliable information easily accessible.
                         </h5>
                     </div>
-                    <div class="col d-flex align-items-end justify-content-end">
+                    <div class="col col-auto d-flex align-items-end justify-content-end">
                         <button class="btn btn-success btn-sm">
                             <a href="https://www.gofundme.com/f/informiz-collaborative-factchecking" target="_blank"
                                style="text-decoration: none; color: inherit;">Donate</a>
@@ -96,13 +96,13 @@
 
 
                 <div calss="row">
-                    <div class="col">
+                    <div class="col col-auto">
                         <div layout:fragment="content"></div>
                     </div>
                 </div>
 
                 <div calss="row">
-                    <div class="col">
+                    <div class="col col-auto">
                         <div th:replace="fragments/style-footer :: footer"></div>
                     </div>
                 </div>
