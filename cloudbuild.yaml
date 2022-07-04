@@ -5,7 +5,7 @@ steps:
 #    entrypoint: mvn
 #    args: ["test"]
 
-  - name: 3.6.0-jdk-11-slim
+  - name: maven:3.8.3.0-jdk-11
     entrypoint: mvn
     args: ["clean", "package", "-P", "prod", "spring-boot:repackage", "-Dmaven.test.skip=true"]
 
