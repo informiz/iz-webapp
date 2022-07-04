@@ -3,10 +3,12 @@ package org.informiz.ctrl.entity;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.Reference;
+import org.informiz.model.ReferencedEntity;
 import org.informiz.model.Review;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.BindingResult;
 
 import java.util.Set;
 
@@ -18,21 +20,37 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
     protected ChaincodeEntityRepo<T> entityRepo;
     // TODO: chaincode DAO
 
-    protected T reviewEntity(T entity, Review review, Authentication authentication) {
-        String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+    protected T reviewEntity(Long id, Review review, Authentication authentication, BindingResult result) {
+        T entity = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
 
-        Review current = entity.getCheckerReview(checker);
-        if (current != null) {
-            current.setRating(review.getRating());
-            current.setComment(review.getComment());
-        } else {
-            entity.addReview(new Review(checker, entity, review.getRating(), review.getComment()));
+        if (! result.hasFieldErrors("rating")) {
+            String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+
+            Review current = entity.getCheckerReview(checker);
+            if (current != null) {
+                current.setRating(review.getRating());
+                current.setComment(review.getComment());
+            } else {
+                entity.addReview(new Review(checker, entity, review.getRating(), review.getComment()));
+            }
         }
         return entity;
     }
 
-    protected <S extends ChainCodeEntity & EntityWithReferences> void referenceEntity(S entity, Reference reference,
-                                                                                      Authentication authentication) {
+    protected void deleteReview(long id, Long revId, Authentication authentication) {
+        T entity = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
+        String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+        Review current = entity.getCheckerReview(checker);
+        if (current != null && current.getId().equals(revId)) {
+            entity.removeReview(current);
+        } // TODO: warn if no review or different id
+    }
+
+
+    protected <S extends ReferencedEntity> void referenceEntity(S entity, Reference reference,
+                                                                Authentication authentication) {
 
         Set<Reference> references = entity.getReferences();
         String creator = AuthUtils.getUserEntityId(authentication.getAuthorities());

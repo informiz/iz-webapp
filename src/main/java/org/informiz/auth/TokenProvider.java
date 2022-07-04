@@ -51,7 +51,7 @@ public class TokenProvider {
     }
 
     public String createToken(@NotNull Authentication authentication) {
-        OAuth2User user = (OAuth2User) authentication.getPrincipal();
+        DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + TOKEN_MAX_AGE);
@@ -59,9 +59,7 @@ public class TokenProvider {
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));
 
-        String entityId = authentication.getAuthorities().stream()
-                .filter(authority -> InformizGrantedAuthority.class.isInstance(authority))
-                .findFirst().map(auth -> ((InformizGrantedAuthority)auth).getEntityId()).orElse(null);
+        String entityId = user.getAttribute("eid");
 
         return JWT.create()
                 // TODO: what to use as subject? How to verify?

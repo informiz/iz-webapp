@@ -6,6 +6,7 @@ import org.informiz.model.InformiBase;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,19 +110,17 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
+    @PreAuthorize("#informi.getOwnerId() == principal.getAttributes().get('eid')")
     public String updateInformi(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
-                                    BindingResult result, Model model) {
+                                    BindingResult result) {
         if (! result.hasErrors()) {
             InformiBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
-            model.addAttribute(INFORMI_ATTR, current);
-            return String.format("redirect:%s/view/%s", PREFIX, id);
         }
-        prepareEditModel(model, informi, new Review(), new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     @PostMapping("/review/{id}")
@@ -129,26 +128,31 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String reviewInformi(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication, Model model) {
-
-        InformiBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-        }
-        prepareEditModel(model, current, review, new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+                                   BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
+
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReviewInformi(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication) {
+
+        deleteReview(id, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
 
     @PostMapping("/reference/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String addReference(@PathVariable("id") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Authentication authentication, Model model) {
+                                BindingResult result, Authentication authentication) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return handleReference(id, reference, result, authentication);
     }
 
     @PostMapping("/reference/{id}/{refId}")
@@ -156,13 +160,13 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                               BindingResult result, Authentication authentication, Model model) {
+                               BindingResult result, Authentication authentication) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return handleReference(id, reference, result, authentication);
     }
 
     private String handleReference(Long id, Reference reference, BindingResult result,
-                                     Authentication authentication, Model model) {
+                                     Authentication authentication) {
 
         InformiBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
@@ -170,8 +174,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         if ( ! result.hasFieldErrors() ) {
             referenceEntity(current, reference, authentication);
         }
-        prepareEditModel(model, current, new Review(), reference);
-        return String.format("%s/update-informi.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {
@@ -179,4 +182,21 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(REVIEW_ATTR, review);
         model.addAttribute(REFERENCE_ATTR, ref);
     }
+
+    @GetMapping("/reference/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReferenceInformi(@PathVariable("id") @Valid Long id,
+                                     @PathVariable("refId") @Valid Long refId,
+                                     Authentication authentication) {
+
+        InformiBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
+
+        current.removeReference(refId);
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
 }
+

@@ -7,6 +7,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -25,7 +27,7 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
     @URL(message = "Please provided a link to the source of the citation")
     private String link;
 
-    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)
     private Set<SourceRef> sources;
 
     public String getText() {
@@ -52,8 +54,14 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
         this.sources = sources;
     }
 
-    public boolean removeSource(SourceRef src) {
-        return sources.remove(src);
+    public boolean removeSource(Long srcRefId) {
+        List<SourceRef> snapshot = new ArrayList(sources);
+        SourceRef ref = snapshot.stream().filter(reference ->
+                srcRefId.equals(reference.getId())).findFirst().orElse(null);
+
+        if (ref != null)
+            return sources.remove(ref);
+        return false;
     }
 
     public boolean addSource(SourceRef src) {

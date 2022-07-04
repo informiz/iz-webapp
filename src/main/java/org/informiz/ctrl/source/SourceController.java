@@ -1,6 +1,8 @@
 package org.informiz.ctrl.source;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
+import org.informiz.model.InformiBase;
+import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
@@ -91,7 +93,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
             current.edit(source);
             entityRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
-            return String.format("redirect:%s/all", PREFIX);
+            return String.format("redirect:%s/details/%s", PREFIX, current.getId());
         }
         return String.format("%s/update-src.html", PREFIX);
     }
@@ -99,20 +101,21 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/review/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String reviewReference(@PathVariable("id") @Valid Long id,
+    public String reviewSource(@PathVariable("id") @Valid Long id,
                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                  BindingResult result, Authentication authentication, Model model) {
-
-        SourceBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-            model.addAttribute(SOURCE_ATTR, current);
-            model.addAttribute(REVIEW_ATTR, new Review());
-        }
-
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+                                  BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @org.springframework.transaction.annotation.Transactional
+    public String unReviewSource(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication) {
+
+        deleteReview(id, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX,  id);
+    }
 }

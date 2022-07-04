@@ -1,33 +1,29 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import org.informiz.ctrl.entity.EntityWithReferences;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="hypothesis")
 @Entity
-public final class HypothesisBase extends ChainCodeEntity implements Serializable, EntityWithReferences {
+public final class HypothesisBase extends ReferencedEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
     @NotBlank(message = "Claim is mandatory")
     private String claim;
 
-    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)
     protected Set<SourceRef> sources;
-
-    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL)
-    protected Set<Reference> references;
-
 
     public String getClaim() {
         return claim;
@@ -35,14 +31,6 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
 
     public void setClaim(String claim) {
         this.claim = claim;
-    }
-
-    public void setReferences(Set<Reference> references) {
-        this.references = references;
-    }
-
-    public Set<Reference> getReferences() {
-        return references;
     }
 
     public Set<SourceRef> getSources() {
@@ -53,8 +41,14 @@ public final class HypothesisBase extends ChainCodeEntity implements Serializabl
         this.sources = sources;
     }
 
-    public boolean removeSource(SourceRef src) {
-        return sources.remove(src);
+    public boolean removeSource(Long srcRefId) {
+        List<SourceRef> snapshot = new ArrayList(sources);
+        SourceRef ref = snapshot.stream().filter(reference ->
+                srcRefId.equals(reference.getId())).findFirst().orElse(null);
+
+        if (ref != null)
+            return sources.remove(ref);
+        return false;
     }
 
     public boolean addSource(SourceRef src) {

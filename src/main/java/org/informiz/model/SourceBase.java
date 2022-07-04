@@ -8,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -54,7 +55,7 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     private String link;
 
     @Enumerated(EnumType.ORDINAL)
-    @NotBlank(message = "Type is mandatory")
+    @NotNull(message = "Type is mandatory")
     private SourceType srcType;
 
     private String description;

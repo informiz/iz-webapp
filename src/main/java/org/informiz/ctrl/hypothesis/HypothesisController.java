@@ -1,10 +1,7 @@
 package org.informiz.ctrl.hypothesis;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.HypothesisBase;
-import org.informiz.model.Reference;
-import org.informiz.model.Review;
-import org.informiz.model.SourceRef;
+import org.informiz.model.*;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -89,14 +86,18 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public String updateHypothesis(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            prepareEditModel(model, hypothesis, new Review(), new Reference());
+            return String.format("%s/update-hypothesis.html", PREFIX);
+        }
+
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
-        if (! result.hasErrors()) {
-            current.edit(hypothesis);
-            entityRepo.save(current);
-        }
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        current.edit(hypothesis);
+        entityRepo.save(current);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+
+
     }
 
     @PostMapping("/review/{id}")
@@ -104,17 +105,26 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @Transactional
     public String reviewHypothesis(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication, Model model) {
+                                   BindingResult result, Authentication authentication) {
 
-        HypothesisBase current = entityRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
-
-        if ( ! result.hasFieldErrors("rating")) {
-            current = reviewEntity(current, review, authentication);
-        }
-        prepareEditModel(model, current, review, new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
+
+
+    @GetMapping("/review/{id}/del/{revId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReviewHypothesis (@PathVariable("id") @Valid Long id,
+                                  @PathVariable("revId") @Valid Long revId,
+                                  Authentication authentication) {
+
+        deleteReview(id, revId, authentication);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+
+
+    }
+
 
     @PostMapping("/reference/{id}")
     @Secured("ROLE_CHECKER")
@@ -126,6 +136,21 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return handleReference(id, reference, result, authentication, model);
     }
 
+    @GetMapping("/reference/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String unReferenceHypothesis(@PathVariable("id") @Valid Long id,
+                                     @PathVariable("refId") @Valid Long refId,
+                                     Authentication authentication) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+
+        current.removeReference(refId);
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
     @PostMapping("/reference/{id}/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
@@ -135,6 +160,8 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
         return handleReference(id, reference, result, authentication, model);
     }
+
+
 
     @PostMapping("/source/{id}")
     @Secured("ROLE_CHECKER")
@@ -170,6 +197,31 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         // TODO: error handling in modal? Where will the error be visible?
         prepareEditModel(model, current, new Review(), new Reference());
         return String.format("%s/update-hypothesis.html", PREFIX);
+    }
+
+    @PostMapping("/source/{id}/{srcId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String editSrcRef(@PathVariable("id") @Valid Long id,
+                             @PathVariable("srcId") @Valid Long srcId,
+                             Authentication authentication) {
+
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+
+    @GetMapping("/source/{id}/del/{refId}")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    public String removeSrcRef(@PathVariable("id") @Valid Long id,
+                                  @PathVariable("refId") @Valid Long refId,
+                                  Authentication authentication) {
+
+        HypothesisBase current = entityRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+
+        current.removeSource(refId);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {

@@ -3,16 +3,37 @@
 <div class="mw-100" th:fragment="header">
     <div class="row my-5">
         <div class="col">
-            <img class="img-fluid float-left" th:src="@{/logo-sm.jpg}" alt="">
+            <img class="img-fluid float-left" th:src="@{/style/logo-sm.jpg}" alt="">
         </div>
-        <div class="col d-flex align-items-end justify-content-end">
-            <button sec:authorize="isFullyAuthenticated()" id="signoutButton" class="btn btn-outline-success btn-sm" onclick="signOut();">
-                Sign Out
-            </button>
-            <button sec:authorize="isAnonymous() or isRememberMe()" id="signinButton" class="btn btn-outline-success btn-sm">
-                <a href="/oauth2/authorization/google"
-                   style="text-decoration: none; color: inherit;">Sign in</a>
-            </button>
+
+
+        <div id="sign_in_div" class="col d-flex align-items-center justify-content-end">
+            <div id="g_id_onload"
+                 th:data-client_id="${@googleOAuthService.getClientId()}"
+                 th:data-nonce="${#strings.randomAlphanumeric(10)}"
+                 data-callback="usrSignIn"
+                 data-auto_prompt="false">
+            </div>
+            <div class="border border-primary rounded d-flex align-items-center">
+                <div class="g_id_signin"
+                     th:data-type="${#authorization.expression('isAuthenticated()') ? 'icon' : 'standard'}"
+                     th:data-theme="${#authorization.expression('isAuthenticated()') ? 'outline' : 'filled_blue'}">
+                </div>
+                <div>
+                    <a sec:authorize="isAuthenticated()" class="small p-2" href="javascript:usrSignOut()">Sign Out</a>
+                </div>
+            </div>
+            <div class="d-none">
+                <form id="login-form" th:action="@{/oauth/login}" action="#" method="post">
+                    <input name="credential" type="text" value="">
+                    <input type="submit" value="Login">
+                </form>
+            </div>
+            <div class="d-none">
+                <form id="logout-form" th:action="@{/oauth/logout}" action="#" method="post">
+                    <input type="submit" value="Login">
+                </form>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -43,38 +64,17 @@
         </div>
     </div>
     <script>
-            $(document).ready(function () {
-                gapi.load('auth2', function() {
-                    gapi.auth2.init();
-                });
+            function usrSignIn(cred_response) {
+                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
+                $( "input[name='credential']", "#login-form" ).val(cred_response.credential);
+                $( "#login-form" ).submit();
+            }
 
-                var url = window.location.pathname;
-                switch (url) {
-                    case "/factchecker/":
-                       $("#nav-checkers").toggleClass("active");
-                       break;
-                    case "/source/":
-                       $("#nav-sources").toggleClass("active");
-                       break;
-                    case "/hypothesis/":
-                       $("#nav-claims").toggleClass("active");
-                       break;
-                    case "/citation/":
-                       $("#nav-citations").toggleClass("active");
-                       break;
-                    case "/informi/":
-                       $("#nav-informiz").toggleClass("active");
-                       break;
-                 }
-            });
-
-            function signOut() {
-                gapi.auth2.getAuthInstance().signOut().then(function () {
-                    gapi.auth2.getAuthInstance().disconnect();
-                });
+            function usrSignOut() {
+                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
+                $( "#logout-form" ).submit();
             }
         </script>
-
 </div>
 
 </html>
