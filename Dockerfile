@@ -1,5 +1,4 @@
-# TODO: official linux+java8 image that does not conflict with IBM/Spring grpc and netty libs?
-FROM rtfpessoa/ubuntu-jdk8
+FROM adoptopenjdk/openjdk11:debian-slim
 
 RUN groupadd spring && useradd -g spring spring
 USER spring:spring
