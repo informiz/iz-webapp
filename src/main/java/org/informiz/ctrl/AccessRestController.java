@@ -71,9 +71,6 @@ public class AccessRestController {
                 authorities, clientId);
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
 
-        } catch (IllegalStateException e) {
-            // TODO: bad credentials? Log this
-            CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
         } catch (Exception e) {
             // TODO: bad credentials? Log this
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
