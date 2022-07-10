@@ -14,8 +14,9 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
-import static org.informiz.auth.CookieUtils.JWT_COOKIE_NAME;
+import static org.informiz.auth.CookieUtils.*;
 
 /**
  * A cookie-based security context repository
@@ -35,12 +36,21 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
         if (cookie != null) {
             try {
                  context.setAuthentication(tokenProvider.authFromToken(cookie.getValue()));
+                return context;
             } catch (JWTVerificationException ex) {
                 // anonymous
             }
         } else {
             // anonymous
         }
+
+        // Not authenticated - set nonce if necessary
+        cookie = WebUtils.getCookie(holder.getRequest(), NONCE_COOKIE_NAME);
+        if (cookie == null) {
+            CookieUtils.setCookie(holder.getResponse(), NONCE_COOKIE_NAME, TOKEN_MAX_AGE,
+                    UUID.randomUUID().toString().substring(0, 16));
+        }
+
         return context;
     }
 

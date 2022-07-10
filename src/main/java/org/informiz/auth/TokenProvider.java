@@ -23,7 +23,6 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class TokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
-    public static final int TOKEN_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day in miliseconds
 
     @Value("${iz.webapp.token.secret}")
     private String tokenSecret;
@@ -54,7 +53,7 @@ public class TokenProvider {
         DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + TOKEN_MAX_AGE);
+        Date expiryDate = new Date(now.getTime() + CookieUtils.TOKEN_MAX_AGE);
 
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));

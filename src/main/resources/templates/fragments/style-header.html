@@ -10,7 +10,7 @@
         <div id="sign_in_div" class="col d-flex align-items-center justify-content-end">
             <div id="g_id_onload"
                  th:data-client_id="${@googleOAuthService.getClientId()}"
-                 th:data-nonce="${#strings.randomAlphanumeric(10)}"
+                 th:data-nonce="${@sUtils.getNonce(#request)}"
                  data-callback="usrSignIn"
                  data-auto_prompt="false">
             </div>
@@ -31,7 +31,7 @@
             </div>
             <div class="d-none">
                 <form id="logout-form" th:action="@{/oauth/logout}" action="#" method="post">
-                    <input type="submit" value="Login">
+                    <input type="submit" value="Logout">
                 </form>
             </div>
         </div>

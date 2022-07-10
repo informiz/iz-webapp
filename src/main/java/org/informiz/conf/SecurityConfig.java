@@ -17,7 +17,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.util.WebUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
 
@@ -30,9 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     TokenSecurityContextRepository securityContextRepo;
-
-    @Autowired
-    CookieCsrfTokenRepository csrfTokenRepository;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -47,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anonymous().principal("viewer").authorities(AuthUtils.anonymousAuthorities())
                 .and()
                 .csrf()
-                .csrfTokenRepository(csrfTokenRepository)
+                .csrfTokenRepository(csrfTokenRepo())
                 .and()
                 .authorizeRequests()
                 .antMatchers("/oauth/login", "/oauth/logout").permitAll()
@@ -57,6 +59,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.TRACE).hasRole("VIEWER")
                 .anyRequest().authenticated()
         ;
+    }
+
+    private CookieCsrfTokenRepository csrfTokenRepo() {
+        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
+        // repo.setCookieDomain(cookieDomain); // TODO: add spring property
+        repo.setParameterName("iz_csrf");
+        repo.setCookieName("IZ_CSRF_TOKEN");
+        repo.setParameterName("IZ_CSRF_TOKEN");
+        repo.setSecure(true);
+        repo.setCookieHttpOnly(true);
+        return repo;
     }
 
     @Bean(name = "googleOAuthService")
@@ -74,17 +87,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public CookieCsrfTokenRepository csrfTokenRepo() {
-        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
-        // repo.setCookieDomain(cookieDomain); // TODO: add spring property
-        repo.setParameterName("iz_csrf");
-        repo.setCookieName("IZ_CSRF_TOKEN");
-        repo.setParameterName("IZ_CSRF_TOKEN");
-        return repo;
-    }
-
-
-    @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
         roleHierarchy.setHierarchy(String.format("%s > %s > %s > %s",
@@ -93,6 +95,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public static class SecUtils {
+        public static String getNonce(HttpServletRequest request) {
+            Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
+            return cookie == null ? "" : cookie.getValue();
+        }
 
         public static boolean isOwner(DefaultOAuth2User principal, ChainCodeEntity entity) {
             return entity.getOwnerId() == principal.getAttributes().get("eid");
