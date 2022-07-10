@@ -4,27 +4,35 @@
 <div th:fragment="sourceList(sources, link)">
     <h3 class="mt-5">Sources</h3>
         <div>
-            <table id="sources-table" class="table table-striped table-bordered">
+            <table id="src-refs-table" class="table table-striped table-bordered"
+                   data-toggle="table"
+                   data-sort-name="source"
+                   data-sort-order="asc"
+                   data-pagination="true"
+                   data-search="true">
                 <thead>
-                <tr>
-                    <th>Source</th>
-                    <th>Link</th>
-                    <th>Description</th>
-                    <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </th:block>
-
-                </tr>
+                    <tr>
+                        <th data-field="source" data-sortable="true" data-searchable="true" data-formatter="sourceFormatter" data-visible="false">Source</th>
+                        <th data-field="link" data-sortable="false" data-searchable="false">Link</th>
+                        <th data-field="description" data-sortable="false" data-searchable="true">Description</th>
+                        <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
+                            <th data-sortable="false" data-searchable="false">Edit</th>
+                            <th data-sortable="false" data-searchable="false">Delete</th>
+                        </th:block>
+                    </tr>
                 </thead>
                 <tbody>
                 <tr th:each="src : ${sources}">
-                    <td th:data-entity-id="${src.srcEntityId}"></td>
-                    <td th:data-link="${src.link}"></td>
+                    <td th:text="${src.srcEntityId}"></td>
+                    <td>
+                        <span class="table-text">
+                            <a th:href="${src.link}" target="_blank" class="btn btn-primary fas fa-link"></a>
+                        </span>
+                    </td>
                     <td>
                         <span class="table-text" th:text="${src.description}"></span>
                     </td>
-                    <th:block th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')} and not ${#strings.isEmpty(link)}">
+                    <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                         <div th:with="action_url = ${link} + '/' + ${src.id.toString()}" class="d-none">
                             <div th:id="'src_' + ${src.id}">
                                 <div th:replace="fragments/src-ref-form :: editSourceForm(${action_url}, ${src})"></div>
@@ -41,7 +49,6 @@
                                class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
                         </td>
                     </th:block>
-
                 </tr>
                 </tbody>
             </table>
@@ -61,27 +68,23 @@
                             th:attr="data-bs-target='#modal_add_src_ref'"
                             class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
-
-
             </th:block>
             <script>
-                    sourcesCallbacks.push(function() {
-                        if ($('#sources-table tr').length > 0) {
-                            $('tbody tr td:nth-child(1)').val(function(){
-                                var source = sources[$(this).attr('data-entity-id')];
-                                if (source) {
-                                    $(this).html('<a href="/source/details/' + source.id + '">' + source.name + '</a>')
-                                }
-                            });
-                            $('tbody tr td:nth-child(2)').val(function(){
-                                if ($(this).attr('data-link')) {
-                                    $(this).html('<a href="' + $(this).attr('data-link') +
-                                         '" target="_blank" class="btn btn-primary fas fa-link"/>')
-                                }
-                            });
-                        }
-                    });
-                </script>
+                sourcesCallbacks.push(function() {});
+
+                function sourceFormatter(value) {
+                    src = sources[value];
+                    if (src) {
+                        return '<span class="table-text"><a href = "/source/view/' + src.id + '">' + src.name + '</a></span>';
+                    }
+                    return '';
+                }
+
+                // TODO: on first table rendering the sources are not loaded yet. Better solution?
+                loadCompleteCallbacks.push(function() {
+                    $('#src-refs-table').bootstrapTable('showColumn', 'source');
+                });
+            </script>
         </div>
     </div>
 </html>
