@@ -2,6 +2,7 @@ package org.informiz.conf;
 
 import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.informiz.auth.AuthUtils;
+import org.informiz.auth.CookieUtils;
 import org.informiz.auth.TokenSecurityContextRepository;
 import org.informiz.model.ChainCodeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,12 @@ import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.util.UUID;
 
 import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
+import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
 
@@ -95,9 +100,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public static class SecUtils {
-        public static String getNonce(HttpServletRequest request) {
+        public static String getNonce(HttpServletRequest request, HttpServletResponse response) {
             Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
-            return cookie == null ? "" : cookie.getValue();
+            if (cookie == null) {
+                cookie = CookieUtils.setCookie(response, NONCE_COOKIE_NAME, TOKEN_MAX_AGE,
+                        UUID.randomUUID().toString().substring(0, 16));
+            }
+
+            return cookie.getValue();
         }
 
         public static boolean isOwner(DefaultOAuth2User principal, ChainCodeEntity entity) {
