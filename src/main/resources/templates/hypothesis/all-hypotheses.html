@@ -20,10 +20,10 @@
                             <th data-field="score"  data-sortable="true" data-searchable="false">Score</th>
                             <th data-field="by"  data-sortable="true" data-searchable="true" data-formatter="checkerToLink" data-visible="false">By</th>
                             <th data-field="date"  data-sortable="true" data-searchable="false" data-formatter="tsToString">Last Updated</th>
-                            <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
-                                data-sortable="false" data-searchable="false">Edit</th>
-                            <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
-                                data-sortable="false" data-searchable="false">Delete</th>
+                            <th:block sec:authorize="hasRole('ROLE_CHECKER')">
+                                <th data-sortable="false" data-searchable="false">Edit</th>
+                                <th data-sortable="false" data-searchable="false">Delete</th>
+                            </th:block>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,14 +37,17 @@
                             <td th:text="${hypothesis.score.reliability}"></td>
                             <td th:text="${hypothesis.ownerId}"></td>
                             <td th:text="${hypothesis.updatedTs}"></td>
-                            <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                                <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
-                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
-                            </td>
-                            <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                                <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
-                                   class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"/>
-                            </td>
+                            <th:block sec:authorize="hasRole('ROLE_CHECKER')">
+                                <td>
+                                    <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
+                                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
+                                </td>
+                                <td><!-- TODO: disabled not working -->
+                                    <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
+                                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
+                                       th:disabled="${@sUtils.getDisabled(#authentication.getPrincipal(), hypothesis)}"/>
+                                </td>
+                            </th:block>
                         </tr>
                     </tbody>
                 </table>

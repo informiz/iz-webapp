@@ -3,6 +3,7 @@ package org.informiz.ctrl.hypothesis;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +84,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
+    @PreAuthorize("#hypothesis.ownerId == authentication.principal.name")
     public String updateHypothesis(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
@@ -136,9 +138,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return handleReference(id, reference, result, authentication, model);
     }
 
-    @GetMapping("/reference/{id}/del/{refId}")
+    @PostMapping("/reference/{id}/del/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
+    // TODO: pass reference and pre authorize
     public String unReferenceHypothesis(@PathVariable("id") @Valid Long id,
                                      @PathVariable("refId") @Valid Long refId,
                                      Authentication authentication) {
@@ -154,13 +157,13 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @PostMapping("/reference/{id}/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
     public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                 BindingResult result, Authentication authentication, Model model) {
 
         return handleReference(id, reference, result, authentication, model);
     }
-
 
 
     @PostMapping("/source/{id}")
@@ -196,8 +199,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         }
         // TODO: error handling in modal? Where will the error be visible?
         prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
+
 
     @PostMapping("/source/{id}/{srcId}")
     @Secured("ROLE_CHECKER")

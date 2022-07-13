@@ -1,19 +1,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
-
-    <div th:fragment="hypothesis(mode)">
+    <fieldset th:fragment="hypothesis(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), hypothesis)}">
         <div class="row">
             <div class="form-group col">
                 <label for="claim" class="col-form-label">Claim</label>
-                <input type="text" th:field="*{claim}" class="form-control" id="claim" placeholder="The sky is blue"
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <input type="text" th:field="*{claim}" class="form-control"
+                       id="claim" placeholder="The sky is blue">
                 <span th:if="${#fields.hasErrors('claim')}" th:errors="*{claim}" class="text-danger"></span>
             </div>
         </div>
         <div class="row">
             <div class="form-group col-4">
                 <label for="locale" class="col-form-label">Locale</label>
-                <select th:field="*{locale}" class="form-control custom-select" id="locale"
-                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+                <select th:field="*{locale}" class="form-control custom-select" id="locale">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
@@ -21,5 +19,5 @@
             </div>
         </div>
         <div th:replace="fragments/score :: score(${mode})"></div>
-    </div>
+    </fieldset>
 </html>

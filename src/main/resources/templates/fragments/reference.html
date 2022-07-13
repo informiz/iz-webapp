@@ -36,8 +36,8 @@
 
 <div th:fragment="editRefForm(action_path, reference)">
     <form th:action="${action_path}" th:object="${reference}" method="post">
-        <!-- The id of the claim or citation being referenced (not necessarily local) -->
-        <input type="hidden" name="referencedId" th:value="${reference.referencedId}"/>
+        <input type="text" class="d-none" name="referencedId" th:value="${reference.referencedId}" readonly/>
+        <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
 
         <div th:replace="fragments/reference :: refProps(${reference})"></div>
 

@@ -65,7 +65,8 @@ public class AccessRestController {
 
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("eid", entityId);
-            attributes.put("name", subscriber);
+            attributes.put("gid", subscriber);
+            attributes.put("name", entityId);
 
             OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities, attributes, "name"),
                 authorities, clientId);

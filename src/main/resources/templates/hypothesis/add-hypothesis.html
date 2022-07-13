@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col">
                     <form action="#" th:action="@{/hypothesis/add}" th:object="${hypothesis}" method="post">
-                        <div th:replace="fragments/hypothesis :: hypothesis('write')"></div>
+                        <div th:replace="fragments/hypothesis :: hypothesis(true)"></div>
                         <div class="row">
                             <div class="col mt-5">
                                 <input type="submit" class="btn btn-primary" value="Add" />

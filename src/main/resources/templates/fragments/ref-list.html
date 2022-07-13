@@ -39,13 +39,18 @@
                         </div>
                         <div th:replace="fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})"></div>
                         <td>
-                            <button type="button" th:id="'edit_ref_' + ${reference.id}" data-bs-toggle="modal"
-                                    th:attr="data-bs-target='#modal_ref_' + ${reference.id}"
+                            <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), reference)}"
+                                    th:id="'edit_ref_' + ${reference.id}" data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal_ref_' + ${reference.id} "
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td>
-                            <a th:href="@{${refsUrl}+'/del/'+${reference.id.toString()}}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
+                            <form th:action="@{${refsUrl}+'/del/'+${reference.id.toString()}}" method="post">
+                               <!-- TODO: Button styling does not work -->
+                                <input type="submit" value="X"
+                                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
+                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), reference)}"/>
+                            </form>
                         </td>
 
                     </th:block>

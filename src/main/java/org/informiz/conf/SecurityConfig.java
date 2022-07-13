@@ -4,7 +4,7 @@ import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
 import org.informiz.auth.TokenSecurityContextRepository;
-import org.informiz.model.ChainCodeEntity;
+import org.informiz.model.InformizEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -100,6 +100,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public static class SecUtils {
+        public static boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
+            return principal.getName().equals(entity.getOwnerId());
+        }
+
+        public static String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
+            return isOwner(principal, entity) ? "false" : "true";
+        }
+
         public static String getNonce(HttpServletRequest request, HttpServletResponse response) {
             Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
             if (cookie == null) {
@@ -108,10 +116,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             }
 
             return cookie.getValue();
-        }
-
-        public static boolean isOwner(DefaultOAuth2User principal, ChainCodeEntity entity) {
-            return entity.getOwnerId() == principal.getAttributes().get("eid");
         }
     }
 

@@ -183,7 +183,6 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(REFERENCE_ATTR, ref);
     }
 
-    @GetMapping("/reference/{id}/del/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String unReferenceInformi(@PathVariable("id") @Valid Long id,
