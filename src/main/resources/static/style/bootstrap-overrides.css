@@ -57,11 +57,6 @@ strong > a:visited {
 }
 
 
-.hidden-column {
-    display: none;
-    visibility: hidden;
-}
-
 /* TODO: is there a better way to make certain columns wide enough on small screens? */
 .column-text {
     /* 35% of portrait phone, only two fit in a row */

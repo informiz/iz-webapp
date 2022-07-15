@@ -18,6 +18,6 @@
                 <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
             </div>
         </div>
-        <div th:replace="fragments/score :: score(${mode})"></div>
+        <div th:replace="fragments/score :: score"></div>
     </fieldset>
 </html>

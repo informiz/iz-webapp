@@ -8,11 +8,13 @@
 
         <script>
             texts = {};
+            media_paths = {}
 
             informizCallbacks.push(function() {
                 $.each(informiz, function(i, informi) {
                     text = informi.name.toLowerCase() + ' ' + informi.description.toLowerCase();
                     texts[informi.entityId] = text;
+                    media_paths[informi.entityId] = informi.mediaPath;
                 });
             });
 
@@ -31,20 +33,21 @@
                    data-show-header="false"
                    data-custom-search="izCustomSearch"
                    data-pagination="true"
+                   data-page-size="5"
                    data-sort-name="date"
                    data-sort-order="desc"
                    data-search="true">
                 <thead>
                     <tr>
-                        <th data-field="date" data-class='hidden-column' data-sortable="true" data-searchable="false"></th>
-                        <th data-field="id" data-class='hidden-column' data-sortable="false" data-searchable="false"></th>
-                        <th data-field="informi" data-sortable="false" data-searchable="true"></th>
+                        <th data-field="date" data-visible="false" data-sortable="true" data-searchable="false"></th>
+                        <th data-field="id" data-visible="false" data-sortable="false" data-searchable="false"></th>
+                        <th data-field="informi" data-sortable="false" data-searchable="true" data-formatter="informiFormatter"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="informi : ${informiz}">
-                        <td th:text="${informi.updatedTs}"></td>
-                        <td th:text="${informi.entityId}"></td>
+                        <td class="d-none" th:text="${informi.updatedTs}"></td>
+                        <td class="d-none" th:text="${informi.entityId}"></td>
                         <td>
                             <div class="lead mt-2">
                                 <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
@@ -69,7 +72,7 @@
                             <div class="row">
                                 <div class="col-md">
                                     <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}">
-                                        <img class="img-fluid rounded mt-2" th:src="${informi.getMediaPath()}">
+                                        <img class="iz-media img-fluid rounded mt-2" />
                                     </a>
                                     <div><small class="text-muted">
                                         <b>Reliability:</b> <span th:text="${informi.score.reliability}"/>
@@ -102,6 +105,19 @@
         </p>
 
         <script>
+
+            // Download media only for visible informiz - adding image-source on render
+            function informiFormatter(value, row) {
+                media_path = media_paths[row.id];
+
+                img_src =  media_path ? ' src="' + media_path + '" ' : '';
+                img_clz_str = 'class="iz-media';
+                img_clz_idx = value.indexOf(img_clz_str);
+
+                return value.substring(0, img_clz_idx) + img_src + value.substring(img_clz_idx, value.length);
+
+            }
+
             $('#informiz-table').on('post-body.bs.table', function (e, data) {
                 timestampsToStrings($('[title="timestamp"]', this));
                 checkersToLinks($('[title="fact-checker"]', this));
@@ -109,8 +125,9 @@
 
             checkersCallbacks.push(function() {});
             loadCompleteCallbacks.push(function() {
-                $('#informiz-table').trigger('post-body.bs.table')
+                $('#informiz-table').bootstrapTable('toggleView');
             });
+
         </script>
 
     </div>
