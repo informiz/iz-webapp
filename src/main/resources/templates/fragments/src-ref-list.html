@@ -22,31 +22,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr th:each="src : ${sources}">
-                    <td th:text="${src.srcEntityId}"></td>
+                <tr th:each="source : ${sources}">
+                    <td th:text="${source.srcEntityId}"></td>
                     <td>
                         <span class="table-text">
-                            <a th:href="${src.link}" target="_blank" class="btn btn-primary fas fa-link"></a>
+                            <a th:href="${source.link}" target="_blank" class="btn btn-primary fas fa-link"></a>
                         </span>
                     </td>
                     <td>
-                        <span class="table-text" th:text="${src.description}"></span>
+                        <span class="table-text" th:text="${source.description}"></span>
                     </td>
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                        <div th:with="action_url = ${link} + '/' + ${src.id.toString()}" class="d-none">
-                            <div th:id="'src_' + ${src.id}">
-                                <div th:replace="fragments/src-ref-form :: editSourceForm(${action_url}, ${src})"></div>
+                        <div th:with="action_url = ${link} + '/' + ${source.id.toString()}" class="d-none">
+                            <div th:id="'src_' + ${source.id}">
+                                <div th:replace="fragments/src-ref-form :: editSourceForm(${action_url}, ${source})"></div>
                             </div>
                         </div>
-                        <div th:replace="fragments/modal :: customModal('Edit Source Reference', 'src_' + ${src.id})"></div>
+                        <div th:replace="fragments/modal :: customModal('Edit Source Reference', 'src_' + ${source.id})"></div>
                         <td>
-                            <button type="button" th:id="'edit_src_' + ${src.id}" data-bs-toggle="modal"
-                                    th:attr="data-bs-target='#modal_src_' + ${src.id}"
+                            <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
+                                    th:id="'edit_src_' + ${source.id}" data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal_src_' + ${source.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td> <!-- TODO: Implement delete  -->
-                            <a th:href="${link} + '/del/' + ${src.id}"
-                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"></a>
+                            <!--<a th:href="${link} + '/del/' + ${source.id}" -->
+                            <form th:action="@{${link}+'/src-ref/del/'}" th:object="${source}" method="post">
+                                <!-- TODO: Button styling does not work -->
+                                <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
+                                <input type="text" class="d-none" name="id" th:value="${source.id}" readonly/>
+                                <input type="submit" value="X"
+                                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
+                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),source)}"/>
+                            </form>
                         </td>
                     </th:block>
                 </tr>

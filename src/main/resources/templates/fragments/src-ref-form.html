@@ -32,6 +32,7 @@
     <div class="row">
         <div class="col">
             <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
+                <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
                 <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
                 <div th:replace="fragments/src-ref-form :: srcRefProps(${source})"></div>
             </form>

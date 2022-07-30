@@ -23,9 +23,7 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.UUID;
-
 import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
 import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 import static org.informiz.auth.InformizGrantedAuthority.*;

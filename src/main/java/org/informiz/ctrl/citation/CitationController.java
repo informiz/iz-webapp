@@ -3,6 +3,7 @@ package org.informiz.ctrl.citation;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +97,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
-    @PostMapping("/review/{id}")
+    @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewCitation(@PathVariable("id") @Valid Long id,
@@ -106,15 +107,26 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-
-    @GetMapping("/review/{id}/del/{revId}")
+    @PostMapping("/{id}/review/edit/")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String unReviewInformi(@PathVariable("id") @Valid Long id,
-                                  @PathVariable("revId") @Valid Long revId,
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String editReview(@PathVariable("id") @Valid Long id,
+                                 @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                                 BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+    @PostMapping("/{id}/review/del/")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String deleteReview(@PathVariable("id") @Valid Long id,
+                               @ModelAttribute(REVIEW_ATTR) Review review,
                                   Authentication authentication) {
 
-        deleteReview(id, revId, authentication);
+        deleteReview(id, review.getId(), authentication);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
@@ -139,9 +151,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, current.getId());
     }
 
+
     @PostMapping("/source/{id}/{srcId}")
     @Secured("ROLE_CHECKER")
     @Transactional
+    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    // TODO: resolve codes duplicate issue
     public String editSrcRef(@PathVariable("id") @Valid Long id,
                              @PathVariable("srcId") @Valid Long srcId,
                              Authentication authentication) {
@@ -150,10 +165,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @GetMapping("/source/{id}/del/{refId}")
+    @PostMapping("/source/{id}/del/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String removeSrcRef(@PathVariable("id") @Valid Long id,
+    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    // TODO: resolve codes duplicate issue
+    public String deleteSrcRef(@PathVariable("id") @Valid Long id,
                                @PathVariable("refId") @Valid Long refId,
                                Authentication authentication) {
 
@@ -163,9 +180,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         current.removeSource(refId);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
-    // TODO: remove/edit source methods
 
     // TODO: which methods need to be declared transactional?
 
-    // TODO: is it  necessary to add empty objects to the model?
 }

@@ -32,7 +32,7 @@
                         <span class="table-text" th:text="${reference.comment}"></span>
                     </td>
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
-                        <div th:with="action_url = ${refsUrl} + '/' + ${reference.id.toString()}" class="d-none">
+                        <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
                             <div th:id="'ref_' + ${reference.id}">
                                 <div th:replace="fragments/reference :: editRefForm(${action_url}, ${reference})"></div>
                             </div>
@@ -45,11 +45,13 @@
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td>
-                            <form th:action="@{${refsUrl}+'/del/'+${reference.id.toString()}}" method="post">
-                               <!-- TODO: Button styling does not work -->
+                            <form th:action="@{${refsUrl}+'/ref/del/'}" th:object="${reference}" method="post">
+                                <!-- TODO: Button styling does not work -->
+                                <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
+                                <input type="text" class="d-none" name="id" th:value="${reference.id}" readonly/>
                                 <input type="submit" value="X"
                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
-                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), reference)}"/>
+                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),reference)}"/>
                             </form>
                         </td>
 

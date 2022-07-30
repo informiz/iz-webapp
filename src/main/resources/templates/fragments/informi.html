@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <fieldset th:fragment="informi(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), hypothesis)}">
+    <fieldset th:fragment="informi(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), informi)}">
         <div class="row">
             <div class="form-group col">
                 <label for="name" class="col-form-label">Title</label>

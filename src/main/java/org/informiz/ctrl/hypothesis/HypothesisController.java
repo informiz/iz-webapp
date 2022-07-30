@@ -98,14 +98,23 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         current.edit(hypothesis);
         entityRepo.save(current);
         return String.format("redirect:%s/details/%s", PREFIX, id);
-
-
     }
 
-    @PostMapping("/review/{id}")
+    @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewHypothesis(@PathVariable("id") @Valid Long id,
+                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                                   BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
+    @PostMapping("/{id}/review/edit/")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String editReview(@PathVariable("id") @Valid Long id,
                                    @Valid @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Authentication authentication) {
 
@@ -113,18 +122,16 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-
-    @GetMapping("/review/{id}/del/{revId}")
+    @PostMapping("/{id}/review/del/")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String unReviewHypothesis (@PathVariable("id") @Valid Long id,
-                                  @PathVariable("revId") @Valid Long revId,
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String deleteReview (@PathVariable("id") @Valid Long id,
+                                      @ModelAttribute(REVIEW_ATTR) Review review,
                                   Authentication authentication) {
 
-        deleteReview(id, revId, authentication);
+        deleteReview(id, review.getId(), authentication);
         return String.format("redirect:%s/details/%s", PREFIX, id);
-
-
     }
 
 
@@ -138,27 +145,27 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return handleReference(id, reference, result, authentication, model);
     }
 
-    @PostMapping("/reference/{id}/del/{refId}")
+
+    @PostMapping("/reference/{id}/ref/del")
     @Secured("ROLE_CHECKER")
     @Transactional
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
     // TODO: pass reference and pre authorize
-    public String unReferenceHypothesis(@PathVariable("id") @Valid Long id,
-                                     @PathVariable("refId") @Valid Long refId,
-                                     Authentication authentication) {
+    public String deleteReference(@PathVariable("id") @Valid Long id,
+                                        @ModelAttribute(REFERENCE_ATTR) Reference reference) {
 
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
-        current.removeReference(refId);
+        current.removeReference(reference.getId());
 
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
-
-    @PostMapping("/reference/{id}/{refId}")
+    @PostMapping("/reference/{id}/edit/")
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
+    public String editReference(@PathVariable("id") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                 BindingResult result, Authentication authentication, Model model) {
 
@@ -206,27 +213,28 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @PostMapping("/source/{id}/{srcId}")
     @Secured("ROLE_CHECKER")
     @Transactional
+    @PreAuthorize("#source.ownerId == authentication.principal.name")
     public String editSrcRef(@PathVariable("id") @Valid Long id,
                              @PathVariable("srcId") @Valid Long srcId,
+                             @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source,
                              Authentication authentication) {
 
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-
-    @GetMapping("/source/{id}/del/{refId}")
+    @PostMapping("/source/{id}/src-ref/del/")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String removeSrcRef(@PathVariable("id") @Valid Long id,
-                                  @PathVariable("refId") @Valid Long refId,
-                                  Authentication authentication) {
-
+    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    public String deleteSrcRef(@PathVariable("id") @Valid Long id,
+                               @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source) {
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
-        current.removeSource(refId);
+        current.removeSource(source.getId());
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
+    // TODO change to post and pre-authorize
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);

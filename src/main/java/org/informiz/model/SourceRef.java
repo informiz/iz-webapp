@@ -19,7 +19,6 @@ public class SourceRef extends InformizEntity implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_sourced_entity_id")
-    @NotNull
     @JsonIgnore
     private ChainCodeEntity sourced;
 

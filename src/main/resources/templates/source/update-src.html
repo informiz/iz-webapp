@@ -18,7 +18,7 @@
                     </form>
                 </div>
             </div>
-            <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/review/' + ${source.id}})"></div>
+            <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/' + ${source.id} + '/review/'})"></div>
         </div>
     </div>
 </html>

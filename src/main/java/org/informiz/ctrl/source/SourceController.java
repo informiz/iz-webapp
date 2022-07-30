@@ -1,23 +1,18 @@
 package org.informiz.ctrl.source;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.InformiBase;
-import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
-import org.informiz.repo.source.SourceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import javax.transaction.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = SourceController.PREFIX)
@@ -98,7 +93,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("%s/update-src.html", PREFIX);
     }
 
-    @PostMapping("/review/{id}")
+    @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewSource(@PathVariable("id") @Valid Long id,
@@ -108,14 +103,27 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-    @GetMapping("/review/{id}/del/{revId}")
+    @PostMapping("/{id}/review/edit/")
     @Secured("ROLE_CHECKER")
     @org.springframework.transaction.annotation.Transactional
-    public String unReviewSource(@PathVariable("id") @Valid Long id,
-                                  @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication) {
-
-        deleteReview(id, revId, authentication);
-        return String.format("redirect:%s/details/%s", PREFIX,  id);
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String editReview(@PathVariable("id") @Valid Long id,
+                             @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                             BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
     }
+
+    @PostMapping("/{id}/review/del/")
+    @Secured("ROLE_CHECKER")
+    @org.springframework.transaction.annotation.Transactional
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String deleteReview (@PathVariable("id") @Valid Long id,
+                               @ModelAttribute(REVIEW_ATTR) Review review,
+                               Authentication authentication) {
+
+        deleteReview(id, review.getId(), authentication);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
+
 }

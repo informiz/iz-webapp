@@ -123,7 +123,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-    @PostMapping("/review/{id}")
+    @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewInformi(@PathVariable("id") @Valid Long id,
@@ -133,14 +133,26 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
-    @GetMapping("/review/{id}/del/{revId}")
+    @PostMapping("/{id}/review/edit/")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String unReviewInformi(@PathVariable("id") @Valid Long id,
-                                  @PathVariable("revId") @Valid Long revId,
-                                  Authentication authentication) {
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String editReviewInformi(@PathVariable("id") @Valid Long id,
+                             @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                             BindingResult result, Authentication authentication) {
+        reviewEntity(id, review, authentication, result);
+        return String.format("redirect:%s/details/%s", PREFIX, id);
+    }
 
-        deleteReview(id, revId, authentication);
+    @PostMapping("/{id}/review/del/")
+    @Secured("ROLE_CHECKER")
+    @Transactional
+    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    public String deleteReview (@PathVariable("id") @Valid Long id,
+                                      @ModelAttribute(REVIEW_ATTR) Review review,
+                                      Authentication authentication) {
+
+        deleteReview(id, review.getId(), authentication);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
@@ -155,10 +167,11 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return handleReference(id, reference, result, authentication);
     }
 
-    @PostMapping("/reference/{id}/{refId}")
+    @PostMapping("/reference/{id}/edit")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String editReference(@PathVariable("id") @Valid Long id, @PathVariable("refId") @Valid Long refId,
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    public String editReference(@PathVariable("id") @Valid Long id,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Authentication authentication) {
 
@@ -183,17 +196,17 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(REFERENCE_ATTR, ref);
     }
 
+    @PostMapping("/reference/{id}/ref/del")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String unReferenceInformi(@PathVariable("id") @Valid Long id,
-                                     @PathVariable("refId") @Valid Long refId,
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    public String deleteReference(@PathVariable("id") @Valid Long id,
+                                  @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                      Authentication authentication) {
 
         InformiBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
-
-        current.removeReference(refId);
-
+        current.removeReference(reference.getId());
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 

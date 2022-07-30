@@ -8,6 +8,7 @@
             <div class="row">
                 <div class="col-4">
                     <label th:for="'rating' + ${review.id}" class="col-form-label">Reliability</label>
+                    <input type="text" class="d-none" name="ownerId" th:value="${review.ownerId}" readonly/>
                     <input type="number" name="rating" th:value="${review.rating}" min="0" max="1" step="0.01"
                            class="form-control" th:id="'rating' + ${review.id}" placeholder="0.9"/>
                     <span th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}" class="text-danger"></span>
