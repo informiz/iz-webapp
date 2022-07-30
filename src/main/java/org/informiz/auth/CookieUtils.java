@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class CookieUtils {
 
-    public static final int TOKEN_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day in miliseconds
+    public static final int TOKEN_MAX_AGE = 24 * 60 * 60; // 1 day in seconds
     public static final String JWT_COOKIE_NAME = "iz_jwt";
     public static final String NONCE_COOKIE_NAME = "iz_nonce";
     public static final String GOOGLE_STATE_COOKIE_NAME = "g_state";

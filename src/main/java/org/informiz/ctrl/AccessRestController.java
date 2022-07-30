@@ -47,6 +47,18 @@ public class AccessRestController {
     private TokenProvider tokenProvider;
 
 
+    /**
+     * Log-in a user. Receive a Google ID-token from the browser and grant access accordingly.
+     * This authorization process is protected by CSRF and nonce tokens.
+     * @hidden TODO: Will we gain security by using the auth-code flow? Or use redirect instead of popup (no browser but also no CSRF)?
+     * @hidden https://developers.google.com/identity/protocols/oauth2/web-server
+     *
+     * @param referer the page that invoked login
+     * @param nonce the expected nonce value
+     * @param response HTTP response to set cookies on
+     * @param credential Google ID-token
+     * @throws IOException
+     */
     @PostMapping(path = LOGIN_PATH, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}) //
     public void login(@RequestHeader("referer") Optional<String> referer,
                         @CookieValue(name = NONCE_COOKIE_NAME) String nonce,

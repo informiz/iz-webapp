@@ -50,7 +50,7 @@
                         <td class="d-none" th:text="${informi.entityId}"></td>
                         <td>
                             <div class="lead mt-2">
-                                <a class="table-text table-text-header" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
+                                <a class="table-text table-text-header text-decoration-none" th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
                                    th:text="${informi.name}"></a>
                             </div>
                             <div class="row mt-3">
@@ -109,13 +109,15 @@
             // Download media only for visible informiz - adding image-source on render
             function informiFormatter(value, row) {
                 media_path = media_paths[row.id];
-
                 img_src =  media_path ? ' src="' + media_path + '" ' : '';
-                img_clz_str = 'class="iz-media';
-                img_clz_idx = value.indexOf(img_clz_str);
 
-                return value.substring(0, img_clz_idx) + img_src + value.substring(img_clz_idx, value.length);
+                if (value.indexOf(img_src) < 0) { // don't add src twice
+                    img_clz_str = 'class="iz-media';
+                    img_clz_idx = value.indexOf(img_clz_str);
+                    value = value.substring(0, img_clz_idx) + img_src + value.substring(img_clz_idx, value.length);
+                }
 
+                return value;
             }
 
             $('#informiz-table').on('post-body.bs.table', function (e, data) {
