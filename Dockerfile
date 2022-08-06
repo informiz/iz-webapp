@@ -1,8 +1,8 @@
 # TODO: move to containerd
 FROM adoptopenjdk/openjdk11:debian-slim
 
-RUN groupadd 22222 && useradd -g 22222 22222
-USER 22222:22222
+RUN groupadd spring && useradd -g spring 22222
+USER spring:22222
 
 ARG DEPENDENCY=target/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
