@@ -75,9 +75,10 @@ spec:
       - name: cloud-sql-proxy
         # It is recommended to use the latest version of the Cloud SQL proxy
         # Make sure to update on a regular schedule!
-        image: gcr.io/cloudsql-docker/gce-proxy:1.17
+        image: gcr.io/cloudsql-docker/gce-proxy:1.28.0
         command:
           - "/cloud_sql_proxy"
+          - "-log_debug_stdout"
           - "-instances=key-master-283113:europe-west1:informiz-beta=tcp:3306"
         securityContext:
           runAsNonRoot: true
