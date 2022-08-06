@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: <CHANNEL_NAME>-cert
+spec:
+  domains:
+    - <CHANNEL_NAME>.informiz.org

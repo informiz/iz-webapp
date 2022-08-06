@@ -15,7 +15,6 @@ spec:
         channel: <CHANNEL_NAME>
     spec:
       serviceAccountName: <CHANNEL_NAME>-ksa
-      # TODO: can add a securityContext with  "runAsNonRoot: true" here and change iz-webapp to use numeric user-id?
       containers:
       - name: iz-webapp
         image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
@@ -31,8 +30,6 @@ spec:
         - name: profile
           value: <PROFILE>
         - name: iz.channel.name
-          value: <CHANNEL_NAME>
-        - name: iz.webapp.key-id
           value: <CHANNEL_NAME>
         - name: iz.webapp.token.issuer
           value: <CHANNEL_NAME>
@@ -63,15 +60,12 @@ spec:
             secretKeyRef:
               name: <CHANNEL_NAME>-oauth-creds
               key: client
-        - name: spring.security.oauth2.client.registration.google.client-secret
-          valueFrom:
-            secretKeyRef:
-              name: <CHANNEL_NAME>-oauth-creds
-              key: secret
         securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
-              - NET_RAW
+              - NET_BIND_SERVICE
       - name: cloud-sql-proxy
         # It is recommended to use the latest version of the Cloud SQL proxy
         # Make sure to update on a regular schedule!
