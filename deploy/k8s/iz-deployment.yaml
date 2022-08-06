@@ -26,6 +26,9 @@ spec:
           initialDelaySeconds: 30
           failureThreshold: 10
           periodSeconds: 10
+        volumeMounts:
+          - mountPath: /tmp
+            name: tmp-volume
         env:
         - name: profile
           value: <PROFILE>
@@ -62,7 +65,10 @@ spec:
               key: client
         securityContext:
           runAsNonRoot: true
+          runAsUser: 22222
+          runAsGroup: 22222
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
               - NET_BIND_SERVICE
@@ -78,3 +84,6 @@ spec:
           capabilities:
             drop:
               - NET_RAW
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
