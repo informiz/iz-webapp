@@ -2,7 +2,7 @@
 FROM adoptopenjdk/openjdk11:debian-slim
 
 RUN groupadd spring && useradd -g spring 22222
-USER spring:22222
+USER 22222:spring
 
 ARG DEPENDENCY=target/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
