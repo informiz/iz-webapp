@@ -29,6 +29,9 @@ spec:
         volumeMounts:
           - mountPath: /tmp
             name: tmp-volume
+          - mountPath: /cert
+            name: cert
+            readOnly: true
         env:
         - name: profile
           value: <PROFILE>
@@ -43,6 +46,11 @@ spec:
             secretKeyRef:
               name: <CHANNEL_NAME>-jwt-secret
               key: secret
+        - name: server.ssl.key-store-password
+          valueFrom:
+            secretKeyRef:
+              name: <CHANNEL_NAME>-backend-cert
+              key: password
         - name: spring.datasource.url
           valueFrom:
             secretKeyRef:
@@ -88,3 +96,6 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+        - name: cert
+          secret:
+            secretName: demo-channel-backend-cert

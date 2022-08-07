@@ -8,6 +8,8 @@ openssl rsa -in devCAEncrypted.key -out devCA.key
 
 kubectl create secret tls demo-channel-tls --cert devCA.pem --key devCA.key
 
+kubectl create secret generic demo-channel-backend-cert --from-file=keystore.p12 --from-literal=password=demochan
+
 kubectl create secret generic demo-channel-service-account-creds --from-file=key.json=/path/to/channel-service-key.json
 
 kubectl create secret generic demo-channel-db-creds --from-literal=username=test --from-literal=password=test
