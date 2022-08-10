@@ -4,19 +4,18 @@ metadata:
   name: iz-webapp-ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
-      kubernetes.io/ingress.global-static-ip-name: <CHANNEL_NAME>
-      kubernetes.io/ingress.allow-http: "false"
-      # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"  TODO: necessary?
+    kubernetes.io/ingress.global-static-ip-name: <CHANNEL_NAME>
+    kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/managed-certificates: <CHANNEL_NAME>-cert
 spec:
   rules:
-    - host: <CHANNEL_NAME>.informiz.org
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: iz-webapp-service
-                port:
-                  name: iz-secure-port
+  - host: <CHANNEL_NAME>.informiz.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: iz-webapp-service
+            port:
+              name: iz-secure-port
