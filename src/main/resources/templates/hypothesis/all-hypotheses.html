@@ -42,10 +42,14 @@
                                     <a th:href="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}"
                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                                 </td>
-                                <td><!-- TODO: disabled not working -->
-                                    <a th:href="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}"
-                                       class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
-                                       th:disabled="${@sUtils.getDisabled(#authentication.getPrincipal(), hypothesis)}"/>
+                                <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+
+                                    <form th:action="@{/hypothesis/delete/{id}(id=${hypothesis.id.toString()})}" method="post">
+                                        <input type="text" class="d-none" name="ownerId" th:value="${hypothesis.ownerId}" readonly/>
+                                        <input type="submit" value="X"
+                                               class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
+                                               th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),hypothesis)}"/>
+                                    </form>
                                 </td>
                             </th:block>
                         </tr>

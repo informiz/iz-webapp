@@ -84,16 +84,24 @@
                                         <span class="table-text table-text-long" th:text="${informi.description}"></span>
                                     </div>
                                     <div class="mt-3 d-flex align-items-end justify-content-end">
-                                        <th:block th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
-                                            <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary me-1 fas fa-pencil-alt"></a>
-                                            <a th:href="@{/informi/delete/{id}(id=${informi.id.toString()})}"
-                                               class="btn btn-outline-primary me-1 waves-effect fas fa-times"></a>
+
+                                         <th:block th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                                        <a th:href="@{/informi/details/{id}(id=${informi.id.toString()})}"
+                                               class="btn btn-outline-primary me-1 fas fa-pencil-alt"></a >
+
+
+                                             <form th:action="@{/informi/delete/{id}(id=${informi.id.toString()})}" method="post">
+                                                 <input type="text" class="d-none" name="ownerId" th:value="${informi.ownerId}" readonly/>
+                                                 <input type="submit" value="X"
+                                                        class="btn btn-outline-primary me-1 waves-effect fas fa-times"
+                                                        th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),informi)}"/>
+                                             </form>
                                         </th:block>
+
                                         <a th:href="@{/informi/view/{id}(id=${informi.id.toString()})}"
                                            class="btn btn-primary btn-sm">Read more...</a>
+                                        </div>
                                     </div>
-                                </div>
                             </div>
                         </td>
                     </tr>

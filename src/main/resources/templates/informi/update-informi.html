@@ -6,11 +6,17 @@
         <div class="my-5">
             <h1 class="mb-5">Update Informi</h1>
             <form action="#" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
-                <input type="hidden" name="id" th:value="${informi.id}"/>
+
+                <input type="number" class="d-none" name="id" th:value="${informi.id}" readonly/>
+                <input type="text" class="d-none" name="entityId" th:value="${informi.entityId}" readonly/>
+                <input type="text" class="d-none" name="ownerId" th:value="${informi.ownerId}" readonly/>
+
+
                 <div th:replace="fragments/informi :: informi(false)"></div>
                 <div class="row">
                     <div class="col mt-5">
-                        <input type="submit" class="btn btn-primary" value="Update"/>
+                        <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), informi)}"
+                               class="btn btn-primary" value="Update"/>
                     </div>
                 </div>
             </form>

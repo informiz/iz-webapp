@@ -3,6 +3,7 @@ package org.informiz.ctrl.source;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
+import org.informiz.model.SourceRef;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,9 +49,10 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
-    public String deleteSource(@PathVariable("id") @Valid Long id) {
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteSource(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
         SourceBase source = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
         // TODO: set inactive
@@ -79,6 +81,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
+    @PreAuthorize("#source.ownerId == authentication.principal.name")
     public String updateSource(@PathVariable("id") @Valid Long id,
                                     @Valid @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                     BindingResult result, Model model) {

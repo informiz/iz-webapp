@@ -8,11 +8,16 @@
             <div class="row">
                 <div class="col">
                     <form action="#" th:action="@{/citation/details/{id}(id=${citation.id.toString()})}" th:object="${citation}" method="post">
-                        <input type="hidden" name="id" th:value="${citation.id}"/>
-                        <div th:replace="fragments/citation :: citation('write')"></div>
-                        <div th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}" class="row">
+                        <input type="number" class="d-none" name="id" th:value="${citation.id}" readonly/>
+                        <input type="text" class="d-none" name="entityId" th:value="${citation.entityId}" readonly/>
+                        <input type="text" class="d-none" name="ownerId" th:value="${citation.ownerId}" readonly/>
+
+                        <div th:replace="fragments/citation :: citation('false')"></div>
+                        <div class="row">
+
                             <div class="col-6 mt-2">
-                                <input type="submit" class="btn btn-primary" value="Update"/>
+                                <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), citation)}"
+                                       class="btn btn-primary" value="Update"/>
                             </div>
                         </div>
                     </form>

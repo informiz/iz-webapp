@@ -50,9 +50,10 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
-    public String deleteCitation(@PathVariable("id") @Valid Long id) {
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteCitation(@PathVariable("id") @Valid Long id ,@RequestParam String ownerId) {
         CitationBase citation = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         // TODO: set inactive
@@ -81,6 +82,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     @PostMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
+    @PreAuthorize("#citation.ownerId == authentication.principal.name")
     public String updateCitation(@PathVariable("id") @Valid Long id,
                                  @Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {

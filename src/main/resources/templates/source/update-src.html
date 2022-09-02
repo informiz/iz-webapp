@@ -8,11 +8,15 @@
             <div class="row">
                 <div class="col">
                     <form action="#" th:action="@{/source/details/{id}(id=${source.id.toString()})}" th:object="${source}" method="post">
-                        <input type="hidden" name="id" th:value="${source.id}"/>
-                        <div th:replace="fragments/source :: source('write')"></div>
+                        <input type="number" class="d-none" name="id" th:value="${source.id}" readonly/>
+                        <input type="text" class="d-none" name="entityId" th:value="${source.entityId}" readonly/>
+                        <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
+
+                        <div th:replace="fragments/source :: source('false')"></div>
                         <div class="row">
                             <div class="col mt-5">
-                                <input type="submit" class="btn btn-primary" value="Update"/>
+                                <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
+                                       class="btn btn-primary" value="Update"/>
                             </div>
                         </div>
                     </form>

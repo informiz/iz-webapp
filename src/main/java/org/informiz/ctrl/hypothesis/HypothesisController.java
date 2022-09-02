@@ -50,9 +50,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
-    public String deleteHypothesis(@PathVariable("id") @Valid Long id) {
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteHypothesis(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
         HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
         // TODO: set inactive

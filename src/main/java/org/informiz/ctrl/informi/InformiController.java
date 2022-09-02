@@ -81,9 +81,10 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Secured("ROLE_MEMBER")
-    public String deleteInformi(@PathVariable("id") @Valid Long id) {
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteInformi(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
         InformiBase informi = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
         // TODO: set inactive
