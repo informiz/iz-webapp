@@ -7,10 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.function.Consumer;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class InformizEntity  implements Serializable {
+public abstract class InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
@@ -37,25 +38,24 @@ public class InformizEntity  implements Serializable {
     @Column(name = "removed")
     protected Long removedTs;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    protected Consumer<InformizEntity> onCreateConsumer() {
+            return entity -> {
+                entity.createdTs = entity.updatedTs = new Date().getTime();
+                try {
+                    entity.creatorId = entity.ownerId =
+                            SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                            .filter(auth -> (auth instanceof InformizGrantedAuthority))
+                            .findFirst()
+                            .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("Entity creation - no authenticated user found");
+                }
+        };
     }
 
     @PrePersist
     protected void onCreate() {
-        createdTs = updatedTs = new Date().getTime();
-        try {
-            creatorId = ownerId = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                    .filter(auth -> (auth instanceof InformizGrantedAuthority))
-                    .findFirst()
-                    .map(auth -> ((InformizGrantedAuthority) auth).getEntityId()).get();
-        } catch (NullPointerException e) {
-            throw new IllegalStateException("Entity creation - no authenticated user found");
-        }
+        onCreateConsumer().accept(this);
     }
 
     @PreUpdate
@@ -70,6 +70,14 @@ public class InformizEntity  implements Serializable {
     public void revive() {
         removedTs = null;
         updatedTs = new Date().getTime();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOwnerId() {

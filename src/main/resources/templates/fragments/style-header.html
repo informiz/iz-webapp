@@ -10,7 +10,7 @@
         <div id="sign_in_div" class="col d-flex align-items-center justify-content-end">
             <div id="g_id_onload"
                  th:data-client_id="${@googleOAuthService.getClientId()}"
-                 th:data-nonce="${@sUtils.getNonce(#request, #response)}"
+                 th:data-nonce="${@sUtils.getNonce()}"
                  data-callback="usrSignIn"
                  data-auto_prompt="false">
             </div>

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.4</version>
+		<version>2.7.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.informiz</groupId>
@@ -19,16 +19,14 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<java.version>11</java.version>
-        <spring.version>5.3.9</spring.version> <!-- spring version compatible with the spring-boot version -->
-        <spring.security.version>5.5.2</spring.security.version> <!-- TODO: version 6.x available -->
-        <jackson.version>2.13.4.1</jackson.version> <!-- jackson version compatible with spring -->
+        <spring.security.version>5.7.5</spring.security.version> <!-- TODO: version 6.x available, requires java 17+ -->
+        <jackson.version>2.14.1</jackson.version> <!-- jackson version compatible with spring -->
 		<junit.version>4.13.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
         <h2.version>2.1.210</h2.version>
-        <!-- Spring and Thymeleaf versions must be compatible.
-             E.g thymeleaf-extras-springsecurity5 3.0.x requires Spring 5.x -->
-		<thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-		<thymeleaf.sec.version>3.0.4.RELEASE</thymeleaf.sec.version>
+        <!-- Spring and Thymeleaf versions must be compatible. -->
+		<thymeleaf.version>3.1.1.RELEASE</thymeleaf.version>
+		<thymeleaf.sec.version>3.1.1.RELEASE</thymeleaf.sec.version>
 	</properties>
 
 	<profiles>
@@ -81,7 +79,7 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>8.0.0</version>
+				<version>26.2.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -128,7 +126,7 @@
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>2.4.1</version>
+            <version>3.1.0</version>
         </dependency>
 
 		<dependency>
@@ -149,13 +147,13 @@
         <dependency>
 			<groupId>org.hyperledger.fabric</groupId>
 			<artifactId>fabric-gateway-java</artifactId>
-			<version>2.0.0</version>
+			<version>2.2.7</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
-			<version>1.35.1</version>
+			<version>2.1.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
@@ -170,7 +168,7 @@
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.10</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -194,7 +192,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.18.1</version>
+			<version>4.2.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>

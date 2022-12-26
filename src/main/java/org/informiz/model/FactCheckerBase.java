@@ -4,11 +4,11 @@ import org.hibernate.validator.constraints.URL;
 import org.informiz.auth.AuthUtils;
 
 import javax.persistence.Entity;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 
 @Table(name="fact_checker")
@@ -65,9 +65,12 @@ public class FactCheckerBase extends ChainCodeEntity implements Serializable {
         this.setName(other.getName());
     }
 
-    @PrePersist
-    private void generateCryptoMaterial() {
-        // TODO: use entity-id instead
-        AuthUtils.generateCryptoMaterial(this.getEmail());
+    protected Consumer<InformizEntity> onCreateConsumer() {
+        Consumer<InformizEntity> consumer = super.onCreateConsumer();
+        return entity -> {
+            consumer.accept(entity);
+            // TODO: use entity-id instead
+            AuthUtils.generateCryptoMaterial(this.getEmail());
+        };
     }
 }

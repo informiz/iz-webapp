@@ -1,6 +1,6 @@
 package org.informiz.conf;
 
-import nz.net.ultraq.thymeleaf.LayoutDialect;
+import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
 import org.informiz.auth.TokenSecurityContextRepository;
@@ -98,15 +98,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public static class SecUtils {
-        public static boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
+        @Autowired
+        private HttpServletRequest request;
+        @Autowired
+        private HttpServletResponse response;
+
+        public boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
             return principal.getName().equals(entity.getOwnerId());
         }
 
-        public static String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
+        public String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
             return isOwner(principal, entity) ? "false" : "true";
         }
 
-        public static String getNonce(HttpServletRequest request, HttpServletResponse response) {
+        public String getNonce() {
             Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
             if (cookie == null) {
                 cookie = CookieUtils.setCookie(response, NONCE_COOKIE_NAME, TOKEN_MAX_AGE,

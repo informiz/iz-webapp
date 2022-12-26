@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -38,11 +39,12 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Valid
     private Score score = new Score();
 
-
-    @PrePersist
-    protected void onCreate() {
-        super.onCreate();
-        entityId = Utils.createEntityId(this);
+    protected Consumer<InformizEntity> onCreateConsumer() {
+        Consumer<InformizEntity> consumer = super.onCreateConsumer();
+        return entity -> {
+            consumer.accept(entity);
+            this.entityId = Utils.createEntityId(this);
+        };
     }
 
     public String getEntityId() {

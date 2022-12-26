@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  @EnableTransactionManagement
  */
 @SpringBootApplication(scanBasePackages = "org.informiz")
-@EnableAutoConfiguration
 @ServletComponentScan
 @EnableJpaRepositories("org.informiz.repo")
 @EntityScan("org.informiz.model")
