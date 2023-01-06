@@ -36,7 +36,7 @@
 
 <div th:fragment="editRefForm(action_path, reference)">
     <form th:action="${action_path}" th:object="${reference}" method="post">
-        <input type="text" class="d-none" name="referencedId" th:value="${reference.referencedId}" readonly/>
+        <input type="text" class="d-none" name="refEntityId" th:value="${reference.refEntityId}" readonly/>
         <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
 
         <div th:replace="fragments/reference :: refProps(${reference})"></div>
@@ -57,8 +57,8 @@
                 <input name="reference-select" class="form-control refAutoSelect"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                         placeholder="Start typing to search..." />
-                <input type="text" class="d-none" name="referencedId" readonly/>
-                <span th:if="${#fields.hasErrors('referencedId')}" th:errors="*{referencedId}" class="text-danger"></span>
+                <input type="text" class="d-none" name="refEntityId" readonly/>
+                <span th:if="${#fields.hasErrors('refEntityId')}" th:errors="*{refEntityId}" class="text-danger"></span>
             </div>
         </div>
 
@@ -93,7 +93,7 @@
             });
 
             $( ".refAutoSelect" ).on( "autocompleteselect", function( event, ui ) {
-                input_obj = $( "input[name='referencedId']", "#modal_add_ref_form" );
+                input_obj = $( "input[name='refEntityId']", "#modal_add_ref_form" );
                 input_obj.val(ui.item.id);
             });
 

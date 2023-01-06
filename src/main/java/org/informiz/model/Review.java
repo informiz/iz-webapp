@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -15,11 +14,7 @@ public class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
-    // TODO: Remove this, controller ignores validation errors for this field, already available as "creatorId"
-    // The fact-checker's id on the ledger (may be from a different channel, so not necessarily in the local db)
-    @Column
-    @NotBlank
-    private String checker;
+    // TODO: Remove db constraints on 'checker' column
 
     @DecimalMin("0.0")
     @DecimalMax("1.0")
@@ -38,19 +33,10 @@ public class Review extends InformizEntity implements Serializable {
 
     public Review() {}
 
-    public Review(String fcid, ChainCodeEntity reviewed, Float rating, String comment) {
-        this.checker = fcid;
+    public Review(ChainCodeEntity reviewed, Float rating, String comment) {
         this.reviewed = reviewed;
         this.rating = rating;
         this.comment = comment;
-    }
-
-    public String getChecker() {
-        return checker;
-    }
-
-    public void setChecker(String checker) {
-        this.checker = checker;
     }
 
     public Float getRating() {
@@ -79,14 +65,14 @@ public class Review extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s", checker, reviewed.getEntityId()).hashCode();
+        return String.format("%s-%s", creatorId, reviewed.getEntityId()).hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null || ! (obj instanceof Review)) return false;
         Review other = (Review) obj;
-        return (this.checker.equalsIgnoreCase(other.checker) &&
+        return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
                 this.reviewed.getEntityId().equals(other.reviewed.getEntityId()));
     }
 }

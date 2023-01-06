@@ -24,7 +24,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="review : ${reviews}">
-                        <td th:text="${review.checker}"></td>
+                        <td th:text="${review.creatorId}"></td>
                         <td th:text="${review.rating}"></td>
                         <td>
                             <span class="table-text" th:text="${review.comment}"></span>

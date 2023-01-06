@@ -53,7 +53,7 @@ public class TokenProvider {
         DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + CookieUtils.TOKEN_MAX_AGE);
+        Date expiryDate = new Date(now.getTime() + CookieUtils.TOKEN_MAX_AGE_MILI);
 
         List<String> scopes = new ArrayList<>();
         authentication.getAuthorities().forEach(authority -> scopes.add(authority.getAuthority()));

@@ -22,7 +22,7 @@ import java.io.Serializable;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="informi")
 @Entity
-public final class InformiBase extends ReferencedEntity implements Serializable {
+public final class InformiBase extends FactCheckedEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 

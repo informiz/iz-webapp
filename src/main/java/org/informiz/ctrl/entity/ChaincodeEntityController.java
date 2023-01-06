@@ -3,7 +3,7 @@ package org.informiz.ctrl.entity;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.Reference;
-import org.informiz.model.ReferencedEntity;
+import org.informiz.model.FactCheckedEntity;
 import org.informiz.model.Review;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
                 current.setRating(review.getRating());
                 current.setComment(review.getComment());
             } else {
-                entity.addReview(new Review(checker, entity, review.getRating(), review.getComment()));
+                entity.addReview(new Review(entity, review.getRating(), review.getComment()));
             }
         }
         return entity;
@@ -49,13 +49,13 @@ public class ChaincodeEntityController<T extends ChainCodeEntity> {
     }
 
 
-    protected <S extends ReferencedEntity> void referenceEntity(S entity, Reference reference,
-                                                                Authentication authentication) {
+    protected <S extends FactCheckedEntity> void referenceEntity(S entity, Reference reference,
+                                                                 Authentication authentication) {
 
         Set<Reference> references = entity.getReferences();
         String creator = AuthUtils.getUserEntityId(authentication.getAuthorities());
         reference.setCreatorId(creator);
-        reference.setReviewed(entity);
+        reference.setFactChecked(entity);
 
         // TODO: confusing user-experience: editing someone else's reference will create a new one
         Reference current = references.stream().filter(ref ->

@@ -9,6 +9,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
+/**
+ * A class for references in support/contradiction of factual claims.
+ *
+ * Textual Entailment means that the truth of text A follows from text B. The reference class points
+ * to those fragments (e.g. a Hypothesis and a supporting Citation), as well as the entailment (in the same example -
+ * the entailment is "Supports").
+ */
 @Table(name="reference")
 @Entity
 public class Reference extends InformizEntity implements Serializable {
@@ -16,9 +23,9 @@ public class Reference extends InformizEntity implements Serializable {
     static final long serialVersionUID = 1L;
 
     public enum Entailment {
-        SUPPORTS("Supports"),
-        CONTRADICTS("Contradicts"),
-        IRRELEVANT("Irrelevant");
+        SUPPORTS("Supports"), // Positive textual-entailment
+        CONTRADICTS("Contradicts"), // Negative textual-entailment
+        IRRELEVANT("Irrelevant"); // Non textual-entailment
 
         private final String displayValue;
 
@@ -33,15 +40,14 @@ public class Reference extends InformizEntity implements Serializable {
 
     // The reviewed-entity (always in the local channel)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reviewed_entity_id")
+    @JoinColumn(name = "fact_checked_entity_id", referencedColumnName = "entity_id")
     @JsonIgnore
-    private ChainCodeEntity reviewed; // TODO: rename this field/column
-
+    private ChainCodeEntity factChecked;
 
     // The entity-id of the claim/citation on the ledger
-    @Column(name = "citation_entity_id")
+    @Column(name = "ref_entity_id")
     @NotBlank
-    private String referencedId; // TODO: rename this column
+    private String refEntityId; // either hypothesis or citation
 
     @Enumerated(EnumType.ORDINAL)
     @NotNull
@@ -60,28 +66,28 @@ public class Reference extends InformizEntity implements Serializable {
 
     public Reference() {}
 
-    public Reference(ChainCodeEntity reviewed, Reference other) {
-        this.reviewed = reviewed;
-        this.referencedId = other.referencedId;
+    public Reference(ChainCodeEntity factChecked, Reference other) {
+        this.factChecked = factChecked;
+        this.refEntityId = other.refEntityId;
         this.entailment = other.entailment;
         this.degree = other.degree;
         this.comment = other.comment;
     }
 
-    public ChainCodeEntity getReviewed() {
-        return reviewed;
+    public ChainCodeEntity getFactChecked() {
+        return factChecked;
     }
 
-    public void setReviewed(ChainCodeEntity reviewed) {
-        this.reviewed = reviewed;
+    public void setFactChecked(ChainCodeEntity referenced) {
+        this.factChecked = referenced;
     }
 
-    public String getReferencedId() {
-        return referencedId;
+    public String getRefEntityId() {
+        return refEntityId;
     }
 
-    public void setReferencedId(String referencedId) {
-        this.referencedId = referencedId;
+    public void setRefEntityId(String refEntityId) {
+        this.refEntityId = refEntityId;
     }
 
     public Entailment getEntailment() {
@@ -110,7 +116,7 @@ public class Reference extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", reviewed.getEntityId(), referencedId, creatorId).hashCode();
+        return String.format("%s-%s-%s", factChecked.getEntityId(), refEntityId, creatorId).hashCode();
     }
 
     @Override
@@ -120,8 +126,8 @@ public class Reference extends InformizEntity implements Serializable {
         Reference other = (Reference) obj;
 
         // considered equal if same entity, claim/citation and creator
-        return (this.reviewed.getEntityId().equals(other.reviewed.getEntityId()) &&
-                this.referencedId.equals(other.referencedId) &&
+        return (this.factChecked.getEntityId().equals(other.factChecked.getEntityId()) &&
+                this.refEntityId.equals(other.refEntityId) &&
                 // creatorId is only set when persisting the reference to db. TODO: is this an issue?
                 ( (this.creatorId == null && other.creatorId == null) ||
                         this.creatorId.equals(other.creatorId)));

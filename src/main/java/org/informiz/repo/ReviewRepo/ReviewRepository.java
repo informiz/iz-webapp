@@ -11,11 +11,11 @@ public interface ReviewRepository extends CrudRepository<Review, Long> {
 
     Review findById(long id);
 
-    Review findByCheckerAndReviewed(String checker, String reviewed);
+    Review findByCreatorIdAndReviewed(String creatorId, String reviewed);
 
     List<Review> findByReviewed(String reviewed);
 
-    List<Review> findByChecker(String checker);
+    List<Review> findByCreatorId(String creatorId);
 
-    long deleteByCheckerAndReviewed(@Param("checker") String checker, @Param("reviewed") String reviewed);
+    long deleteByCreatorIdAndReviewed(@Param("creatorId") String creatorId, @Param("reviewed") String reviewed);
 }

@@ -25,7 +25,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="reference : ${references}">
-                    <td th:text="${reference.referencedId}"></td>
+                    <td th:text="${reference.refEntityId}"></td>
                     <td th:text="${reference.entailment.displayValue}"></td>
                     <td th:text="${reference.degree}"></td>
                     <td>

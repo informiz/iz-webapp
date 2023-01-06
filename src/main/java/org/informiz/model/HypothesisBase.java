@@ -15,7 +15,7 @@ import java.util.Set;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="hypothesis")
 @Entity
-public final class HypothesisBase extends ReferencedEntity implements Serializable {
+public final class HypothesisBase extends FactCheckedEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 

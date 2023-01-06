@@ -89,7 +89,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
         // TODO: more efficient way?
         List<Review> snapshot = new ArrayList(reviews);
         Review byChecker = snapshot.stream().filter(review ->
-                fcid.equals(review.getChecker())).findFirst().orElse(null);
+                fcid.equals(review.getCreatorId())).findFirst().orElse(null);
         return byChecker;
     }
 
