@@ -8,7 +8,10 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class FactCheckedEntity extends ChainCodeEntity {
-    @OneToMany(mappedBy = "factChecked", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy = "factChecked",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval=true)
     protected Set<Reference> references;
 
     public Set<Reference> getReferences() {

@@ -128,7 +128,7 @@ public class Reference extends InformizEntity implements Serializable {
         // considered equal if same entity, claim/citation and creator
         return (this.factChecked.getEntityId().equals(other.factChecked.getEntityId()) &&
                 this.refEntityId.equals(other.refEntityId) &&
-                // creatorId is only set when persisting the reference to db. TODO: is this an issue?
+                // creatorId is only set when persisting the reference to db.
                 ( (this.creatorId == null && other.creatorId == null) ||
                         this.creatorId.equals(other.creatorId)));
     }}

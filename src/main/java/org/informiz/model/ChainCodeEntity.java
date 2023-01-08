@@ -23,13 +23,13 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Column(name = "entity_id", unique = true)
     protected String entityId;
 
-    @Column(columnDefinition = "boolean default 1")
-    protected Boolean active;
-
     @NotNull(message = "Locale is mandatory")
     private Locale locale = Locale.ENGLISH; // Default to English
 
-    @OneToMany(mappedBy = "reviewed", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy = "reviewed",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval=true)
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -108,16 +108,6 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.score = score;
     }
 
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    // TODO: is this how we want to compare entities?
     @Override
     public int hashCode() {
         return this.entityId.hashCode();

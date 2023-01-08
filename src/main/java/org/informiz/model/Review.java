@@ -14,15 +14,13 @@ public class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 1L;
 
-    // TODO: Remove db constraints on 'checker' column
-
     @DecimalMin("0.0")
     @DecimalMax("1.0")
     @NotNull
     private Float rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_entity_id")
+    @JoinColumn(name = "reviewed_entity_id", referencedColumnName = "entity_id")
     @JsonIgnore
     private ChainCodeEntity reviewed;
 
