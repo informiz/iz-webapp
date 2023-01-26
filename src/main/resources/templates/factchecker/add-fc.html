@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col">
                     <form action="#" th:action="@{/factchecker/add}" th:object="${checker}" method="post">
-                        <div th:replace="fragments/checker :: checker('write')"></div>
+                        <div th:replace="~{fragments/checker :: checker('write')}"></div>
                         <div class="row">
                             <div class="col mt-5">
                                 <input type="submit" class="btn btn-primary" value="Add" />

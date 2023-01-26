@@ -5,7 +5,7 @@
         <div class="my-5">
             <h1 class="mb-5">New Informi</h1>
             <form action="#" th:action="@{/informi/add}" th:object="${informi}" method="post">
-                <div th:replace="fragments/informi :: informi(true)"></div>
+                <div th:replace="~{fragments/informi :: informi(true)}"></div>
                 <div class="row">
                     <div class="col mt-5">
                         <input type="submit" class="btn btn-primary" value="Add" />

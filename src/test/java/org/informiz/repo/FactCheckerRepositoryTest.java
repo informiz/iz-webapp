@@ -1,21 +1,21 @@
 package org.informiz.repo;
 
 import org.informiz.WithCustomAuth;
-import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.informiz.auth.InformizGrantedAuthority.ROLE_MEMBER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ActiveProfiles("test")
 public class FactCheckerRepositoryTest {
@@ -28,7 +28,7 @@ public class FactCheckerRepositoryTest {
 
 
     @Test
-    @WithCustomAuth
+    @WithCustomAuth(role = {ROLE_MEMBER})
     public void whenFindBy_thenReturnChecker() {
         FactCheckerBase chuck = new FactCheckerBase("chuck", "chuck@informiz.org", "https://some.link");
         chuck.setEntityId("testEntityID");

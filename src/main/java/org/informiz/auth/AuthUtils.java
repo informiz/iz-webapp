@@ -14,8 +14,8 @@ import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class AuthUtils {
 
     public static List<GrantedAuthority> anonymousAuthorities() {
         return Arrays.asList(
-                new InformizGrantedAuthority("ROLE_VIEWER", "anonymous"));
+                new InformizGrantedAuthority(ROLE_VIEWER, "anonymous"));
     }
 
     public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {

@@ -32,10 +32,10 @@
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                             <div class="d-none">
                                 <div th:id="'rev_' + ${review.id}">
-                                    <div th:replace="fragments/review :: reviewForm(${link} + 'edit/', ${review})"></div>
+                                    <div th:replace="~{fragments/review :: reviewForm(${link} + 'edit/', ${review})}"></div>
                                 </div>
                             </div>
-                            <div th:replace="fragments/modal :: customModal('Edit Review', 'rev_' + ${review.id})"></div>
+                            <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_' + ${review.id})}"></div>
                             <td>
                                 <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), review)}"
                                         th:id="'edit_rev_' + ${review.id}" data-bs-toggle="modal"
@@ -62,11 +62,11 @@
                     <div th:id="add_rev_form">
                         <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
                              TODO: (a 'th:with="review=${new org.informiz.model.Review()}"' statement actually assigns null to the 'review' variable) -->
-                        <div th:replace="fragments/review :: reviewForm(${link}, ${review})"></div>
+                        <div th:replace="~{fragments/review :: reviewForm(${link}, ${review})}"></div>
                     </div>
                 </div>
                 <div
-                    th:replace="fragments/modal :: customModal('Add Review', 'add_rev_form')">
+                    th:replace="~{fragments/modal :: customModal('Add Review', 'add_rev_form')}">
                 </div>
 
                 <div class="mt-2">

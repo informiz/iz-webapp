@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.util.Strings;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
@@ -19,8 +20,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -87,6 +87,7 @@ public class AccessRestController {
 
         } catch (Exception e) {
             // TODO: bad credentials? Log this
+            // TODO: revoke other cookies? reset g_state cookie?
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
         }
         response.sendRedirect(referer.orElse("/"));

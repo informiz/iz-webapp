@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col">
                     <form action="#" th:action="@{/source/add}" th:object="${source}" method="post">
-                        <div th:replace="fragments/source :: source('true')"></div>
+                        <div th:replace="~{fragments/source :: source('true')}"></div>
                         <div class="row">
                             <div class="col mt-5">
                                 <input type="submit" class="btn btn-primary" value="Add"/>

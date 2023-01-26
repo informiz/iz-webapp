@@ -39,7 +39,7 @@
         <input type="text" class="d-none" name="refEntityId" th:value="${reference.refEntityId}" readonly/>
         <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
 
-        <div th:replace="fragments/reference :: refProps(${reference})"></div>
+        <div th:replace="~{fragments/reference :: refProps(${reference})}"></div>
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
             <div class="col-4">
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <div th:replace="fragments/reference :: refProps(${reference})"></div>
+        <div th:replace="~{fragments/reference :: refProps(${reference})}"></div>
 
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">

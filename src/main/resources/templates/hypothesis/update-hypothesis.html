@@ -10,7 +10,7 @@
                     <form action="#" th:action="@{/hypothesis/details/{id}(id=${hypothesis.id.toString()})}" th:object="${hypothesis}" method="post">
                         <input type="text" class="d-none" name="entityId" th:value="${hypothesis.entityId}" readonly/>
                         <input type="text" class="d-none" name="ownerId" th:value="${hypothesis.ownerId}" readonly/>
-                        <div th:replace="fragments/hypothesis :: hypothesis(false)"></div>
+                        <div th:replace="~{fragments/hypothesis :: hypothesis(false)}"></div>
                         <div class="row mt-3">
                             <div class="col">
                                 <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), hypothesis)}"
@@ -21,11 +21,11 @@
                 </div>
             </div>
 
-            <div th:replace="fragments/src-ref-list :: sourceList(${hypothesis.sources}, @{'/hypothesis/source/' + ${hypothesis.id}})"></div>
+            <div th:replace="~{fragments/src-ref-list :: sourceList(${hypothesis.sources}, @{'/hypothesis/source/' + ${hypothesis.id}})}"></div>
 
-            <div th:replace="fragments/ref-list :: referenceList(${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})"></div>
+            <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})}"></div>
 
-            <div th:replace="fragments/review-list :: reviewList(${hypothesis.reviews}, @{'/hypothesis/' + ${hypothesis.id} + '/review/'})"></div>
+            <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.reviews}, @{'/hypothesis/' + ${hypothesis.id} + '/review/'})}"></div>
 
         </div>
     </div>

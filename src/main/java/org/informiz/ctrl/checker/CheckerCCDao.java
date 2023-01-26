@@ -1,10 +1,10 @@
 package org.informiz.ctrl.checker;
 
+import jakarta.servlet.http.HttpSession;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.CryptoUtils.ChaincodeProxy;
 
-import javax.servlet.http.HttpSession;
 
 import static org.informiz.repo.CryptoUtils.ChaincodeProxy.PROXY_ATTR;
 

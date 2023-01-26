@@ -34,7 +34,7 @@
             <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
                 <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
                 <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
-                <div th:replace="fragments/src-ref-form :: srcRefProps(${source})"></div>
+                <div th:replace="~{fragments/src-ref-form :: srcRefProps(${source})}"></div>
             </form>
         </div>
     </div>
@@ -55,7 +55,7 @@
                         <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
                     </div>
                 </div>
-                <div th:replace="fragments/src-ref-form :: srcRefProps(${source})"></div>
+                <div th:replace="~{fragments/src-ref-form :: srcRefProps(${source})}"></div>
             </form>
             <script>
 

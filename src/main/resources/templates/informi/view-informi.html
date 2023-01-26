@@ -14,8 +14,8 @@
             <img id="media" class="img-fluid rounded mt-2" th:src="${informi.getMediaPath()}">
         </div>
 
-        <div th:replace="fragments/ref-list :: referenceList(${informi.references}, '')"></div>
+        <div th:replace="~{fragments/ref-list :: referenceList(${informi.references}, '')}"></div>
 
-        <div th:replace="fragments/review-list :: reviewList(${informi.reviews}, '')"></div>
+        <div th:replace="~{fragments/review-list :: reviewList(${informi.reviews}, '')}"></div>
     </div>
 </html>

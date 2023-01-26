@@ -5,16 +5,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-// TODO: ************************ REMOVE THIS ONCE ENTITY ID IS PROVIDED BY CHAINCODE ************************
 
 @Service
 public class Utils {
 
-    public static String channelName;
+    @Value("${iz.channel.name}")
+    private String channelName;
+
+    private static String CHANNEL_NAME;
 
     @Value("${iz.channel.name}")
-    public void setDatabase(String channelName) {
-        channelName = channelName;
+    public void setChannelName(String name){
+        // workaround for assigning property-value to static field
+        Utils.CHANNEL_NAME = name;
     }
 
     public enum EntityType {
@@ -53,6 +56,6 @@ public class Utils {
 
         // TODO: check uniqueness
         return String.format("%s_%s_%s",
-                entityType, channelName, UUID.randomUUID().toString().substring(0, 16));
+                entityType, CHANNEL_NAME, UUID.randomUUID().toString().substring(0, 16));
     }
 }

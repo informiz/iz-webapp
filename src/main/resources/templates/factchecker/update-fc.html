@@ -9,7 +9,7 @@
                 <div class="col">
                     <form action="#" th:action="@{/factchecker/details/{id}(id=${checker.id.toString()})}" th:object="${checker}" method="post">
                         <input type="hidden" name="id" th:value="${checker.id}"/>
-                        <div th:replace="fragments/checker :: checker('write')"></div>
+                        <div th:replace="~{fragments/checker :: checker('write')}"></div>
                         <div class="row">
                             <div class="col mt-5">
                                 <input type="submit" class="btn btn-primary" value="Update"/>

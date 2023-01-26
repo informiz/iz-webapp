@@ -36,6 +36,6 @@
                 <span id="mediaPathErr" th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
             </div>
         </div>
-        <div th:replace="fragments/score :: score"></div>
+        <div th:replace="~{fragments/score :: score}"></div>
     </fieldset>
 </html>

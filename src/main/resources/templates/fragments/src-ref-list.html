@@ -35,10 +35,10 @@
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
                         <div th:with="action_url = ${link} + '/' + ${source.id.toString()}" class="d-none">
                             <div th:id="'src_' + ${source.id}">
-                                <div th:replace="fragments/src-ref-form :: editSourceForm(${action_url}, ${source})"></div>
+                                <div th:replace="~{fragments/src-ref-form :: editSourceForm(${action_url}, ${source})}"></div>
                             </div>
                         </div>
-                        <div th:replace="fragments/modal :: customModal('Edit Source Reference', 'src_' + ${source.id})"></div>
+                        <div th:replace="~{fragments/modal :: customModal('Edit Source Reference', 'src_' + ${source.id})}"></div>
                         <td>
                             <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
                                     th:id="'edit_src_' + ${source.id}" data-bs-toggle="modal"
@@ -66,10 +66,10 @@
                     <div th:id="add_src_ref">
                         <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
                              TODO: Any creation statement actually assigns null to the variable) -->
-                        <div th:replace="fragments/src-ref-form :: addSourceForm(${link}, ${source})"></div>
+                        <div th:replace="~{fragments/src-ref-form :: addSourceForm(${link}, ${source})}"></div>
                     </div>
                 </div>
-                <div th:replace="fragments/modal :: customModal('Add Source', 'add_src_ref')"></div>
+                <div th:replace="~{fragments/modal :: customModal('Add Source', 'add_src_ref')}"></div>
 
                 <div class="mt-2">
                     <button type="button" th:id="add_rev" data-bs-toggle="modal"

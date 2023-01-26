@@ -12,7 +12,7 @@
                         <input type="text" class="d-none" name="entityId" th:value="${citation.entityId}" readonly/>
                         <input type="text" class="d-none" name="ownerId" th:value="${citation.ownerId}" readonly/>
 
-                        <div th:replace="fragments/citation :: citation('false')"></div>
+                        <div th:replace="~{fragments/citation :: citation('false')}"></div>
                         <div class="row">
 
                             <div class="col-6 mt-2">
@@ -23,9 +23,9 @@
                     </form>
                 </div>
             </div>
-            <div th:replace="fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})"></div>
+            <div th:replace="~{fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})}"></div>
 
-            <div th:replace="fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/' + ${citation.id} + '/review/'})"></div>
+            <div th:replace="~{fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/' + ${citation.id} + '/review/'})}"></div>
         </div>
     </div>
 </html>

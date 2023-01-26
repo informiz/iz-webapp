@@ -12,7 +12,7 @@
                         <input type="text" class="d-none" name="entityId" th:value="${source.entityId}" readonly/>
                         <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
 
-                        <div th:replace="fragments/source :: source('false')"></div>
+                        <div th:replace="~{fragments/source :: source('false')}"></div>
                         <div class="row">
                             <div class="col mt-5">
                                 <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
@@ -22,7 +22,7 @@
                     </form>
                 </div>
             </div>
-            <div th:replace="fragments/review-list :: reviewList(${source.reviews}, @{'/source/' + ${source.id} + '/review/'})"></div>
+            <div th:replace="~{fragments/review-list :: reviewList(${source.reviews}, @{'/source/' + ${source.id} + '/review/'})}"></div>
         </div>
     </div>
 </html>

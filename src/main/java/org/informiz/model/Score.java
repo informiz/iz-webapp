@@ -1,8 +1,8 @@
 package org.informiz.model;
 
-import javax.persistence.Embeddable;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import java.io.Serializable;
 
 @Embeddable

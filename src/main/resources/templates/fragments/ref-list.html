@@ -34,10 +34,10 @@
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
                         <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
                             <div th:id="'ref_' + ${reference.id}">
-                                <div th:replace="fragments/reference :: editRefForm(${action_url}, ${reference})"></div>
+                                <div th:replace="~{fragments/reference :: editRefForm(${action_url}, ${reference})}"></div>
                             </div>
                         </div>
-                        <div th:replace="fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})"></div>
+                        <div th:replace="~{fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})}"></div>
                         <td>
                             <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), reference)}"
                                     th:id="'edit_ref_' + ${reference.id}" data-bs-toggle="modal"
@@ -66,10 +66,10 @@
                     <div th:id="add_ref_form">
                         <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
                              TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
-                        <div th:replace="fragments/reference :: referenceForm(${refsUrl}, ${reference})"></div>
+                        <div th:replace="~{fragments/reference :: referenceForm(${refsUrl}, ${reference})}"></div>
                     </div>
                 </div>
-                <div th:replace="fragments/modal :: customModal('Add Reference', 'add_ref_form')"></div>
+                <div th:replace="~{fragments/modal :: customModal('Add Reference', 'add_ref_form')}"></div>
 
                 <div class="mt-2">
                     <button type="button" th:id="add_ref" data-bs-toggle="modal"

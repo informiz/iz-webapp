@@ -1,5 +1,8 @@
 package org.informiz.conf;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
@@ -8,22 +11,23 @@ import org.informiz.model.InformizEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
+
 import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
 import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 import static org.informiz.auth.InformizGrantedAuthority.*;
@@ -31,16 +35,21 @@ import static org.informiz.auth.InformizGrantedAuthority.*;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@ComponentScan("org.informiz.auth")
+public class SecurityConfig {
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     String googleAuthClientId;
 
-    @Autowired
-    TokenSecurityContextRepository securityContextRepo;
+    private final TokenSecurityContextRepository securityContextRepo;
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
+    @Autowired
+    public SecurityConfig(TokenSecurityContextRepository securityContextRepo) {
+        this.securityContextRepo = securityContextRepo;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -54,14 +63,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .csrfTokenRepository(csrfTokenRepo())
                 .and()
-                .authorizeRequests()
-                .antMatchers("/oauth/login", "/oauth/logout").permitAll()
-                .antMatchers(HttpMethod.GET).hasRole("VIEWER")
-                .antMatchers(HttpMethod.HEAD).hasRole("VIEWER")
-                .antMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
-                .antMatchers(HttpMethod.TRACE).hasRole("VIEWER")
+                .authorizeHttpRequests()
+                .requestMatchers("/oauth/login", "/oauth/logout").permitAll()
+                .requestMatchers(HttpMethod.GET).hasRole("VIEWER")
+                .requestMatchers(HttpMethod.HEAD).hasRole("VIEWER")
+                .requestMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
+                .requestMatchers(HttpMethod.TRACE).hasRole("VIEWER")
                 .anyRequest().authenticated()
         ;
+        return http.build();
     }
 
     private CookieCsrfTokenRepository csrfTokenRepo() {
@@ -125,6 +135,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean(name = "sUtils")
     public SecUtils sUtilsBean() {
         return new SecUtils();
+    }
+
+
+    @Bean
+    @Profile({"dev"})
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web
+                .ignoring()
+                .requestMatchers("/h2-console/**");
     }
 
 }
