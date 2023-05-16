@@ -47,6 +47,19 @@
 			</dependencies>
 		</profile>
 		<profile>
+			<id>stg</id>
+			<properties>
+				<spring.profiles.active>stg</spring.profiles.active>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
 			<id>prod</id>
 			<properties>
 				<spring.profiles.active>prod</spring.profiles.active>

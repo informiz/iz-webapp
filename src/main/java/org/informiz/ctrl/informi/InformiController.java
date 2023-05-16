@@ -1,10 +1,13 @@
 package org.informiz.ctrl.informi;
 
+import jakarta.validation.Valid;
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.InformiBase;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
+import org.informiz.repo.informi.InformiRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -16,7 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,6 +31,10 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public static final String INFORMIZ_ATTR = "informiz";
     public static final String REFERENCE_ATTR = "reference";
 
+    @Autowired
+    public InformiController(InformiRepository repository) {
+        super(repository);
+    }
 
     @GetMapping(path = {"/", "/all"})
     public String getAllInformiz(Model model) {
@@ -94,7 +100,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @GetMapping("/view/{id}")
     public String viewInformi(@PathVariable("id") @Valid Long id, Model model) {
-        InformiBase informi = entityRepo.findById(id)
+        InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
         return String.format("%s/view-informi.html", PREFIX);
@@ -103,7 +109,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getInformi(@PathVariable("id") @Valid Long id, Model model) {
-        InformiBase informi = entityRepo.findById(id)
+        InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         prepareEditModel(model, informi, new Review(), new Reference());
         return String.format("%s/update-informi.html", PREFIX);
@@ -182,7 +188,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     private String handleReference(Long id, Reference reference, BindingResult result,
                                      Authentication authentication) {
 
-        InformiBase current = entityRepo.findById(id)
+        InformiBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
 
         if ( ! result.hasFieldErrors() ) {
@@ -205,7 +211,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                                   @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                      Authentication authentication) {
 
-        InformiBase current = entityRepo.findById(id)
+        InformiBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
         current.removeReference(reference.getId());
         return String.format("redirect:%s/details/%s", PREFIX, id);

@@ -1,7 +1,12 @@
 package org.informiz.ctrl.hypothesis;
 
+import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
+import org.informiz.repo.hypothesis.HypothesisRepository;
+import org.informiz.repo.source.SourceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -11,8 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping(path= HypothesisController.PREFIX)
@@ -24,6 +27,13 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public static final String REFERENCE_ATTR = "reference";
     public static final String SOURCE_ATTR = "source";
 
+    private final SourceRepository sourceRepo;
+
+    @Autowired
+    public HypothesisController(HypothesisRepository repository, SourceRepository sourceRepo) {
+        super(repository);
+        this.sourceRepo = sourceRepo;
+    }
 
     @GetMapping(path = {"/", "/all"})
     public String getAllHypotheses(Model model) {
@@ -63,7 +73,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @GetMapping("/view/{id}")
     public String viewHypothesis(@PathVariable("id") @Valid Long id, Model model) {
-        HypothesisBase hypothesis = entityRepo.findById(id)
+        HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
                 .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
         if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
 
@@ -75,7 +85,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getHypothesis(@PathVariable("id") @Valid Long id, Model model) {
-        HypothesisBase hypothesis = entityRepo.findById(id)
+        HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
                 .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
         if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
 
@@ -151,11 +161,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    // TODO: pass reference and pre authorize
     public String deleteReference(@PathVariable("id") @Valid Long id,
                                         @ModelAttribute(REFERENCE_ATTR) Reference reference) {
 
-        HypothesisBase current = entityRepo.findById(id)
+        HypothesisBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
         current.removeReference(reference.getId());
@@ -177,14 +186,19 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @PostMapping("/source/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
+    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model) {
 
-        HypothesisBase current = entityRepo.findById(id)
+        HypothesisBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
 
+        SourceBase source = null;
+        if (StringUtils.isNotBlank(srcRef.getSrcEntityId())) {
+            source = sourceRepo.findByEntityId(srcRef.getSrcEntityId());
+        }
+
         try {
-            SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
+            SourceRef toAdd = new SourceRef(source, current, source.getLink(), source.getDescription());
             current.addSource(toAdd);
             model.addAttribute(HYPOTHESIS_ATTR, current);
             model.addAttribute(SOURCE_ATTR, new SourceRef());
@@ -199,7 +213,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     private String handleReference(Long id, Reference reference, BindingResult result,
                                    Authentication authentication, Model model) {
 
-        HypothesisBase current = entityRepo.findById(id)
+        HypothesisBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
 
         if ( ! result.hasFieldErrors() ) {
@@ -219,7 +233,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                              @PathVariable("srcId") @Valid Long srcId,
                              @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source,
                              Authentication authentication) {
-
+        // TODO: not implemented?
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
@@ -229,13 +243,12 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     @PreAuthorize("#source.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("id") @Valid Long id,
                                @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source) {
-        HypothesisBase current = entityRepo.findById(id)
+        HypothesisBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
         current.removeSource(source.getId());
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
-    // TODO change to post and pre-authorize
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);

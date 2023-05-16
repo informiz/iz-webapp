@@ -1,7 +1,15 @@
 package org.informiz.ctrl.citation;
 
+import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.*;
+import org.informiz.model.CitationBase;
+import org.informiz.model.Review;
+import org.informiz.model.SourceBase;
+import org.informiz.model.SourceRef;
+import org.informiz.repo.citation.CitationRepository;
+import org.informiz.repo.source.SourceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -12,8 +20,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
 @Controller
 @RequestMapping(path = CitationController.PREFIX)
 public class CitationController extends ChaincodeEntityController<CitationBase> {
@@ -23,6 +29,14 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public static final String SOURCE_ATTR = "source";
     public static final String CITATIONS_ATTR = "citations";
 
+    // TODO: duplicated code, move to superclass for sourceable entities
+    private final SourceRepository sourceRepo;
+
+    @Autowired
+    public CitationController(CitationRepository repository, SourceRepository sourceRepo) {
+        super(repository);
+        this.sourceRepo = sourceRepo;
+    }
 
     @GetMapping(path = {"/", "/all"})
     public String getAllCitations(Model model) {
@@ -63,7 +77,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     @GetMapping("/view/{id}")
     public String viewCitation(@PathVariable("id") @Valid Long id, Model model) {
-        CitationBase citation = entityRepo.findById(id)
+        CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         model.addAttribute(CITATION_ATTR, citation);
         return String.format("%s/view-citation.html", PREFIX);
@@ -72,7 +86,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getCitation(@PathVariable("id") Long id, Model model) {
-        CitationBase citation = entityRepo.findById(id)
+        CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         model.addAttribute(CITATION_ATTR, citation);
         model.addAttribute(REVIEW_ATTR, new Review());
@@ -96,7 +110,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         current.edit(citation);
         entityRepo.save(current);
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
     }
 
     @PostMapping("/{id}/review/")
@@ -136,21 +150,26 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/source/{id}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef source,
+    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result) {
 
-        CitationBase current = entityRepo.findById(id)
+        CitationBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
 
+        SourceBase source = null;
+        if (StringUtils.isNotBlank(srcRef.getSrcEntityId())) {
+            source = sourceRepo.findByEntityId(srcRef.getSrcEntityId());
+        }
+
         try {
-            SourceRef toAdd = new SourceRef(source.getSrcEntityId(), current, source.getLink(), source.getDescription());
+            SourceRef toAdd = new SourceRef(source, current, srcRef.getLink(), srcRef.getDescription());
             current.addSource(toAdd);
 
         } catch (IllegalArgumentException e) {
             result.addError(new ObjectError("link",
                     "Please provide either a link, a source or both"));
         }
-        return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+        return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
     }
 
 
@@ -176,7 +195,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                                @PathVariable("refId") @Valid Long refId,
                                Authentication authentication) {
 
-        CitationBase current = entityRepo.findById(id)
+        CitationBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
         current.removeSource(refId);

@@ -59,10 +59,10 @@ public class FactCheckerControllerTest {
     public static void setup() {
         chuck = new FactCheckerBase("chuck", "chuck@informiz.org", "https://some.link");
         chuck.setEntityId("testEntityID");
-        chuck.setId(1l);
+        chuck.setLocalId(1l);
         cary = new FactCheckerBase("cary", "cary@informiz.org", "https://other.link");
         cary.setEntityId("anotherTestEntityID");
-        cary.setId(2l);
+        cary.setLocalId(2l);
         allCheckers = Arrays.asList(chuck, cary);
 
     }

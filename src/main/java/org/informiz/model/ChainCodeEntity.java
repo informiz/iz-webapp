@@ -1,26 +1,50 @@
 package org.informiz.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+//@MappedSuperclass
 public abstract class ChainCodeEntity extends InformizEntity {
 
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 3L ;
 
     protected static ObjectMapper mapper = new ObjectMapper();
 
 
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    public Long id;
+
+    public Long getLocalId() {
+        return id;
+    }
+
+    public void setLocalId(Long id) {
+        this.id = id;
+    }
+
     // The entity's id on the ledger
+/*  TODO: deprecate local-id?
+    @Id
+    @GeneratedValue(generator = "entity-id-generator")
+    @GenericGenerator(name = "entity-id-generator",
+            strategy = "org.informiz.model.EntityIdGenerator")
+*/
     @Column(name = "entity_id", unique = true)
+    @Access(AccessType.PROPERTY)
     protected String entityId;
 
     @NotNull(message = "Locale is mandatory")
@@ -30,6 +54,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval=true)
+    @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -71,6 +97,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.reviews = reviews;
     }
 
+    // TODO: check: safe for concurrent reviewing?
     public void addReview(Review review) {
         synchronized (reviews) {
             getReviews().add(review);

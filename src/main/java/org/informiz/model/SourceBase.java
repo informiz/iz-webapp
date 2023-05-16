@@ -1,10 +1,7 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
@@ -14,10 +11,17 @@ import java.io.Serializable;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="source")
 @Entity
+@NamedEntityGraph(
+        name= SourceBase.SOURCE_DATA,
+        attributeNodes={
+                @NamedAttributeNode("reviews"),
+                @NamedAttributeNode("score")
+        })
 public final class SourceBase extends ChainCodeEntity implements Serializable {
 
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 3L ;
 
+    public static final String SOURCE_DATA = "source-data";
     // TODO: additional details per source-type?
     public enum SourceType {
         UNIVERSITY("University"),

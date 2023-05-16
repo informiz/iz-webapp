@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_MEMBER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(SpringExtension.class)
@@ -40,5 +41,7 @@ public class FactCheckerRepositoryTest {
 
         found = factCheckerRepo.findByEmail(chuck.getEmail());
         assertEquals(chuck.getName(), found.getName());
+        assertEquals(chuck.getEntityId(), found.getEntityId());
+        assertNotNull(found.getLocalId());
     }
 }

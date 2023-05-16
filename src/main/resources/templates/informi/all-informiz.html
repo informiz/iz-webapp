@@ -117,9 +117,9 @@
             // Download media only for visible informiz - adding image-source on render
             function informiFormatter(value, row) {
                 media_path = media_paths[row.id];
-                img_src =  media_path ? ' src="' + media_path + '" ' : '';
+                img_src =  media_path ? ' src="' + media_path + '" ' : null;
 
-                if (value.indexOf(img_src) < 0) { // don't add src twice
+                if (img_src && value.indexOf(img_src) < 0) { // don't add src twice
                     img_clz_str = 'class="iz-media';
                     img_clz_idx = value.indexOf(img_clz_str);
                     value = value.substring(0, img_clz_idx) + img_src + value.substring(img_clz_idx, value.length);

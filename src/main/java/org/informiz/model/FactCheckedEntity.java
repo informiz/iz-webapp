@@ -1,18 +1,27 @@
 package org.informiz.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+//@MappedSuperclass
 public abstract class FactCheckedEntity extends ChainCodeEntity {
+
     @OneToMany(mappedBy = "factChecked",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval=true)
-    protected Set<Reference> references;
+    @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
+    protected Set<Reference> references = new HashSet<>();
 
     public Set<Reference> getReferences() {
         return references;

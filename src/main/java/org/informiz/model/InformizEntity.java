@@ -1,24 +1,18 @@
 package org.informiz.model;
 
 
+import jakarta.persistence.*;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.function.Consumer;
 
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class InformizEntity implements Serializable {
 
-    static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    //@JsonIgnore
-    protected Long id;
+    static final long serialVersionUID = 3L;
 
     @Column(name = "creator_entity_id")
     protected String creatorId;
@@ -70,14 +64,6 @@ public abstract class InformizEntity implements Serializable {
     public void revive() {
         removedTs = null;
         updatedTs = new Date().getTime();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getOwnerId() {

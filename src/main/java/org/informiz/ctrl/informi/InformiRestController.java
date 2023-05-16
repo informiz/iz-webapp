@@ -21,6 +21,7 @@ public class InformiRestController {
     @Autowired
     private InformiRepository informiRepo;
 
+    // TODO: what DTOs do we actually need in the front-end? Json shouldn't include everything...
     @GetMapping(path = {"/", "/all"})
     public List<InformiBase> getAllInformiz() {
         return StreamSupport
@@ -28,6 +29,7 @@ public class InformiRestController {
                 .collect(Collectors.toList());
     }
 
+    // TODO: necessary?
     @GetMapping(path = {"/", "/informi"})
     public InformiBase getInformi(@RequestParam String entityId) {
         return informiRepo.findByEntityId(entityId);

@@ -4,29 +4,35 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.logging.log4j.util.Strings;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
 import org.informiz.auth.TokenProvider;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static org.informiz.auth.CookieUtils.*;
-
 @RestController
 @RequestMapping(path = AccessRestController.PREFIX)
 public class AccessRestController {
@@ -40,11 +46,20 @@ public class AccessRestController {
     private String clientId;
 
     // TODO: user may not be a member, get entity-id from ES
-    @Autowired
-    private FactCheckerRepository factCheckerRepo;
+    private final FactCheckerRepository factCheckerRepo;
+
+    private final TokenProvider tokenProvider;
+
+    private final SecurityContextRepository securityContextRepo;
+
+    private static final Logger logger = LoggerFactory.getLogger(AccessRestController.class);
 
     @Autowired
-    private TokenProvider tokenProvider;
+    public AccessRestController(FactCheckerRepository factCheckerRepo, TokenProvider tokenProvider, SecurityContextRepository securityContextRepo) {
+        this.factCheckerRepo = factCheckerRepo;
+        this.tokenProvider = tokenProvider;
+        this.securityContextRepo = securityContextRepo;
+    }
 
 
     /**
@@ -63,6 +78,7 @@ public class AccessRestController {
     public void login(@RequestHeader("referer") Optional<String> referer,
                         @CookieValue(name = NONCE_COOKIE_NAME) String nonce,
                         HttpServletResponse response,
+                        HttpServletRequest request,
                         String credential) throws IOException {
         try {
             GoogleIdToken.Payload idToken = getIdToken(credential, nonce);
@@ -73,7 +89,7 @@ public class AccessRestController {
             // TODO: user may not be a member, get entity-id from ES
             FactCheckerBase checker = factCheckerRepo.findByEmail(email);
             String entityId = checker == null ? "" : checker.getEntityId();
-            Collection<GrantedAuthority> authorities = AuthUtils.getUserAuthorities(email, entityId);
+            Collection<? extends GrantedAuthority> authorities = AuthUtils.getUserAuthorities(email, entityId);
 
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("eid", entityId);
@@ -83,14 +99,19 @@ public class AccessRestController {
             OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities, attributes, "name"),
                 authorities, clientId);
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
-            CookieUtils.setCookie(response, NONCE_COOKIE_NAME, 0, "");
+
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(auth);
+            SecurityContextHolder.setContext(context);
+            securityContextRepo.saveContext(context, request, response);
 
         } catch (Exception e) {
-            // TODO: bad credentials? Log this
+            logger.error("Unexpected error during auth", e);
             // TODO: revoke other cookies? reset g_state cookie?
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
         }
-        response.sendRedirect(referer.orElse("/"));
+        String path  = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
+        response.sendRedirect(path);
     }
 
     private GoogleIdToken.Payload getIdToken(final String credential, @NotBlank String nonce) throws GeneralSecurityException, IOException {
@@ -110,7 +131,9 @@ public class AccessRestController {
         CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
         CookieUtils.setCookie(response, GOOGLE_STATE_COOKIE_NAME, 0, "");
 
-        response.sendRedirect(referer.orElse("/"));
+        // TODO: stay on same page if it doesn't require auth?
+        // String path  = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
+        response.sendRedirect("/");
     }
 
 }

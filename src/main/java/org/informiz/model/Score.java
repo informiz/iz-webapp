@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Embeddable
 public class Score implements Serializable {
 
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 3L ;
 
     @DecimalMin("0.0")
     @DecimalMax("1.0")

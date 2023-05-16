@@ -1,11 +1,11 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,14 +15,39 @@ import java.util.Set;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="hypothesis")
 @Entity
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name= HypothesisBase.CLAIM_PREVIEW,
+                includeAllAttributes=true,
+                attributeNodes={
+                        @NamedAttributeNode("reviews"),
+                        @NamedAttributeNode("score")
+                }
+        ),
+        @NamedEntityGraph(
+                name= HypothesisBase.CLAIM_DATA,
+                includeAllAttributes=true,
+                attributeNodes={
+                        @NamedAttributeNode("reviews"),
+                        @NamedAttributeNode("score"),
+                        @NamedAttributeNode("references"),
+                        @NamedAttributeNode("sources")
+                }
+        )
+
+})
 public final class HypothesisBase extends FactCheckedEntity implements Serializable {
 
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 3L ;
+    public static final String CLAIM_PREVIEW = "claim-with-reviews";
+    public static final String CLAIM_DATA = "claim-full-data";
 
     @NotBlank(message = "Claim is mandatory")
     private String claim;
 
     @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)
+    @Fetch(FetchMode.SUBSELECT)
+    @JsonIgnore
     protected Set<SourceRef> sources;
 
     public String getClaim() {

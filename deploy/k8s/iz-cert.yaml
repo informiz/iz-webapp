@@ -5,3 +5,4 @@ metadata:
 spec:
   domains:
     - <CHANNEL_NAME>.informiz.org
+    - www.<CHANNEL_NAME>.informiz.org

@@ -32,6 +32,7 @@ mvnw.cmd
 build/
 tmp/
 deploy-test/
+deploy-prod/
 
 ### VS Code ###
 .vscode/
@@ -39,7 +40,7 @@ deploy-test/
 ### Local dev config ###
 application-dev.properties
 application.properties*
-src/main/resources/initDb.sql
+src/main/resources/initDb*.sql
 
 ### Test crypto material ###
 src/main/resources/test-crypto/*

@@ -5,17 +5,18 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-        <!-- TODO: hacky, improve this -->
-        <meta th:if="${informi != null}" property="og:title" th:content="${informi.name}"/>
-        <meta th:if="${informi != null}" property="og:description" th:content="${informi.description}"/>
-        <meta th:if="${informi != null}" property="og:type" content="website" />
-        <meta th:if="${informi != null}" property="og:image" th:content="${informi.getMediaPath()}"/>
+        <th:block th:if="${informi?.name}">
+        <!-- tags for link display -->
+            <meta property="og:title" th:content="${informi.name}"/>
+            <meta property="og:description" th:content="${informi.description}"/>
+            <meta property="og:type" content="website" />
+            <meta property="og:image" th:content="${informi.getMediaPath()}"/>
 
-        <meta th:if="${informi != null}" name="twitter:card" content="summary_large_image"/>
-        <meta th:if="${informi != null}" name="twitter:title" th:content="${informi.name}"/>
-        <meta th:if="${informi != null}" name="twitter:description" th:content="${informi.description}"/>
-        <meta th:if="${informi != null}" name="twitter:image" th:content="${informi.getMediaPath()}"/>
-
+            <meta name="twitter:card" content="summary_large_image"/>
+            <meta name="twitter:title" th:content="${informi.name}"/>
+            <meta name="twitter:description" th:content="${informi.description}"/>
+            <meta name="twitter:image" th:content="${informi.getMediaPath()}"/>
+        </th:block>
 
         <link rel="shortcut icon" type="image/png" th:href="@{/style/favicon.png}"/>
 
@@ -72,10 +73,16 @@
 
         <div class="container">
 
+            <div th:if="${#arrays.isEmpty(@environment.getActiveProfiles()) || ! #arrays.contains(@environment.getActiveProfiles(), 'prod')}"
+                 class="row mt-3">
+                <div class="col d-flex align-items-center justify-content-center">
+                    <h3 class="alert-heading mt-2">------- TEST APPLICATION ------</h3>
+                </div>
+            </div>
+
             <div th:replace="~{fragments/style-header :: header}"></div>
 
             <div class="mt-3 px-2 bg-light bg-gradient">
-
                 <div class="row mx-1 alert alert-secondary" role="alert">
                     <div class="col col-auto">
                         <h3 class="alert-heading mt-2">

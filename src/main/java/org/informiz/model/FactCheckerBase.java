@@ -1,6 +1,8 @@
 package org.informiz.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,9 +15,17 @@ import java.util.function.Consumer;
 
 @Table(name="fact_checker")
 @Entity
-public class FactCheckerBase extends ChainCodeEntity implements Serializable {
+@NamedEntityGraph(
+        name= FactCheckerBase.FACT_CHECKER_DATA,
+        attributeNodes={
+                @NamedAttributeNode("reviews"),
+                @NamedAttributeNode("score")
+        })
+public final class FactCheckerBase extends ChainCodeEntity implements Serializable {
 
-    static final long serialVersionUID = 1L;
+    public static final String FACT_CHECKER_DATA = "fact-checker-data";
+
+    static final long serialVersionUID = 3L ;
 
     @NotBlank(message = "Name is mandatory")
     private String name;

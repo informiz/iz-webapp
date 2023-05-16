@@ -6,6 +6,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Formula;
 
 import java.io.Serializable;
 
@@ -18,9 +19,14 @@ import java.io.Serializable;
  */
 @Table(name="reference")
 @Entity
-public class Reference extends InformizEntity implements Serializable {
+public final class Reference extends InformizEntity implements Serializable {
 
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 3L ;
+
+    public static final String QUERY = "(IF ref_entity_id like CLAIM_% " +
+            "SELECT * FROM claim c where c.entity_id = ref_entity_id " +
+            "ELSE " +
+            "SELECT * FROM informi i where i.entity_id = ref_entity_id)";
 
     public enum Entailment {
         SUPPORTS("Supports"), // Positive textual-entailment
@@ -38,8 +44,23 @@ public class Reference extends InformizEntity implements Serializable {
         }
     }
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    protected Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     // The reviewed-entity (always in the local channel)
     @ManyToOne(fetch = FetchType.LAZY)
+    @Formula(value=QUERY)
+    // TODO: can't target FactCheckedEntity with entity_id as ref-column, fixed in Hibernate 6.3
+    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501
     @JoinColumn(name = "fact_checked_entity_id", referencedColumnName = "entity_id")
     @JsonIgnore
     private ChainCodeEntity factChecked;

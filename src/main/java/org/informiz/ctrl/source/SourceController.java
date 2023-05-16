@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
+import org.informiz.repo.source.SourceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,10 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     public static final String SOURCE_ATTR = "source";
     public static final String SOURCES_ATTR = "sources";
 
+    @Autowired
+    public SourceController(SourceRepository repository) {
+        super(repository);
+    }
 
     @GetMapping(path = {"/", "/all"})
     public String getAllSources(Model model) {
@@ -62,7 +68,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @GetMapping("/view/{id}")
     @Secured("ROLE_MEMBER")
     public String viewSource(@PathVariable("id") @Valid Long id, Model model) {
-        SourceBase source = entityRepo.findById(id)
+        SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
         model.addAttribute(SOURCE_ATTR, source);
         return String.format("%s/view-src.html", PREFIX);
@@ -71,7 +77,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @GetMapping("/details/{id}")
     @Secured("ROLE_MEMBER")
     public String getSource(@PathVariable("id") @Valid Long id, Model model) {
-        SourceBase source = entityRepo.findById(id)
+        SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
         model.addAttribute(SOURCE_ATTR, source);
         model.addAttribute(REVIEW_ATTR, new Review());
@@ -90,7 +96,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
             current.edit(source);
             entityRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
-            return String.format("redirect:%s/details/%s", PREFIX, current.getId());
+            return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
         }
         return String.format("%s/update-src.html", PREFIX);
     }

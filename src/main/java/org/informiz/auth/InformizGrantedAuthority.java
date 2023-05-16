@@ -1,5 +1,6 @@
 package org.informiz.auth;
 
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.core.GrantedAuthority;
 
 public class InformizGrantedAuthority implements GrantedAuthority {
@@ -18,6 +19,17 @@ public class InformizGrantedAuthority implements GrantedAuthority {
     public InformizGrantedAuthority(String role, String entityId) {
         this.role = role;
         this.entityId = entityId;
+    }
+
+    /**
+     * TODO: make this available a Bean once Spring 6.1.x is GA
+     * @return Informiz' role-hierarchy
+     */
+    public static RoleHierarchyImpl roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy(String.format("%s > %s > %s > %s",
+                ROLE_ADMIN, ROLE_MEMBER, ROLE_CHECKER, ROLE_VIEWER));
+        return roleHierarchy;
     }
 
     @Override

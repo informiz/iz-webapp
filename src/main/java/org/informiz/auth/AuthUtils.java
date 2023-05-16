@@ -8,14 +8,15 @@ import com.google.cloud.kms.v1.EncryptResponse;
 import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.*;
 import com.google.protobuf.ByteString;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.hyperledger.fabric.gateway.Identity;
 import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.util.*;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
 public class AuthUtils {
+
+    static RoleHierarchy roleHierarchy = InformizGrantedAuthority.roleHierarchy();
 
     public static void generateCryptoMaterial(String userEntityId) {
         // TODO: generate using organization's CA
@@ -69,7 +72,7 @@ public class AuthUtils {
                 new InformizGrantedAuthority(ROLE_VIEWER, "anonymous"));
     }
 
-    public static Collection<GrantedAuthority> getUserAuthorities(String email, String entityId) {
+    public static Collection<? extends GrantedAuthority> getUserAuthorities(String email, String entityId) {
         // TODO: get wallet from secret-manager based on user entity-id
         Wallet userWallet;
         try {
@@ -97,7 +100,12 @@ public class AuthUtils {
             authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId));
         }
 
-        return authorities;
+        // TODO: AuthorityAuthorizationManager not using defined role hierarchy, fixed in Spring 6.1.x
+        /**
+         * see https://github.com/spring-projects/spring-security/issues/12473
+         */
+        return roleHierarchy.getReachableGrantedAuthorities(authorities);
+        //return authorities;
     }
 
     // TODO: Very inefficient!! Implement a user-details service to keep this info

@@ -6,16 +6,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-// TODO: extend PagingAndSortingRepository instead?
+// TODO: is this needed?
 public interface ReviewRepository extends CrudRepository<Review, Long> {
 
     Review findById(long id);
 
-    Review findByCreatorIdAndReviewed(String creatorId, String reviewed);
+    Review findByCreatorIdAndReviewed(String creatorId, @Param("reviewed_entity_id") String reviewed);
 
-    List<Review> findByReviewed(String reviewed);
+    List<Review> findByReviewed(@Param("reviewed_entity_id") String reviewed);
 
     List<Review> findByCreatorId(String creatorId);
 
-    long deleteByCreatorIdAndReviewed(@Param("creatorId") String creatorId, @Param("reviewed") String reviewed);
+    long deleteByCreatorIdAndReviewed(String creatorId, @Param("reviewed_entity_id") String reviewed);
 }
