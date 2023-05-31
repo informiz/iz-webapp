@@ -18,10 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(path = CitationController.PREFIX)
+@Validated
 public class CitationController extends ChaincodeEntityController<CitationBase> {
 
     public static final String PREFIX = "/citation";
@@ -113,11 +115,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
     }
 
+    // TODO: test validation
     @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
     @Transactional
     public String reviewCitation(@PathVariable("id") @Valid Long id,
-                                 @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                                 @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Authentication authentication) {
         reviewEntity(id, review, authentication, result);
         return String.format("redirect:%s/details/%s", PREFIX, id);
@@ -128,7 +131,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("id") @Valid Long id,
-                                 @Valid @ModelAttribute(REVIEW_ATTR) Review review,
+                             @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Authentication authentication) {
         reviewEntity(id, review, authentication, result);
         return String.format("redirect:%s/details/%s", PREFIX, id);
@@ -139,7 +142,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String deleteReview(@PathVariable("id") @Valid Long id,
-                               @ModelAttribute(REVIEW_ATTR) Review review,
+                               @Validated(Review.ReviewDeletion.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                   Authentication authentication) {
 
         deleteReview(id, review.getId(), authentication);

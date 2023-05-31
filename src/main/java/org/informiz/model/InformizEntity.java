@@ -1,7 +1,13 @@
 package org.informiz.model;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -14,18 +20,24 @@ public abstract class InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L;
 
-    @Column(name = "creator_entity_id")
+    @Column(name = "creator_entity_id", nullable = false, updatable = false)
+    @NotBlank
+    @Size(max = 255)
     protected String creatorId;
 
-    @Column(name = "owner_entity_id")
+    @Column(name = "owner_entity_id", nullable = false)
+    @NotBlank
+    @Size(max = 255)
     protected String ownerId;
 
     // Creation time, as UTC timestamp in milliseconds
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = false, updatable = false)
+    @NotNull
     protected Long createdTs;
 
     // Last-updated time, as UTC timestamp in milliseconds
     @Column(name = "last_updated", nullable = false)
+    @NotNull
     protected Long updatedTs;
 
     // Removal time, as UTC timestamp in milliseconds

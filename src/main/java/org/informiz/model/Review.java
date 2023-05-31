@@ -2,15 +2,18 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
+import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Formula;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Table(name="review")
 @Entity
+//@Review.ReviewOfEntity
 public final class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
@@ -37,10 +40,18 @@ public final class Review extends InformizEntity implements Serializable {
         this.id = id;
     }
 
-    @DecimalMin("0.0")
-    @DecimalMax("1.0")
-    @NotNull
+    @DecimalMin(value = "0.0", groups = { UserReview.class, Default.class })
+    @DecimalMax(value = "1.0", groups = { UserReview.class, Default.class })
+    @NotNull(groups = { UserReview.class, Default.class })
+    @Column(name = "rating", nullable = false)
     private Float rating;
+
+
+    // Mapping both reviewedEntityId and reviewed to same column - value is not insertable/updatable
+    @Column(name = "reviewed_entity_id", nullable = false, insertable=false, updatable=false)
+    @NotBlank(groups = { UserReview.class, ReviewDeletion.class, Default.class })
+    @Size(max = 255, groups = { UserReview.class, ReviewDeletion.class, Default.class })
+    private String reviewedEntityId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Formula(value=QUERY)
@@ -48,7 +59,8 @@ public final class Review extends InformizEntity implements Serializable {
     @JsonIgnore
     private ChainCodeEntity reviewed;
 
-    @Column
+    @Column(name = "comment")
+    @Size(max = 255)
     private String comment;
 
     public static Review create() { return new Review(); }
@@ -77,6 +89,14 @@ public final class Review extends InformizEntity implements Serializable {
         this.reviewed = reviewed;
     }
 
+    public String getReviewedEntityId() {
+        return reviewedEntityId;
+    }
+
+    public void setReviewedEntityId(String reviewedEntityId) {
+        this.reviewedEntityId = reviewedEntityId;
+    }
+
     public String getComment() {
         return comment;
     }
@@ -97,4 +117,9 @@ public final class Review extends InformizEntity implements Serializable {
         return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
                 this.reviewed.getEntityId().equals(other.reviewed.getEntityId()));
     }
+
+
+    // Validation groups:
+    public interface UserReview {}
+    public interface ReviewDeletion {}
 }
