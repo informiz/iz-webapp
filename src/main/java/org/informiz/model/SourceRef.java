@@ -125,7 +125,7 @@ public final class SourceRef extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", getSrcEntityId(), sourced.getEntityId(), link).hashCode();
+        return String.format("%s-%s-%s", getSrcEntityId(), srcEntityId, link).hashCode();
     }
 
     @Override

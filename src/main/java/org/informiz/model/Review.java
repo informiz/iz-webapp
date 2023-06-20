@@ -2,21 +2,30 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Formula;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Set;
 
 @Table(name="review")
 @Entity
-//@Review.ReviewOfEntity
 public final class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
+
+    /**
+     * Validation group for incoming review from UI (most fields will not be initialized)
+     */
+    public interface UserReview {}
+
+
     public static final String QUERY = "(IF reviewed_entity_id like FACT_CHECKER_% " +
             "SELECT * FROM fact_checker fc where fc.entity_id = reviewed_entity_id " +
             "ELSE IF reviewed_entity_id like CITATION_% " +
@@ -49,8 +58,8 @@ public final class Review extends InformizEntity implements Serializable {
 
     // Mapping both reviewedEntityId and reviewed to same column - value is not insertable/updatable
     @Column(name = "reviewed_entity_id", nullable = false, insertable=false, updatable=false)
-    @NotBlank(groups = { UserReview.class, ReviewDeletion.class, Default.class })
-    @Size(max = 255, groups = { UserReview.class, ReviewDeletion.class, Default.class })
+    @NotBlank
+    @Size(max = 255)
     private String reviewedEntityId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,8 +76,9 @@ public final class Review extends InformizEntity implements Serializable {
 
     public Review() {}
 
-    public Review(ChainCodeEntity reviewed, Float rating, String comment) {
+    public Review(@NotNull ChainCodeEntity reviewed, Float rating, String comment) {
         this.reviewed = reviewed;
+        this.reviewedEntityId = reviewed.getEntityId();
         this.rating = rating;
         this.comment = comment;
     }
@@ -107,7 +117,7 @@ public final class Review extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s", creatorId, reviewed.getEntityId()).hashCode();
+        return String.format("%s-%s", creatorId, reviewedEntityId).hashCode();
     }
 
     @Override
@@ -115,11 +125,31 @@ public final class Review extends InformizEntity implements Serializable {
         if (obj == null || ! (obj instanceof Review)) return false;
         Review other = (Review) obj;
         return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
-                this.reviewed.getEntityId().equals(other.reviewed.getEntityId()));
+                this.reviewedEntityId.equals(other.reviewedEntityId));
     }
 
+    // Custom validation for review-deletion requests coming from the UI - annotation and validator definitions
+    @Target({ElementType.PARAMETER})
+    @Retention(RetentionPolicy.RUNTIME)
+    @Constraint(validatedBy = ReviewDeletionValidator.class)
+    public @interface ReviewDeletion {
+        String message() default "Review deletion requires owner-id and review-id";
+        Class<?>[] groups() default {};
+        Class<? extends Payload>[] payload() default {};
+    }
 
-    // Validation groups:
-    public interface UserReview {}
-    public interface ReviewDeletion {}
+    public static class ReviewDeletionValidator implements ConstraintValidator<ReviewDeletion, Review> {
+        private final static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        @Override
+        public void initialize(ReviewDeletion constraintAnnotation) {
+            ConstraintValidator.super.initialize(constraintAnnotation);
+        }
+
+        @Override
+        public boolean isValid(Review review, ConstraintValidatorContext context) {
+            Set<ConstraintViolation<Review>> violations = validator.validateProperty(review, "ownerId");
+            violations.addAll(validator.validateProperty(review, "id"));
+            return violations.isEmpty();
+        }
+    }
 }

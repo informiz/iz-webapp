@@ -23,11 +23,12 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         this.entityRepo = entityRepo;
     }
 
+    // TODO: confusing interface: returning the entity if review failed
     protected T reviewEntity(Long id, Review review, Authentication authentication, BindingResult result) {
         T entity = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid local entity id"));
 
-        if (! result.hasFieldErrors("rating")) {
+        if (! result.hasErrors()) {
             String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
 
             Review current = entity.getCheckerReview(checker);
@@ -37,11 +38,13 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
             } else {
                 entity.addReview(new Review(entity, review.getRating(), review.getComment()));
             }
+            entityRepo.save(entity);
+            return null;
         }
         return entity;
     }
 
-    protected void deleteReview(long id, Long revId, Authentication authentication) {
+    protected T deleteReview(long id, Long revId, Authentication authentication) {
         T entity = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
         String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
@@ -49,6 +52,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         if (current != null && current.getId().equals(revId)) {
             entity.removeReview(current);
         } // TODO: warn if no review or different id
+        return entity;
     }
 
 

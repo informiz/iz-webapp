@@ -8,19 +8,18 @@
                     <h5 class="modal-title" th:text="${title}"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div th:id="'modal_body_' + ${content_id}" class="modal-body">
+                <div th:id="'modal_' + ${content_id} + '_body'" class="modal-body">
                 </div>
-                <div class="modal-footer"/>
+                <div th:id="'modal_' + ${content_id} + '_footer'" class="modal-footer"/>
             </div>
         </div>
     </div>
     <script>
         $( document ).ready(function() {
-            var body_selector = "#modal_body_[[${content_id}]]";
-            var content_selector = "#[[${content_id}]]";
-            // TODO: WORKAROUND - check why form closed prematurely in 'Edit Reference'
-            htmlStr = $(content_selector).html().replace('</form>','') + "</form>";
-            $(body_selector).append(htmlStr)
+            const body_selector = "#modal_[[${content_id}]]_body";
+            const content_selector = "#[[${content_id}]]";
+            // Move content into modal body
+            $(body_selector).append($(content_selector));
         });
     </script>
 </div>

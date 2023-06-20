@@ -115,37 +115,45 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
     }
 
-    // TODO: test validation
     @PostMapping("/{id}/review/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String reviewCitation(@PathVariable("id") @Valid Long id,
+    public String addReview(@PathVariable("id") @Valid Long id,
                                  @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
-                                 BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+                                 BindingResult result, Model model, Authentication authentication) {
+        return reviewCitation(id, review, result, model, authentication);
     }
 
     @PostMapping("/{id}/review/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("id") @Valid Long id,
                              @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
-                                 BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+                                 BindingResult result, Model model, Authentication authentication) {
+        return reviewCitation(id, review, result, model, authentication);
+    }
+
+    private String reviewCitation(Long id, Review review, BindingResult result, Model model, Authentication authentication) {
+        CitationBase current = reviewEntity(id, review, authentication, result);
+
+        if(current == null) {
+            // Review successful, redirect back to edit page
+            return String.format("redirect:%s/details/%s", PREFIX, id);
+        }
+        // Failed to review, reloaded page presents errors in UI, just add necessary entities to the model
+        model.addAttribute(CITATION_ATTR, current);
+        model.addAttribute(SOURCE_ATTR, new SourceRef());
+        return String.format("%s/update-citation.html", PREFIX);
     }
 
     @PostMapping("/{id}/review/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String deleteReview(@PathVariable("id") @Valid Long id,
-                               @Validated(Review.ReviewDeletion.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                               @Valid @Review.ReviewDeletion @ModelAttribute(REVIEW_ATTR) Review review,
                                   Authentication authentication) {
 
-        deleteReview(id, review.getId(), authentication);
+        CitationBase current = deleteReview(id, review.getId(), authentication);
+        entityRepo.save(current);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
