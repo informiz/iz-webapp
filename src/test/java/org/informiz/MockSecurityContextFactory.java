@@ -17,14 +17,16 @@ import java.util.Map;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomAuth> {
 
+    public static final String DEFAULT_TEST_CHECKER_ID = "usr1234";
+
     @Override
     public SecurityContext createSecurityContext(WithCustomAuth withCustomAuth) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         Map<String, Object> attributes = new HashMap<>();
 
-        attributes.put("eid", "1234");
-        attributes.put("name", "Mock User");
+        attributes.put("eid", DEFAULT_TEST_CHECKER_ID);
+        attributes.put("name", DEFAULT_TEST_CHECKER_ID);
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for (String role: withCustomAuth.role())

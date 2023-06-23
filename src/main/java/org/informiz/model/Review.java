@@ -6,6 +6,8 @@ import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Formula;
+import org.hibernate.validator.internal.constraintvalidators.bv.NotNullValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.number.sign.PositiveValidatorForLong;
 
 import java.io.Serializable;
 import java.lang.annotation.ElementType;
@@ -42,7 +44,7 @@ public final class Review extends InformizEntity implements Serializable {
     protected Long id;
 
     public Long getId() {
-        return id;
+        return (id == null) ? 0 : id;
     }
 
     public void setId(Long id) {
@@ -138,8 +140,11 @@ public final class Review extends InformizEntity implements Serializable {
         Class<? extends Payload>[] payload() default {};
     }
 
+    // A validator for verifying review-deletion required fields
     public static class ReviewDeletionValidator implements ConstraintValidator<ReviewDeletion, Review> {
         private final static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        private final static ConstraintValidator isLong = new PositiveValidatorForLong();
+        private final static ConstraintValidator isNotNull = new NotNullValidator();
         @Override
         public void initialize(ReviewDeletion constraintAnnotation) {
             ConstraintValidator.super.initialize(constraintAnnotation);
@@ -149,7 +154,9 @@ public final class Review extends InformizEntity implements Serializable {
         public boolean isValid(Review review, ConstraintValidatorContext context) {
             Set<ConstraintViolation<Review>> violations = validator.validateProperty(review, "ownerId");
             violations.addAll(validator.validateProperty(review, "id"));
-            return violations.isEmpty();
+            return violations.isEmpty() &&
+                    isNotNull.isValid(review.getId(), context) &&
+                    isLong.isValid(review.getId(), context);
         }
     }
 }

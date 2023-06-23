@@ -4,7 +4,9 @@ import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
+import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
+import org.informiz.model.Review;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_CHECKER;
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_VIEWER;
 import static org.mockito.BDDMockito.given;
@@ -28,7 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, CitationController.class})
+@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, CitationController.class, ErrorHandlingAdvice.class})
 @ActiveProfiles("test")
 @WebMvcTest(CitationController.class)
 class CitationControllerTest {
@@ -54,19 +58,19 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/")
                         .secure(true).with(csrf())
                         .param("rating", "0.82")
-                        .contentType("application/json"))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerReviewsCitationNoRating_thenError() throws Exception {
+    void whenCheckerReviewsCitationNoRating_thenErrorMsg() throws Exception {
 
         given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
 
         mockMvc.perform(post("/citation/1/review/")
                         .secure(true).with(csrf())
-                        .contentType("application/json"))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isOk())
                 .andExpect(content().string(new StringContains("must not be null")));
     }
@@ -81,9 +85,100 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/")
                         .secure(true).with(csrf())
                         .param("rating", "0.82")
-                        .contentType("application/json"))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isForbidden());
     }
+
+
+    @Test
+    @WithCustomAuth(role = {ROLE_VIEWER})
+    void whenViewerEditsReviewOfCitation_thenForbidden() throws Exception {
+
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
+
+        mockMvc.perform(post("/citation/1/review/edit/")
+                        .secure(true).with(csrf())
+                        .param("rating", "0.82")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerEditsReviewOfCitation_succeedIfOwner() throws Exception {
+
+        CitationBase citation = getPopulatedCitation();
+        Review review = getPopulatedReview(citation);
+        citation.addReview(review);
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        // Initially review owner-id not the same as authenticated user
+        mockMvc.perform(post("/citation/1/review/edit/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .param("rating", "0.82")
+                        .param("comment", "Changed Comment")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isForbidden());
+
+        // Use same owner-id for review as authenticated user
+        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        mockMvc.perform(post("/citation/1/review/edit/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .param("rating", "0.82")
+                        .param("comment", "Changed Comment")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerDeletesReviewOfCitationNoId_thenErrorMessage() throws Exception {
+
+        CitationBase citation = getPopulatedCitation();
+        Review review = getPopulatedReview(citation);
+        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        citation.addReview(review);
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        mockMvc.perform(post("/citation/1/review/del/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new StringContains("Submitted data is invalid")));
+    }
+
+
+
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerDeletesReviewOfCitation_succeedIfOwner() throws Exception {
+
+        CitationBase citation = getPopulatedCitation();
+        Review review = getPopulatedReview(citation);
+        citation.addReview(review);
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        // Initially review owner-id not the same as authenticated user
+        mockMvc.perform(post("/citation/1/review/del/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .param("id", review.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        // Use same owner-id for review as authenticated user
+        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        mockMvc.perform(post("/citation/1/review/del/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .param("id", review.getId().toString())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
+    }
+
 
 
     @NotNull
@@ -100,12 +195,15 @@ class CitationControllerTest {
         return citation;
     }
 
-    // TODO: complete tests
-    @Test
-    void editReview() {
-    }
-
-    @Test
-    void deleteReview() {
+    @NotNull
+    private static Review getPopulatedReview(CitationBase citation) {
+        Review review = new Review(citation, 0.9f, "Test review");
+        review.setId(1l);
+        review.setReviewedEntityId("test");
+        review.setCreatorId("test");
+        review.setOwnerId("test");
+        review.setCreatedTs(12345l);
+        review.setUpdatedTs(12345l);
+        return review;
     }
 }

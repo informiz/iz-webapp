@@ -30,22 +30,23 @@
                             <span class="table-text" th:text="${review.comment}"></span>
                         </td>
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                            <div class="d-none">
-                                <div th:id="'rev_' + ${review.id}">
-                                    <div th:replace="~{fragments/review :: reviewForm(${link} + 'edit/', ${review})}"></div>
-                                </div>
-                            </div>
-                            <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_form_' + ${review.id})}"></div>
                             <td>
+                                <div class="d-none">
+                                    <div th:id="'rev_' + ${review.getId()}">
+                                        <div th:replace="~{fragments/review :: reviewForm(${link} + 'edit/', ${review})}"></div>
+                                    </div>
+                                </div>
+                                <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_form_' + ${review.getId()})}"></div>
+
                                 <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), review)}"
-                                        th:id="'edit_rev_' + ${review.id}" data-bs-toggle="modal"
-                                        th:attr="data-bs-target='#modal_rev_' + ${review.id}"
+                                        th:id="'edit_rev_' + ${review.getId()}" data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#modal_rev_form_' + ${review.getId()}"
                                         class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                             </td>
                             <td>
                                 <form th:action="@{${link}+'del/'}" th:object="${review}" method="post">
                                     <input type="text" class="d-none" name="ownerId" th:value="${review.ownerId}" readonly/>
-                                    <input type="text" class="d-none" name="id" th:value="${review.id}" readonly/>
+                                    <input type="text" class="d-none" name="id" th:value="${review.getId()}" readonly/>
                                     <input type="submit" value="X"
                                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
                                            th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),review)}"/>

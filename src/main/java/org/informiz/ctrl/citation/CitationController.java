@@ -66,10 +66,10 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete/{citationId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteCitation(@PathVariable("id") @Valid Long id ,@RequestParam String ownerId) {
+    public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
         CitationBase citation = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         // TODO: set inactive
@@ -77,17 +77,17 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/view/{id}")
-    public String viewCitation(@PathVariable("id") @Valid Long id, Model model) {
+    @GetMapping("/view/{citationId}")
+    public String viewCitation(@PathVariable("citationId") @Valid Long id, Model model) {
         CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         model.addAttribute(CITATION_ATTR, citation);
         return String.format("%s/view-citation.html", PREFIX);
     }
 
-    @GetMapping("/details/{id}")
+    @GetMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
-    public String getCitation(@PathVariable("id") Long id, Model model) {
+    public String getCitation(@PathVariable("citationId") Long id, Model model) {
         CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         model.addAttribute(CITATION_ATTR, citation);
@@ -96,10 +96,10 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("%s/update-citation.html", PREFIX);
     }
 
-    @PostMapping("/details/{id}")
+    @PostMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#citation.ownerId == authentication.principal.name")
-    public String updateCitation(@PathVariable("id") @Valid Long id,
+    public String updateCitation(@PathVariable("citationId") @Valid Long id,
                                  @Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -115,18 +115,18 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
     }
 
-    @PostMapping("/{id}/review/")
+    @PostMapping("/{citationId}/review/")
     @Secured("ROLE_CHECKER")
-    public String addReview(@PathVariable("id") @Valid Long id,
+    public String addReview(@PathVariable("citationId") @Valid Long id,
                                  @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Model model, Authentication authentication) {
         return reviewCitation(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/edit/")
+    @PostMapping("/{citationId}/review/edit/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String editReview(@PathVariable("id") @Valid Long id,
+    public String editReview(@PathVariable("citationId") @Valid Long id,
                              @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Model model, Authentication authentication) {
         return reviewCitation(id, review, result, model, authentication);
@@ -145,23 +145,22 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("%s/update-citation.html", PREFIX);
     }
 
-    @PostMapping("/{id}/review/del/")
+    @PostMapping("/{citationId}/review/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String deleteReview(@PathVariable("id") @Valid Long id,
-                               @Valid @Review.ReviewDeletion @ModelAttribute(REVIEW_ATTR) Review review,
-                                  Authentication authentication) {
-
+    public String deleteReview(@PathVariable("citationId") @Valid Long id,
+                               @Review.ReviewDeletion @ModelAttribute Review review,
+                               Authentication authentication) {
         CitationBase current = deleteReview(id, review.getId(), authentication);
         entityRepo.save(current);
         return String.format("redirect:%s/details/%s", PREFIX, id);
     }
 
 
-    @PostMapping("/source/{id}")
+    @PostMapping("/source/{citationId}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+    public String addSource(@PathVariable("citationId") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result) {
 
         CitationBase current = entityRepo.loadByLocalId(id)
@@ -184,12 +183,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/source/{id}/{srcId}")
+    @PostMapping("/source/{citationId}/{srcId}")
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#source.ownerId == authentication.principal.name")
     // TODO: resolve codes duplicate issue
-    public String editSrcRef(@PathVariable("id") @Valid Long id,
+    public String editSrcRef(@PathVariable("citationId") @Valid Long id,
                              @PathVariable("srcId") @Valid Long srcId,
                              Authentication authentication) {
 
@@ -197,12 +196,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/source/{id}/del/{refId}")
+    @PostMapping("/source/{citationId}/del/{refId}")
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#source.ownerId == authentication.principal.name")
     // TODO: resolve codes duplicate issue
-    public String deleteSrcRef(@PathVariable("id") @Valid Long id,
+    public String deleteSrcRef(@PathVariable("citationId") @Valid Long id,
                                @PathVariable("refId") @Valid Long refId,
                                Authentication authentication) {
 
