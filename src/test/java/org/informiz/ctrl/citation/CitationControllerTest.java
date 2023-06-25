@@ -72,7 +72,7 @@ class CitationControllerTest {
                         .secure(true).with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("must not be null")));
+                .andExpect(content().string(new StringContains("Please submit rating between 0.0 and 1.0")));
     }
 
 
@@ -147,7 +147,7 @@ class CitationControllerTest {
                         .param("ownerId", review.getOwnerId())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Submitted data is invalid")));
+                .andExpect(content().string(new StringContains("Please provide an ID")));
     }
 
 

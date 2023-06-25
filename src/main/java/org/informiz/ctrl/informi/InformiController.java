@@ -3,10 +3,9 @@ package org.informiz.ctrl.informi;
 import jakarta.validation.Valid;
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.InformiBase;
-import org.informiz.model.Reference;
-import org.informiz.model.Review;
+import org.informiz.model.*;
 import org.informiz.repo.informi.InformiRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +24,7 @@ import java.io.InputStream;
 
 @Controller
 @RequestMapping(path = InformiController.PREFIX)
+@Validated
 public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     public static final String PREFIX = "/informi";
@@ -78,7 +79,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addInformi(@Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
+    public String addInformi(@Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                              BindingResult result, Model model) {
         if (result.hasErrors()) {
             return String.format("%s/add-informi.html", PREFIX);
@@ -87,10 +88,10 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete/{informiId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteInformi(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
+    public String deleteInformi(@PathVariable("informiId") @Valid Long id, @RequestParam String ownerId) {
         InformiBase informi = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
         // TODO: set inactive
@@ -98,28 +99,28 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/view/{id}")
-    public String viewInformi(@PathVariable("id") @Valid Long id, Model model) {
+    @GetMapping("/view/{informiId}")
+    public String viewInformi(@PathVariable("informiId") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
         return String.format("%s/view-informi.html", PREFIX);
     }
 
-    @GetMapping("/details/{id}")
+    @GetMapping("/details/{informiId}")
     @Secured("ROLE_MEMBER")
-    public String getInformi(@PathVariable("id") @Valid Long id, Model model) {
+    public String getInformi(@PathVariable("informiId") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         prepareEditModel(model, informi, new Review(), new Reference());
-        return String.format("%s/update-informi.html", PREFIX);
+        return getEditPageTemplate();
     }
 
-    @PostMapping("/details/{id}")
+    @PostMapping("/details/{informiId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#informi.getOwnerId() == principal.getAttributes().get('eid')")
-    public String updateInformi(@PathVariable("id") @Valid Long id,
-                                    @Valid @ModelAttribute(INFORMI_ATTR) InformiBase informi,
+    public String updateInformi(@PathVariable("informiId") @Valid Long id,
+                                    @Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result) {
         if (! result.hasErrors()) {
             InformiBase current = entityRepo.findById(id)
@@ -127,58 +128,50 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
             current.edit(informi);
             entityRepo.save(current);
         }
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage(id);
     }
 
-    @PostMapping("/{id}/review/")
+    @PostMapping("/{informiId}/review/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String reviewInformi(@PathVariable("id") @Valid Long id,
-                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String reviewInformi(@PathVariable("informiId") @Valid Long id,
+                                @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/edit/")
+    @PostMapping("/{informiId}/review/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String editReviewInformi(@PathVariable("id") @Valid Long id,
-                             @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                             BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String editReview(@PathVariable("informiId") @Valid Long id,
+                                    @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                    BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/del/")
+    @PostMapping("/{informiId}/review/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String deleteReview (@PathVariable("id") @Valid Long id,
-                                      @ModelAttribute(REVIEW_ATTR) Review review,
-                                      Authentication authentication) {
-
-        deleteReview(id, review.getId(), authentication);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String deleteReview (@PathVariable("informiId") @Valid Long id,
+                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                BindingResult result, Model model, Authentication authentication) {
+        return deleteReview(id, review.getId(), result, model, authentication);
     }
 
-
-    @PostMapping("/reference/{id}")
+    @PostMapping("/reference/{informiId}")
     @Secured("ROLE_CHECKER")
     @Transactional
-    public String addReference(@PathVariable("id") @Valid Long id,
+    public String addReference(@PathVariable("informiId") @Valid Long id,
                                 @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                 BindingResult result, Authentication authentication) {
 
         return handleReference(id, reference, result, authentication);
     }
 
-    @PostMapping("/reference/{id}/edit")
+    @PostMapping("/reference/{informiId}/edit")
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String editReference(@PathVariable("id") @Valid Long id,
+    public String editReference(@PathVariable("informiId") @Valid Long id,
                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Authentication authentication) {
 
@@ -194,7 +187,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         if ( ! result.hasFieldErrors() ) {
             referenceEntity(current, reference, authentication);
         }
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage(id);
     }
 
     private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {
@@ -203,19 +196,27 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(REFERENCE_ATTR, ref);
     }
 
-    @PostMapping("/reference/{id}/ref/del")
+    @PostMapping("/reference/{informiId}/ref/del")
     @Secured("ROLE_CHECKER")
     @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String deleteReference(@PathVariable("id") @Valid Long id,
+    public String deleteReference(@PathVariable("informiId") @Valid Long id,
                                   @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                      Authentication authentication) {
 
         InformiBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
         current.removeReference(reference.getId());
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage(id);
     }
+
+    protected void modelForReviewError(@NotNull Model model, InformiBase current) {
+        model.addAttribute(INFORMI_ATTR, current);
+        model.addAttribute(REFERENCE_ATTR, new Reference());
+    }
+
+    protected String getEditPageTemplate() { return String.format("%s/update-informi.html", PREFIX); }
+    protected String getRedirectToEditPage(Long id) { return String.format("redirect:%s/details/%s", PREFIX, id); }
 
 }
 

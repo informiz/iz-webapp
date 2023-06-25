@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -42,7 +43,12 @@ public final class HypothesisBase extends FactCheckedEntity implements Serializa
     public static final String CLAIM_PREVIEW = "claim-with-reviews";
     public static final String CLAIM_DATA = "claim-full-data";
 
-    @NotBlank(message = "Claim is mandatory")
+    /**
+     * Validation group for add/edit hypothesis through the UI (most fields will not be initialized)
+     */
+    public interface HypothesisFromUI {}
+
+    @NotBlank(message = "Claim is mandatory", groups = {HypothesisFromUI.class, Default.class})
     private String claim;
 
     @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)

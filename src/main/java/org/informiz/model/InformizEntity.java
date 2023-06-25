@@ -8,6 +8,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -20,14 +21,24 @@ public abstract class InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L;
 
+    /**
+     * Validation group for deletion requests coming from UI (most fields will not be initialized)
+     */
+    public interface DeleteEntity {}
+
+    /**
+     * Validation group for edit requests coming from UI (some fields will not be initialized)
+     */
+    public interface EditEntity {}
+
     @Column(name = "creator_entity_id", nullable = false, updatable = false)
     @NotBlank
     @Size(max = 255)
     protected String creatorId;
 
     @Column(name = "owner_entity_id", nullable = false)
-    @NotBlank
-    @Size(max = 255)
+    @NotBlank(message = "Owner ID is required", groups = { EditEntity.class, DeleteEntity.class, Default.class })
+    @Size(max = 255, groups = { DeleteEntity.class, Default.class })
     protected String ownerId;
 
     // Creation time, as UTC timestamp in milliseconds

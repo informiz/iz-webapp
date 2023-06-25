@@ -21,9 +21,6 @@
             <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
                 <div class="col-4">
                     <input type="submit" th:id="'rev_form_submit_' + ${review.getId()}" class="btn btn-primary"
-                       th:data-modal-selector="'#modal_rev_form_' + ${review.getId()}"
-                       th:data-form-selector="'#rev_form_' + ${review.getId()}"
-                       th:data-action_path="${action_path}"
                            value="Submit">
                     </a>
                 </div>

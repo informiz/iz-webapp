@@ -41,6 +41,8 @@ public final class Review extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
@@ -53,7 +55,7 @@ public final class Review extends InformizEntity implements Serializable {
 
     @DecimalMin(value = "0.0", groups = { UserReview.class, Default.class })
     @DecimalMax(value = "1.0", groups = { UserReview.class, Default.class })
-    @NotNull(groups = { UserReview.class, Default.class })
+    @NotNull(groups = { UserReview.class, Default.class }, message = "Please submit rating between 0.0 and 1.0")
     @Column(name = "rating", nullable = false)
     private Float rating;
 
@@ -128,35 +130,5 @@ public final class Review extends InformizEntity implements Serializable {
         Review other = (Review) obj;
         return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
                 this.reviewedEntityId.equals(other.reviewedEntityId));
-    }
-
-    // Custom validation for review-deletion requests coming from the UI - annotation and validator definitions
-    @Target({ElementType.PARAMETER})
-    @Retention(RetentionPolicy.RUNTIME)
-    @Constraint(validatedBy = ReviewDeletionValidator.class)
-    public @interface ReviewDeletion {
-        String message() default "Review deletion requires owner-id and review-id";
-        Class<?>[] groups() default {};
-        Class<? extends Payload>[] payload() default {};
-    }
-
-    // A validator for verifying review-deletion required fields
-    public static class ReviewDeletionValidator implements ConstraintValidator<ReviewDeletion, Review> {
-        private final static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        private final static ConstraintValidator isLong = new PositiveValidatorForLong();
-        private final static ConstraintValidator isNotNull = new NotNullValidator();
-        @Override
-        public void initialize(ReviewDeletion constraintAnnotation) {
-            ConstraintValidator.super.initialize(constraintAnnotation);
-        }
-
-        @Override
-        public boolean isValid(Review review, ConstraintValidatorContext context) {
-            Set<ConstraintViolation<Review>> violations = validator.validateProperty(review, "ownerId");
-            violations.addAll(validator.validateProperty(review, "id"));
-            return violations.isEmpty() &&
-                    isNotNull.isValid(review.getId(), context) &&
-                    isLong.isValid(review.getId(), context);
-        }
     }
 }

@@ -7,6 +7,7 @@ import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import java.util.Set;
@@ -23,7 +24,22 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         this.entityRepo = entityRepo;
     }
 
-    // TODO: confusing interface: returning the entity if review failed
+    protected abstract String getRedirectToEditPage(Long id);
+    protected abstract String getEditPageTemplate();
+    protected abstract void modelForReviewError(Model model, T current);
+
+    protected String reviewEntity(Long id, Review review, BindingResult result, Model model, Authentication authentication) {
+        T current = reviewEntity(id, review, authentication, result);
+
+        if(current == null) {
+            // Review successful, redirect back to edit page
+            return getRedirectToEditPage(id);
+        }
+        // Failed to review, reloaded page presents errors in UI, just add necessary entities to the model
+        modelForReviewError(model, current);
+        return getEditPageTemplate();
+    }
+
     protected T reviewEntity(Long id, Review review, Authentication authentication, BindingResult result) {
         T entity = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid local entity id"));
@@ -44,14 +60,32 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         return entity;
     }
 
-    protected T deleteReview(long id, Long revId, Authentication authentication) {
+    protected String deleteReview(Long id, Long revId, BindingResult result, Model model, Authentication authentication) {
+        T current = deleteReview(id, revId, result, authentication);
+
+        if(current == null) {
+            // Deletion successful, redirect back to edit page
+            return getRedirectToEditPage(id);
+        }
+        // Failed to delete review, reloaded page presents errors in UI, just add necessary entities to the model
+        modelForReviewError(model, current);
+        return getEditPageTemplate();
+    }
+
+
+    protected T deleteReview(long id, Long revId, BindingResult result, Authentication authentication) {
         T entity = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid entity id"));
-        String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
-        Review current = entity.getCheckerReview(checker);
-        if (current != null && current.getId().equals(revId)) {
-            entity.removeReview(current);
-        } // TODO: warn if no review or different id
+
+        if (! result.hasErrors()) {
+            String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
+            Review current = entity.getCheckerReview(checker);
+            if (current != null && current.getId().equals(revId)) {
+                entity.removeReview(current);
+                entityRepo.save(entity);
+            } // TODO: warn if no review or different id?
+            return null;
+        }
         return entity;
     }
 

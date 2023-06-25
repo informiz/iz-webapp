@@ -1,11 +1,10 @@
 package org.informiz.ctrl.source;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.Review;
-import org.informiz.model.SourceBase;
+import org.informiz.model.*;
 import org.informiz.repo.source.SourceRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,11 +12,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
 @Controller
 @RequestMapping(path = SourceController.PREFIX)
+@Validated
 public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     public static final String PREFIX = "/source";
@@ -44,7 +45,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addSource(@Valid @ModelAttribute(SOURCE_ATTR) SourceBase source,
+    public String addSource(@Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-src.html", PREFIX);
@@ -54,10 +55,10 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete/{sourceId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteSource(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
+    public String deleteSource(@PathVariable("sourceId") @Valid Long id, @RequestParam String ownerId) {
         SourceBase source = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
         // TODO: set inactive
@@ -65,73 +66,73 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/view/{id}")
+    @GetMapping("/view/{sourceId}")
     @Secured("ROLE_MEMBER")
-    public String viewSource(@PathVariable("id") @Valid Long id, Model model) {
+    public String viewSource(@PathVariable("sourceId") @Valid Long id, Model model) {
         SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
         model.addAttribute(SOURCE_ATTR, source);
         return String.format("%s/view-src.html", PREFIX);
     }
 
-    @GetMapping("/details/{id}")
+    @GetMapping("/details/{sourceId}")
     @Secured("ROLE_MEMBER")
-    public String getSource(@PathVariable("id") @Valid Long id, Model model) {
+    public String getSource(@PathVariable("sourceId") @Valid Long id, Model model) {
         SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
         model.addAttribute(SOURCE_ATTR, source);
         model.addAttribute(REVIEW_ATTR, new Review());
-        return String.format("%s/update-src.html", PREFIX);
+        return getEditPageTemplate();
     }
 
-    @PostMapping("/details/{id}")
+    @PostMapping("/details/{sourceId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#source.ownerId == authentication.principal.name")
-    public String updateSource(@PathVariable("id") @Valid Long id,
-                                    @Valid @ModelAttribute(SOURCE_ATTR) SourceBase source,
-                                    BindingResult result, Model model) {
+    public String updateSource(@PathVariable("sourceId") @Valid Long id,
+                               @Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
+                               BindingResult result, Model model) {
         if (! result.hasErrors()) {
             SourceBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
             current.edit(source);
             entityRepo.save(current);
             model.addAttribute(SOURCE_ATTR, current);
-            return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
+            return getRedirectToEditPage(current.getLocalId());
         }
-        return String.format("%s/update-src.html", PREFIX);
+        return getEditPageTemplate();
     }
 
-    @PostMapping("/{id}/review/")
+    @PostMapping("/{sourceId}/review/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String reviewSource(@PathVariable("id") @Valid Long id,
-                                  @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                  BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String reviewSource(@PathVariable("sourceId") @Valid Long id,
+                               @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                               BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/edit/")
+    @PostMapping("/{sourceId}/review/edit/")
     @Secured("ROLE_CHECKER")
-    @org.springframework.transaction.annotation.Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String editReview(@PathVariable("id") @Valid Long id,
-                             @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                             BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String editReview(@PathVariable("sourceId") @Valid Long id,
+                             @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                             BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/del/")
+    @PostMapping("/{sourceId}/review/del/")
     @Secured("ROLE_CHECKER")
-    @org.springframework.transaction.annotation.Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String deleteReview (@PathVariable("id") @Valid Long id,
-                               @ModelAttribute(REVIEW_ATTR) Review review,
-                               Authentication authentication) {
-
-        deleteReview(id, review.getId(), authentication);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String deleteReview (@PathVariable("sourceId") @Valid Long id,
+                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                BindingResult result, Model model, Authentication authentication) {
+        return deleteReview(id, review.getId(), result, model, authentication);
     }
 
+    protected void modelForReviewError(@NotNull Model model, SourceBase current) {
+        model.addAttribute(SOURCE_ATTR, current);
+        model.addAttribute(REVIEW_ATTR, new Review());
+    }
+
+    protected String getEditPageTemplate() { return String.format("%s/update-src.html", PREFIX); }
+    protected String getRedirectToEditPage(Long id) { return String.format("redirect:%s/details/%s", PREFIX, id); }
 }

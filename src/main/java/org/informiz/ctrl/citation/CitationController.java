@@ -3,12 +3,10 @@ package org.informiz.ctrl.citation;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.CitationBase;
-import org.informiz.model.Review;
-import org.informiz.model.SourceBase;
-import org.informiz.model.SourceRef;
+import org.informiz.model.*;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class CitationController extends ChaincodeEntityController<CitationBase> {
 
     public static final String PREFIX = "/citation";
+    public static final String EDIT_PAGE_TEMPLATE = String.format("%s/update-citation.html", PREFIX);
     public static final String CITATION_ATTR = "citation";
     public static final String SOURCE_ATTR = "source";
     public static final String CITATIONS_ATTR = "citations";
@@ -55,7 +54,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addCitation(@Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
+    public String addCitation(@Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                               BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-citation.html", PREFIX);
@@ -93,26 +92,26 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         model.addAttribute(CITATION_ATTR, citation);
         model.addAttribute(REVIEW_ATTR, new Review());
         model.addAttribute(SOURCE_ATTR, new SourceRef());
-        return String.format("%s/update-citation.html", PREFIX);
+        return EDIT_PAGE_TEMPLATE;
     }
 
     @PostMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#citation.ownerId == authentication.principal.name")
     public String updateCitation(@PathVariable("citationId") @Valid Long id,
-                                 @Valid @ModelAttribute(CITATION_ATTR) CitationBase citation,
+                                 @Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute(REVIEW_ATTR, new Review());
             model.addAttribute(SOURCE_ATTR, new SourceRef());
-            return String.format("%s/update-citation.html", PREFIX);
+            return EDIT_PAGE_TEMPLATE;
         }
 
         CitationBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         current.edit(citation);
         entityRepo.save(current);
-        return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
+        return getRedirectToEditPage(current.getLocalId());
     }
 
     @PostMapping("/{citationId}/review/")
@@ -120,7 +119,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public String addReview(@PathVariable("citationId") @Valid Long id,
                                  @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Model model, Authentication authentication) {
-        return reviewCitation(id, review, result, model, authentication);
+        return reviewEntity(id, review, result, model, authentication);
     }
 
     @PostMapping("/{citationId}/review/edit/")
@@ -128,32 +127,18 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("citationId") @Valid Long id,
                              @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
-                                 BindingResult result, Model model, Authentication authentication) {
-        return reviewCitation(id, review, result, model, authentication);
+                             BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    private String reviewCitation(Long id, Review review, BindingResult result, Model model, Authentication authentication) {
-        CitationBase current = reviewEntity(id, review, authentication, result);
-
-        if(current == null) {
-            // Review successful, redirect back to edit page
-            return String.format("redirect:%s/details/%s", PREFIX, id);
-        }
-        // Failed to review, reloaded page presents errors in UI, just add necessary entities to the model
-        model.addAttribute(CITATION_ATTR, current);
-        model.addAttribute(SOURCE_ATTR, new SourceRef());
-        return String.format("%s/update-citation.html", PREFIX);
-    }
 
     @PostMapping("/{citationId}/review/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String deleteReview(@PathVariable("citationId") @Valid Long id,
-                               @Review.ReviewDeletion @ModelAttribute Review review,
-                               Authentication authentication) {
-        CitationBase current = deleteReview(id, review.getId(), authentication);
-        entityRepo.save(current);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+                               @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                               BindingResult result, Model model, Authentication authentication) {
+        return deleteReview(id, review.getId(), result, model, authentication);
     }
 
 
@@ -179,7 +164,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
             result.addError(new ObjectError("link",
                     "Please provide either a link, a source or both"));
         }
-        return String.format("redirect:%s/details/%s", PREFIX, current.getLocalId());
+        return getRedirectToEditPage(current.getLocalId());
     }
 
 
@@ -192,7 +177,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                              @PathVariable("srcId") @Valid Long srcId,
                              Authentication authentication) {
 
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage(id);
     }
 
 
@@ -209,9 +194,17 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
 
         current.removeSource(refId);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage(id);
     }
 
     // TODO: which methods need to be declared transactional?
+
+    protected void modelForReviewError(@NotNull Model model, CitationBase current) {
+        model.addAttribute(CITATION_ATTR, current);
+        model.addAttribute(SOURCE_ATTR, new SourceRef());
+    }
+
+    protected String getEditPageTemplate() { return String.format("%s/update-citation.html", PREFIX); }
+    protected String getRedirectToEditPage(Long id) { return String.format("redirect:%s/details/%s", PREFIX, id); }
 
 }

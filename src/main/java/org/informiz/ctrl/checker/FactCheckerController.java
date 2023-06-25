@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 //@RestController
 @Controller
 @RequestMapping(path= FactCheckerController.PREFIX)
+@Validated
 public class FactCheckerController {
 
     public static final String PREFIX = "/factchecker";
@@ -40,7 +42,7 @@ public class FactCheckerController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String addFactChecker(@Valid @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
+    public String addFactChecker(@Validated(FactCheckerBase.FactCheckerFromUI.class) @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-fc.html", PREFIX);
@@ -80,7 +82,7 @@ public class FactCheckerController {
     @PostMapping("/details/{id}")
     @Secured("ROLE_ADMIN")
     public String updateFactChecker(@PathVariable("id")  Long id,
-                                    @Valid @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
+                                    @Validated(FactCheckerBase.FactCheckerFromUI.class) @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
             FactCheckerBase current = factCheckerRepo.findById(id)
