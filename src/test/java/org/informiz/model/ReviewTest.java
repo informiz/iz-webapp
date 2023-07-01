@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ class ReviewTest {
 
     @Test
     public void whenValidReview_thenDefaultValidatorSucceeds() {
-        Review review = getPopulatedReview();
+        Review review = ModelTestUtils.getPopulatedReview();
 
         Set<ConstraintViolation<Review>> violations = validator.validate(review);
         assertEquals(0, violations.size());
@@ -38,7 +37,7 @@ class ReviewTest {
 
     @Test
     public void whenBadEntityId_thenDefaultValidatorViolation() {
-        Review review = getPopulatedReview();
+        Review review = ModelTestUtils.getPopulatedReview();
         Set<ConstraintViolation<Review>> violations;
 
         // not null
@@ -88,18 +87,5 @@ class ReviewTest {
         violations = validator.validate(review, Review.UserReview.class);
         assertEquals(0, violations.size());
 
-    }
-
-    @NotNull
-    private static Review getPopulatedReview() {
-        Review review = new Review();
-        review.setRating(0.8f);
-        review.setReviewedEntityId("test");
-        review.setId(1l);
-        review.setCreatorId("test");
-        review.setOwnerId("test");
-        review.setCreatedTs(12345l);
-        review.setUpdatedTs(12345l);
-        return review;
     }
 }

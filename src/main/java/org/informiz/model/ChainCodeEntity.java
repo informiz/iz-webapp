@@ -7,11 +7,16 @@ import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 import java.util.function.Consumer;
+
+import static org.informiz.model.Score.CONFIDENCE_BOOST;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -26,6 +31,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    @Positive(groups = { DeleteEntity.class, Default.class })
     public Long id;
 
     public Long getLocalId() {
@@ -36,15 +43,11 @@ public abstract class ChainCodeEntity extends InformizEntity {
         this.id = id;
     }
 
-    // The entity's id on the ledger
-/*  TODO: deprecate local-id?
-    @Id
-    @GeneratedValue(generator = "entity-id-generator")
-    @GenericGenerator(name = "entity-id-generator",
-            strategy = "org.informiz.model.EntityIdGenerator")
-*/
+    // Unique entity identifier
     @Column(name = "entity_id", unique = true)
     @Access(AccessType.PROPERTY)
+    @NotNull(message = "Please provide an entity-ID", groups = { DeleteEntity.class, Default.class })
+    @Size(message = "Entity-ID is expected to be 25-255 characters long", min = 25, max = 255, groups = { DeleteEntity.class, Default.class })
     protected String entityId;
 
     @NotNull(message = "Locale is mandatory")
@@ -125,7 +128,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
         int numReviews = snapshot.size();
         if (numReviews > 0) {
             Double sumRatings = snapshot.stream().mapToDouble(review -> review.getRating()).sum();
-            score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, 0.15f * numReviews));
+            score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, CONFIDENCE_BOOST * numReviews));
         }
 
         return score;

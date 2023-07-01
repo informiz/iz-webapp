@@ -2,19 +2,11 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
 import org.hibernate.annotations.Formula;
-import org.hibernate.validator.internal.constraintvalidators.bv.NotNullValidator;
-import org.hibernate.validator.internal.constraintvalidators.bv.number.sign.PositiveValidatorForLong;
 
 import java.io.Serializable;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.Set;
 
 @Table(name="review")
 @Entity
@@ -99,8 +91,9 @@ public final class Review extends InformizEntity implements Serializable {
         return reviewed;
     }
 
-    public void setReviewed(ChainCodeEntity reviewed) {
+    synchronized public void setReviewed(@NotNull ChainCodeEntity reviewed) {
         this.reviewed = reviewed;
+        this.reviewedEntityId = reviewed.getEntityId();
     }
 
     public String getReviewedEntityId() {

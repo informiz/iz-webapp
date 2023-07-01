@@ -4,6 +4,14 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
+// TODO: Consider deprecating local-id and using entity-id as primary-key. I.e. add annotations:
+/*
+    @Id
+    @GeneratedValue(generator = "entity-id-generator")
+    @GenericGenerator(name = "entity-id-generator",
+            strategy = "org.informiz.model.EntityIdGenerator")
+*/
+
 public class EntityIdGenerator implements IdentifierGenerator {
     @Override
     public Object generate(SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws HibernateException {

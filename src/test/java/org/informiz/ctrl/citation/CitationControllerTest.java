@@ -41,7 +41,7 @@ class CitationControllerTest {
     private CitationRepository repo;
 
     @MockBean
-    private SourceRepository sourceRepo;
+    private SourceRepository sourceRepo; // citation controller requires source repo
 
     @MockBean
     private SecurityConfig.ClientIdService googleOAuthService;

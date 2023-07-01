@@ -65,7 +65,7 @@ public final class Reference extends InformizEntity implements Serializable {
     @JsonIgnore
     private ChainCodeEntity factChecked;
 
-    // The entity-id of the claim/citation on the ledger
+    // The entity-id of the claim/citation on the ledger. TODO: validation??
     @Column(name = "ref_entity_id")
     @NotBlank
     private String refEntityId; // either hypothesis or citation

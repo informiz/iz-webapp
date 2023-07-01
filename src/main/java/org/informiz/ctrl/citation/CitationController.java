@@ -31,6 +31,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public static final String CITATIONS_ATTR = "citations";
 
     // TODO: duplicated code, move to superclass for sourceable entities
+    // TODO: sources are not necessarily in local channel
     private final SourceRepository sourceRepo;
 
     @Autowired

@@ -10,6 +10,10 @@ public class Score implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
+    public static Float CONFIDENCE_BOOST = 0.15f;
+
+    public static Double EPSILON = 0.001;
+
     @DecimalMin("0.0")
     @DecimalMax("1.0")
     private Float reliability;
@@ -44,9 +48,9 @@ public class Score implements Serializable {
         this.confidence = confidence;
     }
 
-    public void edit(Score other) {
-        this.setReliability(other.getReliability());
-        this.setConfidence(other.getConfidence());
+    synchronized public void edit(Score other) {
+        this.reliability = other.getReliability();
+        this.confidence = other.getConfidence();
     }
 
     @Override
@@ -60,8 +64,8 @@ public class Score implements Serializable {
         }
 
         Score other = (Score) obj;
-
-        return this.reliability.equals(other.reliability) && this.confidence.equals(other.confidence);
+        return Math.abs(this.reliability - other.reliability) < EPSILON &&
+                Math.abs(this.confidence - other.confidence) < EPSILON;
     }
 
     // TODO: make comparable?

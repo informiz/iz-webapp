@@ -10,14 +10,11 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomAuth> {
 
-    public static final String DEFAULT_TEST_CHECKER_ID = "usr1234";
+    public static final String DEFAULT_TEST_CHECKER_ID = UUID.randomUUID().toString().substring(0, 30);
 
     @Override
     public SecurityContext createSecurityContext(WithCustomAuth withCustomAuth) {
@@ -30,7 +27,7 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Wi
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for (String role: withCustomAuth.role())
-            authorities.add(new InformizGrantedAuthority(role, "1234"));
+            authorities.add(new InformizGrantedAuthority(role, DEFAULT_TEST_CHECKER_ID));
 
         OAuth2User user = new DefaultOAuth2User(authorities, attributes, "name");
         Authentication auth = new OAuth2AuthenticationToken(user, authorities, "mockClientId");

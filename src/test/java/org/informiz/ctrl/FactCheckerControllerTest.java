@@ -88,7 +88,7 @@ public class FactCheckerControllerTest {
 
         mockMvc.perform(post("/factchecker/add")
                         .with(oauth2Login().authorities(AuthUtils.anonymousAuthorities()))
-                        .secure(true)
+                        .secure(true).with(csrf())
                         .param("name", cary.getName())
                         .param("email", cary.getEmail())
                         .param("link", cary.getLink())
@@ -97,7 +97,7 @@ public class FactCheckerControllerTest {
 
         mockMvc.perform(post("/factchecker/add")
                         .with(oauth2Login().authorities(new InformizGrantedAuthority(ROLE_VIEWER, "entityId")))
-                        .secure(true)
+                        .secure(true).with(csrf())
                         .param("name", cary.getName())
                         .param("email", cary.getEmail())
                         .param("link", cary.getLink())
