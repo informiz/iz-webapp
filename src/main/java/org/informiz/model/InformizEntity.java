@@ -1,6 +1,7 @@
 package org.informiz.model;
 
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.function.Consumer;
 
 @MappedSuperclass
+@JsonView(Utils.Views.EntityDefaultView.class)
 public abstract class InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L;

@@ -97,7 +97,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         Set<Reference> references = entity.getReferences();
         String creator = AuthUtils.getUserEntityId(authentication.getAuthorities());
         reference.setCreatorId(creator);
-        reference.setFactChecked(entity);
+        reference.setFactCheckedEntityId(entity.getEntityId());
 
         Reference current = references.stream().filter(ref ->
                 ref.equals(reference)).findFirst().orElse(null);
@@ -106,7 +106,9 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
             current.setDegree(reference.getDegree());
             current.setComment(reference.getComment());
         } else {
-            references.add(new Reference(entity, reference));
+            current = new Reference(entity, reference);
         }
+        entity.addReference(current);
+        entityRepo.save((T)entity);
     }
 }

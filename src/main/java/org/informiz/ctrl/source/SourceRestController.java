@@ -1,6 +1,8 @@
 package org.informiz.ctrl.source;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.model.SourceBase;
+import org.informiz.model.Utils;
 import org.informiz.repo.source.SourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ public class SourceRestController {
     private SourceRepository sourceRepo;
 
     @GetMapping(path = {"/", "/all"})
+    @JsonView(Utils.Views.EntityDefaultView.class)
     public List<SourceBase> getAllSources() {
         return StreamSupport
                 .stream(sourceRepo.findAll().spliterator(), false)

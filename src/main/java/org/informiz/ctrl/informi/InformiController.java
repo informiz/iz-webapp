@@ -1,5 +1,6 @@
 package org.informiz.ctrl.informi;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
@@ -92,7 +93,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
     public String deleteInformi(@PathVariable("informiId") @Valid Long id, @RequestParam String ownerId) {
-        InformiBase informi = entityRepo.findById(Long.valueOf(id))
+        InformiBase informi = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
         // TODO: set inactive
         entityRepo.delete(informi);
@@ -104,6 +105,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
+        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
         return String.format("%s/view-informi.html", PREFIX);
     }
 
@@ -123,7 +125,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                                     @Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result) {
         if (! result.hasErrors()) {
-            InformiBase current = entityRepo.findById(id)
+            InformiBase current = entityRepo.loadByLocalId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
@@ -161,8 +163,8 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Secured("ROLE_CHECKER")
     @Transactional
     public String addReference(@PathVariable("informiId") @Valid Long id,
-                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Authentication authentication) {
+                               @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               BindingResult result, Authentication authentication) {
 
         return handleReference(id, reference, result, authentication);
     }
@@ -172,7 +174,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
     public String editReference(@PathVariable("informiId") @Valid Long id,
-                               @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Authentication authentication) {
 
         return handleReference(id, reference, result, authentication);
@@ -194,6 +196,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(INFORMI_ATTR, informi);
         model.addAttribute(REVIEW_ATTR, review);
         model.addAttribute(REFERENCE_ATTR, ref);
+        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
     }
 
     @PostMapping("/reference/{informiId}/ref/del")
@@ -212,6 +215,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     protected void modelForReviewError(@NotNull Model model, InformiBase current) {
         model.addAttribute(INFORMI_ATTR, current);
+        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
         model.addAttribute(REFERENCE_ATTR, new Reference());
     }
 

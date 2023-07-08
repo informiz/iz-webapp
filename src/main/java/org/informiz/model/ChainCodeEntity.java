@@ -1,6 +1,6 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
@@ -10,8 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -20,6 +18,7 @@ import static org.informiz.model.Score.CONFIDENCE_BOOST;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@JsonView(Utils.Views.EntityDefaultView.class)
 //@MappedSuperclass
 public abstract class ChainCodeEntity extends InformizEntity {
 
@@ -53,12 +52,9 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @NotNull(message = "Locale is mandatory")
     private Locale locale = Locale.ENGLISH; // Default to English
 
-    @OneToMany(mappedBy = "reviewed",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+    @OneToMany(cascade = CascadeType.ALL,
             orphanRemoval=true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnore
+    @JoinColumn(name = "reviewed_entity_id", referencedColumnName = "entity_id")
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -184,4 +180,25 @@ public abstract class ChainCodeEntity extends InformizEntity {
             throw new IllegalArgumentException(String.format("Failed to deserialize entity of type %s", clazz), e);
         }
     }
+
+    // TODO: can't target sub-classes with entity_id as ref-column, fixed in Hibernate 6.3
+    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501, move collections to subclasses when 6.3 available
+
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "fact_checked_entity_id", referencedColumnName = "entity_id")
+    @JsonView(Utils.Views.EntityData.class)
+    protected Set<Reference> references = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
+    @JsonView(Utils.Views.EntityData.class)
+    protected Set<SourceRef> sources = new HashSet<>();
+
+
+
+
 }

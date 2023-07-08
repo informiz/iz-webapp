@@ -1,6 +1,6 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,9 +9,9 @@ import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="source")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraph(
         name= SourceBase.SOURCE_DATA,
         attributeNodes={

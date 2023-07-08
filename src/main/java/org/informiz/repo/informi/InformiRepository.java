@@ -11,6 +11,7 @@ import static org.informiz.model.InformiBase.INFORMI_PREVIEW;
 
 public interface InformiRepository extends ChaincodeEntityRepo<InformiBase> {
 
+
     @Override
     @EntityGraph(value = INFORMI_DATA)
     Optional<InformiBase> findById(Long id);
@@ -20,6 +21,7 @@ public interface InformiRepository extends ChaincodeEntityRepo<InformiBase> {
 
     @Override
     @EntityGraph(value = INFORMI_PREVIEW)
+//    @EntityGraph(value = INFORMI_DATA)
     Iterable<InformiBase> findAll();
 
     @Override

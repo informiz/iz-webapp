@@ -23,7 +23,7 @@ public class ModelTestUtils {
         if (reviewed == null) {
             review.setReviewedEntityId("test");
         } else {
-            review.setReviewed(reviewed);
+            review.setReviewedEntityId(reviewed.getEntityId());
         }
         review.setId(id);
         setMetaData(id, review);
@@ -35,7 +35,7 @@ public class ModelTestUtils {
                                                   @Nullable String refEntityId,
                                                   @Nullable Long id) {
         Reference ref = new Reference();
-        ref.setFactChecked(referenced);
+        ref.setFactCheckedEntityId(referenced == null ? "test" : referenced.getEntityId());
         ref.setRefEntityId(refEntityId);
         ref.setEntailment(Reference.Entailment.SUPPORTS);
         ref.setDegree(0.9f);

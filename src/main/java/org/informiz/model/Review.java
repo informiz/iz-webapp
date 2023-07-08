@@ -1,10 +1,8 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
-import org.hibernate.annotations.Formula;
 
 import java.io.Serializable;
 
@@ -18,18 +16,6 @@ public final class Review extends InformizEntity implements Serializable {
      * Validation group for incoming review from UI (most fields will not be initialized)
      */
     public interface UserReview {}
-
-
-    public static final String QUERY = "(IF reviewed_entity_id like FACT_CHECKER_% " +
-            "SELECT * FROM fact_checker fc where fc.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like CITATION_% " +
-            "SELECT * FROM citation c where c.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like SOURCE_% " +
-            "SELECT * FROM source s where s.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like CLAIM_% " +
-            "SELECT * FROM claim c where c.entity_id = reviewed_entity_id " +
-            "ELSE " +
-            "SELECT * FROM informi i where i.entity_id = reviewed_entity_id)";
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
@@ -52,17 +38,10 @@ public final class Review extends InformizEntity implements Serializable {
     private Float rating;
 
 
-    // Mapping both reviewedEntityId and reviewed to same column - value is not insertable/updatable
-    @Column(name = "reviewed_entity_id", nullable = false, insertable=false, updatable=false)
+    @Column(name = "reviewed_entity_id")
     @NotBlank
     @Size(max = 255)
     private String reviewedEntityId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Formula(value=QUERY)
-    @JoinColumn(name = "reviewed_entity_id", referencedColumnName = "entity_id")
-    @JsonIgnore
-    private ChainCodeEntity reviewed;
 
     @Column(name = "comment")
     @Size(max = 255)
@@ -73,7 +52,6 @@ public final class Review extends InformizEntity implements Serializable {
     public Review() {}
 
     public Review(@NotNull ChainCodeEntity reviewed, Float rating, String comment) {
-        this.reviewed = reviewed;
         this.reviewedEntityId = reviewed.getEntityId();
         this.rating = rating;
         this.comment = comment;
@@ -85,15 +63,6 @@ public final class Review extends InformizEntity implements Serializable {
 
     public void setRating(Float rating) {
         this.rating = rating;
-    }
-
-    public ChainCodeEntity getReviewed() {
-        return reviewed;
-    }
-
-    synchronized public void setReviewed(@NotNull ChainCodeEntity reviewed) {
-        this.reviewed = reviewed;
-        this.reviewedEntityId = reviewed.getEntityId();
     }
 
     public String getReviewedEntityId() {

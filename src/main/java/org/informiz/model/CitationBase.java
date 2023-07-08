@@ -1,13 +1,10 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
@@ -15,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name = "citation")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name = CitationBase.CITATION_PREVIEW,
@@ -56,11 +53,6 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
     @URL(message = "Please provide a link to the source of the citation")
     private String link;
 
-    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnore
-    private Set<SourceRef> sources;
-
     public String getText() {
         return text;
     }
@@ -77,6 +69,9 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
         this.link = link;
     }
 
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true)
+    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
     public Set<SourceRef> getSources() {
         return sources;
     }

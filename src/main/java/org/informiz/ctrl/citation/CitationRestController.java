@@ -1,6 +1,8 @@
 package org.informiz.ctrl.citation;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.model.CitationBase;
+import org.informiz.model.Utils;
 import org.informiz.repo.citation.CitationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ public class CitationRestController {
     private CitationRepository citationRepo;
 
     @GetMapping(path = {"/", "/all"})
+    @JsonView(Utils.Views.EntityDefaultView.class)
     public List<CitationBase> getAllCitations() {
         return StreamSupport
                 .stream(citationRepo.findAll().spliterator(), false)

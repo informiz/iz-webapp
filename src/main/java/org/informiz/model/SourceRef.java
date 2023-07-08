@@ -1,12 +1,12 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Formula;
 import org.hibernate.validator.constraints.URL;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -17,18 +17,6 @@ public final class SourceRef extends InformizEntity implements Serializable {
     static final long serialVersionUID = 3L ;
 
     public static final String SRC_QUERY = "(SELECT * FROM source s where s.entity_id = src_entity_id)";
-
-    // TODO: replace fk_sourced_entity_id (local id) with actual sourced_entity_id
-    public static final String QUERY = "(IF (select count(c) = 1 from claim c where id = fk_sourced_entity_id) " +
-            "SELECT * FROM claim c where c.id = fk_sourced_entity_id " +
-            "ELSE " +
-            "SELECT * FROM citation c where c.id = fk_sourced_entity_id)";
-/*
-    public static final String QUERY = "(IF sourced_entity_id like CLAIM_% " +
-            "SELECT * FROM claim c where c.entity_id = sourced_entity_id " +
-            "ELSE " +
-            "SELECT * FROM citation c where c.entity_id = sourced_entity_id)";
-*/
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
@@ -42,25 +30,14 @@ public final class SourceRef extends InformizEntity implements Serializable {
         this.id = id;
     }
 
-    // Mapping both srcEntityId and source to same column - value is not insertable/updatable
-    @Column(name = "src_entity_id", insertable=false, updatable=false)
+    @Column(name = "src_entity_id")
+    @Size(max = 255)
     private String srcEntityId;
 
-
-    // TODO: can't target SourceBase with entity_id as ref-column, fixed in Hibernate 6.3
-    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Nullable
-    @JoinColumn(name = "src_entity_id", referencedColumnName = "entity_id")
-    @Formula(value=SRC_QUERY)
-    @JsonIgnore
-    private ChainCodeEntity source;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_sourced_entity_id") // TODO: need to change in DB
-    @Formula(value=QUERY)
-    @JsonIgnore
-    private ChainCodeEntity sourced;
+    @Column(name = "fk_sourced_entity_id") // TODO: need to change in DB from id to entity-id
+    @NotBlank
+    @Size(max = 255)
+    private String sourcedId;
 
     @URL
     private String link;
@@ -71,40 +48,31 @@ public final class SourceRef extends InformizEntity implements Serializable {
     public SourceRef() {}
 
 
-    public SourceRef(SourceBase src, ChainCodeEntity sourced, String link, String description) {
+    public SourceRef(SourceBase src, @NotNull ChainCodeEntity sourced, String link, String description) {
         if (src == null && StringUtils.isBlank(link)) {
             throw new IllegalArgumentException("Please provide either a link, a source or both");
         }
-        this.sourced = sourced;
-        this.source = src;
+        this.sourcedId = sourced.getEntityId();
+        this.srcEntityId = src == null ? null : src.getEntityId();
         if (src != null) srcEntityId = src.getEntityId();
         this.link = link;
         this.description = description;
     }
 
-    @Nullable
-    public ChainCodeEntity getSource() {
-        return source;
+    public String getSourcedId() {
+        return sourcedId;
     }
 
-    public void setSource(@Nullable SourceBase source) {
-        this.source = source;
+    public void setSourcedId(String sourcedId) {
+        this.sourcedId = sourcedId;
     }
 
     public String getSrcEntityId() {
-        return (source == null) ? srcEntityId : source.entityId;
+        return srcEntityId;
     }
 
     public void setSrcEntityId(String srcEntityId) {
         this.srcEntityId = srcEntityId;
-    }
-
-    public ChainCodeEntity getSourced() {
-        return sourced;
-    }
-
-    public void setSourced(ChainCodeEntity sourced) {
-        this.sourced = sourced;
     }
 
     public String getLink() {
@@ -136,6 +104,6 @@ public final class SourceRef extends InformizEntity implements Serializable {
         boolean sameSrc = getSrcEntityId() == null ?
                 other.getSrcEntityId() == null :
                 getSrcEntityId().equals(other.getSrcEntityId());
-        return (sourced.equals(other.sourced) && sameLink && sameSrc);
+        return (sourcedId.equals(other.sourcedId) && sameLink && sameSrc);
     }
 }

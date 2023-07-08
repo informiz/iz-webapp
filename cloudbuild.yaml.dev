@@ -1,6 +1,7 @@
 steps:
 
 # TODO: separate build and deploy scripts
+# TODO: need to specify machineType for build? Default changes in September 2023
   - name: maven:3-jdk-8
     entrypoint: mvn
     args: ["test"]

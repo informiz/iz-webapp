@@ -1,12 +1,8 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Formula;
+import jakarta.validation.constraints.*;
+import jakarta.validation.groups.Default;
 
 import java.io.Serializable;
 
@@ -23,10 +19,10 @@ public final class Reference extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
-    public static final String QUERY = "(IF ref_entity_id like CLAIM_% " +
-            "SELECT * FROM claim c where c.entity_id = ref_entity_id " +
-            "ELSE " +
-            "SELECT * FROM informi i where i.entity_id = ref_entity_id)";
+    /**
+     * Validation group for incoming reference from UI (most fields will not be initialized)
+     */
+    public interface UserReference {}
 
     public enum Entailment {
         SUPPORTS("Supports"), // Positive textual-entailment
@@ -46,6 +42,8 @@ public final class Reference extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
@@ -56,51 +54,49 @@ public final class Reference extends InformizEntity implements Serializable {
         this.id = id;
     }
 
-    // The reviewed-entity (always in the local channel)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Formula(value=QUERY)
-    // TODO: can't target FactCheckedEntity with entity_id as ref-column, fixed in Hibernate 6.3
-    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501
-    @JoinColumn(name = "fact_checked_entity_id", referencedColumnName = "entity_id")
-    @JsonIgnore
-    private ChainCodeEntity factChecked;
+
+    @Column(name = "fact_checked_entity_id")
+    @NotBlank(groups = { UserReference.class, Default.class })
+    @Size(max = 255, groups = { UserReference.class, Default.class })
+    private String factCheckedEntityId;
 
     // The entity-id of the claim/citation on the ledger. TODO: validation??
     @Column(name = "ref_entity_id")
-    @NotBlank
+    @NotBlank(groups = { UserReference.class, Default.class })
     private String refEntityId; // either hypothesis or citation
 
     @Enumerated(EnumType.ORDINAL)
-    @NotNull
+    @NotNull(groups = { UserReference.class, Default.class })
     private Entailment entailment;
 
-    @DecimalMin("0.0")
-    @DecimalMax("1.0")
-    //@NotNull
+    @DecimalMin(value = "0.0", groups = { UserReference.class, Default.class })
+    @DecimalMax(value = "1.0", groups = { UserReference.class, Default.class })
+    @NotNull(groups = { UserReference.class, Default.class })
     // The degree to which the reference entails the entity
     private Float degree = 0.9f;
 
     @Column
+    @Size(max = 255, groups = { UserReference.class, Default.class })
     private String comment;
 
     public static Reference create() { return new Reference(); }
 
     public Reference() {}
 
-    public Reference(ChainCodeEntity factChecked, Reference other) {
-        this.factChecked = factChecked;
+    public Reference(@NotNull ChainCodeEntity factChecked, @NotNull Reference other) {
+        this.factCheckedEntityId = factChecked.getEntityId();
         this.refEntityId = other.refEntityId;
         this.entailment = other.entailment;
         this.degree = other.degree;
         this.comment = other.comment;
     }
 
-    public ChainCodeEntity getFactChecked() {
-        return factChecked;
+    public String getFactCheckedEntityId() {
+        return factCheckedEntityId;
     }
 
-    public void setFactChecked(ChainCodeEntity referenced) {
-        this.factChecked = referenced;
+    public void setFactCheckedEntityId(String factCheckedEntityId) {
+        this.factCheckedEntityId = factCheckedEntityId;
     }
 
     public String getRefEntityId() {
@@ -137,7 +133,7 @@ public final class Reference extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", factChecked.getEntityId(), refEntityId, creatorId).hashCode();
+        return String.format("%s-%s-%s", factCheckedEntityId, refEntityId, creatorId).hashCode();
     }
 
     @Override
@@ -147,7 +143,7 @@ public final class Reference extends InformizEntity implements Serializable {
         Reference other = (Reference) obj;
 
         // considered equal if same entity, claim/citation and creator
-        return (this.factChecked.getEntityId().equals(other.factChecked.getEntityId()) &&
+        return (this.factCheckedEntityId.equals(other.factCheckedEntityId) &&
                 this.refEntityId.equals(other.refEntityId) &&
                 // creatorId is only set when persisting the reference to db.
                 ( (this.creatorId == null && other.creatorId == null) ||

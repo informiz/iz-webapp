@@ -1,21 +1,18 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.groups.Default;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="hypothesis")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name= HypothesisBase.CLAIM_PREVIEW,
@@ -51,11 +48,6 @@ public final class HypothesisBase extends FactCheckedEntity implements Serializa
     @NotBlank(message = "Claim is mandatory", groups = {HypothesisFromUI.class, Default.class})
     private String claim;
 
-    @OneToMany(mappedBy = "sourced", cascade = CascadeType.ALL, orphanRemoval=true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnore
-    protected Set<SourceRef> sources;
-
     public String getClaim() {
         return claim;
     }
@@ -64,6 +56,9 @@ public final class HypothesisBase extends FactCheckedEntity implements Serializa
         this.claim = claim;
     }
 
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true)
+    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
     public Set<SourceRef> getSources() {
         return sources;
     }

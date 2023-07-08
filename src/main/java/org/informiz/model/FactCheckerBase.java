@@ -1,5 +1,6 @@
 package org.informiz.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 
 @Table(name="fact_checker")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraph(
         name= FactCheckerBase.FACT_CHECKER_DATA,
         attributeNodes={

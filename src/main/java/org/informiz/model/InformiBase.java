@@ -1,6 +1,6 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,9 +18,9 @@ import java.io.Serializable;
  * - reviews by fact-checkers
  * Any additional metadata should be saved on a separate CMS
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="informi")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name= InformiBase.INFORMI_PREVIEW,

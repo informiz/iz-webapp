@@ -58,4 +58,13 @@ public class Utils {
         return String.format("%s_%s_%s",
                 entityType, CHANNEL_NAME, UUID.randomUUID().toString().substring(0, 16));
     }
+
+    public static class Views {
+        public static class EntityDefaultView {
+        }
+
+        public static class EntityData extends EntityDefaultView {
+        }
+    }
+
 }
