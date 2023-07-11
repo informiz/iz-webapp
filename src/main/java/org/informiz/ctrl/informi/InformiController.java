@@ -12,7 +12,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -31,7 +30,6 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public static final String PREFIX = "/informi";
     public static final String INFORMI_ATTR = "informi";
     public static final String INFORMIZ_ATTR = "informiz";
-    public static final String REFERENCE_ATTR = "reference";
 
     @Autowired
     public InformiController(InformiRepository repository) {
@@ -161,35 +159,28 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @PostMapping("/reference/{informiId}")
     @Secured("ROLE_CHECKER")
-    @Transactional
     public String addReference(@PathVariable("informiId") @Valid Long id,
                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                               BindingResult result, Authentication authentication) {
-
-        return handleReference(id, reference, result, authentication);
+                               BindingResult result, Model model, Authentication authentication) {
+        return referenceEntity(id, reference, result, model, authentication);
     }
 
-    @PostMapping("/reference/{informiId}/edit")
+    @PostMapping("/reference/{informiId}/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
     public String editReference(@PathVariable("informiId") @Valid Long id,
                                 @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                               BindingResult result, Authentication authentication) {
-
-        return handleReference(id, reference, result, authentication);
+                               BindingResult result, Model model, Authentication authentication) {
+        return referenceEntity(id, reference, result, model, authentication);
     }
 
-    private String handleReference(Long id, Reference reference, BindingResult result,
-                                     Authentication authentication) {
-
-        InformiBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
-
-        if ( ! result.hasFieldErrors() ) {
-            referenceEntity(current, reference, authentication);
-        }
-        return getRedirectToEditPage(id);
+    @PostMapping("/reference/{informiId}/ref/del/")
+    @Secured("ROLE_CHECKER")
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    public String deleteReference(@PathVariable("informiId") @Valid Long id,
+                                  @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                  BindingResult result, Model model, Authentication authentication) {
+        return deleteReference(id, reference.getId(), result, model, authentication);
     }
 
     private void prepareEditModel(Model model, InformiBase informi, Review review, Reference ref) {
@@ -199,24 +190,11 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
     }
 
-    @PostMapping("/reference/{informiId}/ref/del")
-    @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String deleteReference(@PathVariable("informiId") @Valid Long id,
-                                  @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                     Authentication authentication) {
-
-        InformiBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Informi id"));
-        current.removeReference(reference.getId());
-        return getRedirectToEditPage(id);
-    }
-
-    protected void modelForReviewError(@NotNull Model model, InformiBase current) {
+    @Override
+    protected void modelForError(@NotNull Model model, InformiBase current) {
+        super.modelForError(model, current);
         model.addAttribute(INFORMI_ATTR, current);
-        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
-        model.addAttribute(REFERENCE_ATTR, new Reference());
+        if (! model.containsAttribute(REFERENCE_ATTR)) model.addAttribute(REFERENCE_ATTR, new Reference());
     }
 
     protected String getEditPageTemplate() { return String.format("%s/update-informi.html", PREFIX); }

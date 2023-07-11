@@ -128,9 +128,9 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return deleteReview(id, review.getId(), result, model, authentication);
     }
 
-    protected void modelForReviewError(@NotNull Model model, SourceBase current) {
+    protected void modelForError(@NotNull Model model, SourceBase current) {
+        super.modelForError(model, current);
         model.addAttribute(SOURCE_ATTR, current);
-        model.addAttribute(REVIEW_ATTR, new Review());
     }
 
     protected String getEditPageTemplate() { return String.format("%s/update-src.html", PREFIX); }

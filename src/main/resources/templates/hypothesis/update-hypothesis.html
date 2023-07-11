@@ -23,7 +23,7 @@
 
             <div th:replace="~{fragments/src-ref-list :: sourceList(${hypothesis.sources}, @{'/hypothesis/source/' + ${hypothesis.id}})}"></div>
 
-            <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})}"></div>
+            <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.entityId}, ${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})}"></div>
 
             <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.reviews}, @{'/hypothesis/' + ${hypothesis.id} + '/review/'})}"></div>
 

@@ -11,7 +11,7 @@
         </span>
         <div th:replace="~{fragments/src-ref-list :: sourceList(${hypothesis.sources}, '')}"></div>
 
-        <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.references}, '')}"></div>
+        <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.entityId}, ${hypothesis.references}, '')}"></div>
 
         <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.reviews}, '')}"></div>
     </div>

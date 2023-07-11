@@ -29,7 +29,8 @@
                 <!-- Display form if submission failed with errors -->
                 <script>
                     loadCompleteCallbacks.push(function() {
-                        const form_selector = "#rev_form_" + "[[${review.getId()}]]";
+                        // Note: Thymeleaf returns the string "null" for no-id in html, but empty-string inside javascript
+                        const form_selector = "#rev_form_" + ("[[${review.getId()}]]" ? "[[${review.getId()}]]" : "null");
                         // trigger containing modal to display form
                         const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
                         $("button[data-bs-target='"+ modal_selector +"']").click();

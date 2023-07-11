@@ -2,7 +2,38 @@
 
 <!-- TODO: reference-list overflows the container a bit on small screens. Fix this -->
 
-    <div th:fragment="referenceList(references, refsUrl)">
+    <div th:fragment="referenceList(entityId, references, refsUrl)">
+
+        <script>
+            // ********************** TODO: prevent entities referencing themselves **********************
+
+            var references = []
+
+            autoSearchCallbacks.push(function() {
+
+                $.each(citations, function(id, citation) {
+                    display_text = citation.text + ' [Citation]';
+                    references.push( { label: display_text, value: display_text, id: citation.entityId } );
+                });
+
+                $.each(claims, function(id, hypothesis) {
+                    display_text = hypothesis.claim + ' [Claim]';
+                    references.push( { label: display_text, value: display_text, id: hypothesis.entityId } );
+                });
+
+
+                $( ".refAutoSelect" ).autocomplete({
+                    source: references
+                });
+
+                $( ".refAutoSelect" ).on( "autocompleteselect", function( event, ui ) {
+                    input_obj = $( "input[name='refEntityId']", event.target.form );
+                    input_obj.val(ui.item.id);
+                });
+
+            });
+        </script>
+
         <h2 class="mt-5">References</h2>
         <div>
             <table id="references-table" class="table table-striped table-bordered"
@@ -62,11 +93,11 @@
 
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
+                <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
+                     TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
                 <div class="d-none">
                     <div th:id="add_ref_form">
-                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
-                             TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
-                        <div th:replace="~{fragments/reference :: referenceForm(${refsUrl}, ${reference})}"></div>
+                        <div th:replace="~{fragments/reference :: referenceForm(${refsUrl}, ${reference}, ${entityId})}"></div>
                     </div>
                 </div>
                 <div th:replace="~{fragments/modal :: customModal('Add Reference', 'add_ref_form')}"></div>

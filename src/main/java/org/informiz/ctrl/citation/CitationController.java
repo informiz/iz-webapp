@@ -27,7 +27,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     public static final String PREFIX = "/citation";
     public static final String EDIT_PAGE_TEMPLATE = String.format("%s/update-citation.html", PREFIX);
     public static final String CITATION_ATTR = "citation";
-    public static final String SOURCE_ATTR = "source";
     public static final String CITATIONS_ATTR = "citations";
 
     // TODO: duplicated code, move to superclass for sourceable entities
@@ -198,11 +197,11 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return getRedirectToEditPage(id);
     }
 
-    // TODO: which methods need to be declared transactional?
-
-    protected void modelForReviewError(@NotNull Model model, CitationBase current) {
+    @Override
+    protected void modelForError(@NotNull Model model, CitationBase current) {
+        super.modelForError(model, current);
         model.addAttribute(CITATION_ATTR, current);
-        model.addAttribute(SOURCE_ATTR, new SourceRef());
+        if (! model.containsAttribute(SOURCE_ATTR)) model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
 
     protected String getEditPageTemplate() { return String.format("%s/update-citation.html", PREFIX); }

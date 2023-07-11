@@ -27,8 +27,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     public static final String PREFIX = "/hypothesis";
     public static final String HYPOTHESIS_ATTR = "hypothesis"; // singular
     public static final String HYPOTHESES_ATTR = "hypotheses"; // plural
-    public static final String REFERENCE_ATTR = "reference";
-    public static final String SOURCE_ATTR = "source";
 
     private final SourceRepository sourceRepo;
 
@@ -143,38 +141,32 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @PostMapping("/reference/{hypothesisId}")
     @Secured("ROLE_CHECKER")
-    @Transactional
     public String addReference(@PathVariable("hypothesisId") @Valid Long id,
-                               @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result,Authentication authentication, Model model) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return referenceEntity(id, reference, result, model, authentication);
+    }
+
+
+    @PostMapping("/reference/{hypothesisId}/edit/")
+    @Secured("ROLE_CHECKER")
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    public String editReference(@PathVariable("hypothesisId") @Valid Long id,
+                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                BindingResult result, Authentication authentication, Model model) {
+
+        return referenceEntity(id, reference, result, model, authentication);
     }
 
 
     @PostMapping("/reference/{hypothesisId}/ref/del")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
     public String deleteReference(@PathVariable("hypothesisId") @Valid Long id,
-                                        @ModelAttribute(REFERENCE_ATTR) Reference reference) {
-
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
-
-        current.removeReference(reference.getId());
-
-        return getRedirectToEditPage(id);
-    }
-    @PostMapping("/reference/{hypothesisId}/edit/")
-    @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String editReference(@PathVariable("hypothesisId") @Valid Long id,
-                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
-                                BindingResult result, Authentication authentication, Model model) {
-
-        return handleReference(id, reference, result, authentication, model);
+                                  @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                  BindingResult result, Model model, Authentication authentication) {
+        return deleteReference(id, reference.getId(), result, model, authentication);
     }
 
 
@@ -204,21 +196,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         prepareEditModel(model, current, new Review(), new Reference());
         return getEditPageTemplate();
     }
-
-    private String handleReference(Long id, Reference reference, BindingResult result,
-                                   Authentication authentication, Model model) {
-
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
-
-        if ( ! result.hasFieldErrors() ) {
-            referenceEntity(current, reference, authentication);
-        }
-        // TODO: error handling in modal? Where will the error be visible?
-        prepareEditModel(model, current, new Review(), new Reference());
-        return getRedirectToEditPage(id);
-    }
-
 
     @PostMapping("/source/{hypothesisId}/{srcId}")
     @Secured("ROLE_CHECKER")
@@ -252,10 +229,11 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
 
-    protected void modelForReviewError(@NotNull Model model, HypothesisBase current) {
+    protected void modelForError(@NotNull Model model, HypothesisBase current) {
+        super.modelForError(model, current);
         model.addAttribute(HYPOTHESIS_ATTR, current);
-        model.addAttribute(REFERENCE_ATTR, new SourceRef());
-        model.addAttribute(SOURCE_ATTR, new SourceRef());
+        if (! model.containsAttribute(REFERENCE_ATTR)) model.addAttribute(REFERENCE_ATTR, new Reference());
+        if (! model.containsAttribute(SOURCE_ATTR)) model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
 
     protected String getEditPageTemplate() { return String.format("%s/update-hypothesis.html", PREFIX); }

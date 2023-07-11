@@ -1,9 +1,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
+<!-- TODO:   Thymeleaf 3.0.15 issue with binding form-objects during list-iteration: only works if there's a
+     TODO:   "reference" object in the model (even though it's not the one getting bound to the form).
+     TODO:   'th:field' syntax doesn't populate the inputs  -->
+
 <div th:fragment="refProps(reference)">
-    <!-- TODO:   Thymeleaf 3.0.15 issue with binding form-objects during list-iteration: only works if there's a
-         TODO:   "reference" object in the model (even though it's not the one getting bound to the form).
-         TODO:   'th:field' syntax doesn't populate the inputs  -->
     <div class="form-row">
         <div class="form-group col-6">
             <label th:for="'entailment' + ${reference.id}">Entailment</label>
@@ -35,29 +36,42 @@
 </div>
 
 <div th:fragment="editRefForm(action_path, reference)">
-    <form th:action="${action_path}" th:object="${reference}" method="post">
-        <input type="text" class="d-none" name="refEntityId" th:value="${reference.refEntityId}" readonly/>
-        <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
+    <form th:id="'reference_form_' + ${reference.getId()}" th:action="${action_path}" th:object="${reference}" method="post">
+        <input type="text" class="d-none" name="refEntityId" th:value="${reference.getRefEntityId()}" readonly>
+        <input type="text" class="d-none" name="factCheckedEntityId" th:value="${reference.getFactCheckedEntityId()}" readonly>
+        <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly>
 
         <div th:replace="~{fragments/reference :: refProps(${reference})}"></div>
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
             <div class="col-4">
-                <input type="submit" class="btn btn-primary" value="Update"/>
+                <input type="submit" class="btn btn-primary" value="Update">
             </div>
         </div>
+        <th:block th:if="${#fields.hasAnyErrors()}">
+            <!-- Display form if submission failed with errors -->
+            <script>
+                loadCompleteCallbacks.push(function() {
+                    const form_selector = "#reference_form_" + "[[${reference.getId()}]]";
+                    // trigger containing modal to display form
+                    const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
+                    $("button[data-bs-target='"+ modal_selector +"']").click();
+                });
+            </script>
+        </th:block>
     </form>
 </div>
 
-<div th:fragment="referenceForm(action_path, reference)">
-    <form action="#" th:action="${action_path}" th:object="${reference}"  method="post"
-           th:data-path="${action_path}">
+<div th:fragment="referenceForm(action_path, reference, entityId)">
+    <form th:id="'reference_form_' + ${reference.getId()}" th:action="${action_path}" th:object="${reference}"  method="post"
+          th:data-path="${action_path}">
         <div class="row">
             <div class="form-group col">
                 <input name="reference-select" class="form-control refAutoSelect"
-                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
-                        placeholder="Start typing to search..." />
-                <input type="text" class="d-none" name="refEntityId" readonly/>
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
+                       placeholder="Start typing to search..." >
+                <input type="text" class="d-none" name="refEntityId" th:value="${reference.getRefEntityId()}">
+                <input type="text" class="d-none" name="factCheckedEntityId" th:value="${entityId}" readonly>
                 <span th:if="${#fields.hasErrors('refEntityId')}" th:errors="*{refEntityId}" class="text-danger"></span>
             </div>
         </div>
@@ -67,39 +81,38 @@
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
             <div class="col-4">
-                <input type="submit" class="btn btn-primary" value="Add"/>
+                <input type="submit" class="btn btn-primary" value="Add">
             </div>
         </div>
-        <script>
-            // ********************** TODO: prevent entities referencing themselves **********************
+        <th:block th:if="${#fields.hasAnyErrors()}">
+            <!-- Display form if submission failed with errors -->
+            <script>
+                // Note: Thymeleaf returns the string "null" for no-id in html, but empty-string inside javascript
+                const form_selector = "#reference_form_" + ("[[${reference.getId()}]]" ? "[[${reference.getId()}]]" : "null");
+                const ref_entity_id = "[[${reference.getRefEntityId()}]]";
 
-        var references = []
+                modalCallbacks.push(function () {
+                    if ( ref_entity_id ) {
+                        // trigger containing modal to display form
+                        const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
+                        $("button[data-bs-target='"+ modal_selector +"']").click();
 
-        autoSearchCallbacks.push(function() {
+                        // TODO: how to set the selected reference's text to the autocomplete widget?
 
-            $.each(citations, function(id, citation) {
-                display_text = citation.text + ' [Citation]';
-                references.push( { label: display_text, value: display_text, id: citation.entityId } );
-            });
+                        //$('.refAutoSelect').val( references[ref_entity_id] );
+                        //      .autocomplete("search", references[ref_entity_id]);
+                        // const menu = $('.refAutoSelect').autocomplete("widget");
+                        // $(menu[0].children[0]).click();
 
-            $.each(claims, function(id, hypothesis) {
-                display_text = hypothesis.claim + ' [Claim]';
-                references.push( { label: display_text, value: display_text, id: hypothesis.entityId } );
-            });
+                        // $('.refAutoSelect').autocomplete('set', {
+                        //     id: ref_entity_id,
+                        //     value: ref_entity_id,
+                        //     label: references[ref_entity_id] })
 
-
-            $( ".refAutoSelect" ).autocomplete({
-                source: references
-            });
-
-            $( ".refAutoSelect" ).on( "autocompleteselect", function( event, ui ) {
-                input_obj = $( "input[name='refEntityId']", "#modal_add_ref_form" );
-                input_obj.val(ui.item.id);
-            });
-
-        });
-
-        </script>
+                    }
+                })
+            </script>
+        </th:block>
     </form>
 </div>
 
