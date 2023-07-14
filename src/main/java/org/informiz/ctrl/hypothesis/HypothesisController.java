@@ -160,7 +160,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
 
-    @PostMapping("/reference/{hypothesisId}/ref/del")
+    @PostMapping("/reference/{hypothesisId}/ref/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
     public String deleteReference(@PathVariable("hypothesisId") @Valid Long id,

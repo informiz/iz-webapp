@@ -65,7 +65,7 @@
 <div th:fragment="referenceForm(action_path, reference, entityId)">
     <form th:id="'reference_form_' + ${reference.getId()}" th:action="${action_path}" th:object="${reference}"  method="post"
           th:data-path="${action_path}">
-        <div class="row">
+        <div class="form-row">
             <div class="form-group col">
                 <input name="reference-select" class="form-control refAutoSelect"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
@@ -93,22 +93,21 @@
 
                 modalCallbacks.push(function () {
                     if ( ref_entity_id ) {
-                        // trigger containing modal to display form
+                        let ref = references.find(obj => {
+                            return obj.id === ref_entity_id;
+                        })
                         const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
-                        $("button[data-bs-target='"+ modal_selector +"']").click();
-
-                        // TODO: how to set the selected reference's text to the autocomplete widget?
-
-                        //$('.refAutoSelect').val( references[ref_entity_id] );
-                        //      .autocomplete("search", references[ref_entity_id]);
-                        // const menu = $('.refAutoSelect').autocomplete("widget");
-                        // $(menu[0].children[0]).click();
-
-                        // $('.refAutoSelect').autocomplete('set', {
-                        //     id: ref_entity_id,
-                        //     value: ref_entity_id,
-                        //     label: references[ref_entity_id] })
-
+                        if (ref) {
+                            // if user already chose a reference - select it when modal pops up
+                            $(modal_selector).one('shown.bs.modal', function() {
+                                $('.refAutoSelect').autocomplete('search', ref.label)
+                                let menu = $(".refAutoSelect").autocomplete("widget");
+                                let found = $(menu[0].children[0])//.click();
+                                if (found) found.click();
+                            });
+                        }
+                        // trigger containing modal to display form
+                        $(modal_selector).modal('show');
                     }
                 })
             </script>
