@@ -1,61 +1,67 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- TODO:   Thymeleaf 3.0.15 issue with binding form-objects during list-iteration: only works if there's a
-     TODO:   "reference" object in the model (even though it's not the one getting bound to the form).
-     TODO:   'th:field' syntax doesn't populate the inputs  -->
+<!-- /*
+     NOTE:
+     Fragments get the iteration variables, but all forms bind the 'reference' model-object.
+      This means that input values should be taken from the iteration-variable using 'th:value' rather than 'th:field',
+      while errors should just refer to the bound variable's fields (e.g. #fields.hasErrors('entailment') ).
 
-<div th:fragment="refProps(reference)">
+     IMPORTANT:
+     Modal selectors must match their given ids in the ref-list template.
+     */ -->
+
+<div th:fragment="refProps(ref)">
     <div class="form-row">
+        <input type="text" class="d-none" name="id" th:value="${ref.id}" readonly>
         <div class="form-group col-6">
-            <label th:for="'entailment' + ${reference.id}">Entailment</label>
-            <select name="entailment" th:value="${reference.entailment}" class="form-control" th:id="'entailment' + ${reference.id}"
+            <label th:for="'entailment' + ${ref.id}">Entailment</label>
+            <select name="entailment" th:value="${ref.entailment}" class="form-control" th:id="'entailment' + ${ref.id}"
                     th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                 <option value=""> -- </option>
                 <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
                         th:value="${entailmentOpt}" th:text="${entailmentOpt.getDisplayValue()}"
-                        th:selected="${entailmentOpt.equals(reference.entailment)}"></option>
+                        th:selected="${entailmentOpt.equals(ref.entailment)}"></option>
             </select>
-            <span th:if="${#fields.hasErrors('entailment')}" th:errors="*{entailment}" class="text-danger"></span>
+            <span th:if="${#fields.hasErrors('entailment') && reference.getId() == ref.getId()}" th:errors="*{entailment}" class="text-danger"></span>
         </div>
         <div class="form-group col-6">
-            <label th:for="'degree' + ${reference.id}">Degree</label>
-            <input type="number" name="degree" th:value="${reference.degree}" th:id="'degree' + ${reference.id}"
+            <label th:for="'degree' + ${ref.id}">Degree</label>
+            <input type="number" name="degree" th:value="${ref.degree}" th:id="'degree' + ${ref.id}"
                    min="0" max="1" step="0.01" class="form-control"
                    th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
-            <span th:if="${#fields.hasErrors('degree')}" th:errors="*{degree}" class="text-danger"></span>
+            <span th:if="${#fields.hasErrors('degree') && reference.getId() == ref.getId()}" th:errors="*{degree}" class="text-danger"></span>
 
         </div>
     </div>
     <div>
-        <label th:for="'comment' + ${reference.id}" class="col-form-label">Comment</label>
-        <textarea name="comment" class="form-control" cols="20" th:id="'comment' + ${reference.id}"
+        <label th:for="'comment' + ${ref.id}" class="col-form-label">Comment</label>
+        <textarea name="comment" class="form-control" cols="20" th:id="'comment' + ${ref.id}"
                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
-                  th:text="${reference.comment}"></textarea>
-        <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
+                  th:text="${ref.comment}"></textarea>
+        <span th:if="${#fields.hasErrors('comment') && reference.getId() == ref.getId()}" th:errors="*{comment}" class="text-danger"></span>
     </div>
 </div>
 
-<div th:fragment="editRefForm(action_path, reference)">
-    <form th:id="'reference_form_' + ${reference.getId()}" th:action="${action_path}" th:object="${reference}" method="post">
-        <input type="text" class="d-none" name="refEntityId" th:value="${reference.getRefEntityId()}" readonly>
-        <input type="text" class="d-none" name="factCheckedEntityId" th:value="${reference.getFactCheckedEntityId()}" readonly>
-        <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly>
+<div th:fragment="editRefForm(action_path, cur_ref)">
+    <form th:id="'reference_form_' + ${cur_ref.getId()}" th:action="${action_path}" th:object="${reference}" method="post">
+        <input type="text" class="d-none" name="refEntityId" th:value="${cur_ref.getRefEntityId()}" readonly>
+        <input type="text" class="d-none" name="factCheckedEntityId" th:value="${cur_ref.getFactCheckedEntityId()}" readonly>
+        <input type="text" class="d-none" name="ownerId" th:value="${cur_ref.ownerId}" readonly>
 
-        <div th:replace="~{fragments/reference :: refProps(${reference})}"></div>
+        <div th:insert="~{fragments/reference :: refProps(${cur_ref})}" th:remove="tag"></div>
 
         <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
             <div class="col-4">
                 <input type="submit" class="btn btn-primary" value="Update">
             </div>
         </div>
-        <th:block th:if="${#fields.hasAnyErrors()}">
+        <th:block th:if="${#fields.hasAnyErrors() && reference.getId() == cur_ref.getId() }">
             <!-- Display form if submission failed with errors -->
             <script>
                 loadCompleteCallbacks.push(function() {
-                    const form_selector = "#reference_form_" + "[[${reference.getId()}]]";
                     // trigger containing modal to display form
-                    const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
-                    $("button[data-bs-target='"+ modal_selector +"']").click();
+                    const modal_selector = "#modal_ref_" + "[[${reference.getId()}]]";
+                    $(modal_selector).modal('show');
                 });
             </script>
         </th:block>
@@ -63,7 +69,7 @@
 </div>
 
 <div th:fragment="referenceForm(action_path, reference, entityId)">
-    <form th:id="'reference_form_' + ${reference.getId()}" th:action="${action_path}" th:object="${reference}"  method="post"
+    <form id="reference_form_null" th:action="${action_path}" th:object="${reference}"  method="post"
           th:data-path="${action_path}">
         <div class="form-row">
             <div class="form-group col">
@@ -84,31 +90,29 @@
                 <input type="submit" class="btn btn-primary" value="Add">
             </div>
         </div>
-        <th:block th:if="${#fields.hasAnyErrors()}">
+        <th:block th:if="${ #fields.hasAnyErrors() && reference.getId() == null }">
             <!-- Display form if submission failed with errors -->
             <script>
-                // Note: Thymeleaf returns the string "null" for no-id in html, but empty-string inside javascript
-                const form_selector = "#reference_form_" + ("[[${reference.getId()}]]" ? "[[${reference.getId()}]]" : "null");
                 const ref_entity_id = "[[${reference.getRefEntityId()}]]";
+                const modal_selector = "#modal_add_ref_form";
 
                 modalCallbacks.push(function () {
                     if ( ref_entity_id ) {
                         let ref = references.find(obj => {
                             return obj.id === ref_entity_id;
                         })
-                        const modal_selector = "#" + $(form_selector).closest(".modal").attr("id");
                         if (ref) {
                             // if user already chose a reference - select it when modal pops up
                             $(modal_selector).one('shown.bs.modal', function() {
                                 $('.refAutoSelect').autocomplete('search', ref.label)
                                 let menu = $(".refAutoSelect").autocomplete("widget");
-                                let found = $(menu[0].children[0])//.click();
+                                let found = $(menu[0].children[0]);
                                 if (found) found.click();
                             });
                         }
-                        // trigger containing modal to display form
-                        $(modal_selector).modal('show');
                     }
+                    // trigger containing modal to display form
+                    $(modal_selector).modal('show');
                 })
             </script>
         </th:block>

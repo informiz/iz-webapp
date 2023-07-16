@@ -20,6 +20,8 @@
             const content_selector = "#[[${content_id}]]";
             // Move content into modal body
             $(body_selector).append($(content_selector));
+
+            // TODO: After failed form submission - browser should return to "details" page if modal is dismissed
         });
     </script>
 </div>

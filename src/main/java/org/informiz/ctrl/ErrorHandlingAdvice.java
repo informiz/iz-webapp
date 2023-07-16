@@ -6,8 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -40,5 +42,12 @@ public class ErrorHandlingAdvice {
         return mv;
 
     }
+
+
+    @ModelAttribute
+    public void addAttributes(Model model, HttpServletRequest request) {
+        model.addAttribute("url", request.getServletPath());
+    }
+
 
 }
