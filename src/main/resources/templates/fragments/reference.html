@@ -11,7 +11,7 @@
      */ -->
 
 <div th:fragment="refProps(ref)">
-    <div class="form-row">
+    <div>
         <input type="text" class="d-none" name="id" th:value="${ref.id}" readonly>
         <div class="form-group col-6">
             <label th:for="'entailment' + ${ref.id}">Entailment</label>
@@ -22,14 +22,14 @@
                         th:value="${entailmentOpt}" th:text="${entailmentOpt.getDisplayValue()}"
                         th:selected="${entailmentOpt.equals(ref.entailment)}"></option>
             </select>
-            <span th:if="${#fields.hasErrors('entailment') && reference.getId() == ref.getId()}" th:errors="*{entailment}" class="text-danger"></span>
+            <span th:if="${#fields.hasErrors('entailment') && @tlUtils.isRefFormError(ref, reference)}" th:errors="*{entailment}" class="text-danger"></span>
         </div>
         <div class="form-group col-6">
             <label th:for="'degree' + ${ref.id}">Degree</label>
             <input type="number" name="degree" th:value="${ref.degree}" th:id="'degree' + ${ref.id}"
                    min="0" max="1" step="0.01" class="form-control"
                    th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
-            <span th:if="${#fields.hasErrors('degree') && reference.getId() == ref.getId()}" th:errors="*{degree}" class="text-danger"></span>
+            <span th:if="${#fields.hasErrors('degree') && @tlUtils.isRefFormError(ref, reference)}" th:errors="*{degree}" class="text-danger"></span>
 
         </div>
     </div>
@@ -38,7 +38,7 @@
         <textarea name="comment" class="form-control" cols="20" th:id="'comment' + ${ref.id}"
                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                   th:text="${ref.comment}"></textarea>
-        <span th:if="${#fields.hasErrors('comment') && reference.getId() == ref.getId()}" th:errors="*{comment}" class="text-danger"></span>
+        <span th:if="${#fields.hasErrors('comment') && @tlUtils.isRefFormError(ref, reference)}" th:errors="*{comment}" class="text-danger"></span>
     </div>
 </div>
 
@@ -48,14 +48,16 @@
         <input type="text" class="d-none" name="factCheckedEntityId" th:value="${cur_ref.getFactCheckedEntityId()}" readonly>
         <input type="text" class="d-none" name="ownerId" th:value="${cur_ref.ownerId}" readonly>
 
+        <!-- /* IMPORTANT: when passing variables to fragments use th:insert, not th:replace. The later may not work
+                        because of processing precedence (e.g. iteration variables are not yet available) */ -->
         <div th:insert="~{fragments/reference :: refProps(${cur_ref})}" th:remove="tag"></div>
 
-        <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
+        <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
             <div class="col-4">
                 <input type="submit" class="btn btn-primary" value="Update">
             </div>
         </div>
-        <th:block th:if="${#fields.hasAnyErrors() && reference.getId() == cur_ref.getId() }">
+        <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isRefFormError(cur_ref, reference) }">
             <!-- Display form if submission failed with errors -->
             <script>
                 loadCompleteCallbacks.push(function() {
@@ -68,32 +70,35 @@
     </form>
 </div>
 
-<div th:fragment="referenceForm(action_path, reference, entityId)">
+<div th:fragment="referenceForm(action_path, ref, entityId)">
     <form id="reference_form_null" th:action="${action_path}" th:object="${reference}"  method="post"
           th:data-path="${action_path}">
-        <div class="form-row">
+        <div>
             <div class="form-group col">
                 <input name="reference-select" class="form-control refAutoSelect"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                        placeholder="Start typing to search..." >
-                <input type="text" class="d-none" name="refEntityId" th:value="${reference.getRefEntityId()}">
+                <input type="text" class="d-none" name="refEntityId" th:value="${ref.getRefEntityId()}">
                 <input type="text" class="d-none" name="factCheckedEntityId" th:value="${entityId}" readonly>
-                <span th:if="${#fields.hasErrors('refEntityId')}" th:errors="*{refEntityId}" class="text-danger"></span>
+                <span th:if="${#fields.hasErrors('refEntityId') && @tlUtils.isAddRefFormError(ref, reference) }"
+                      th:errors="*{refEntityId}" class="text-danger"></span>
             </div>
         </div>
 
-        <div th:replace="~{fragments/reference :: refProps(${reference})}"></div>
+        <!-- /* IMPORTANT: when passing variables to fragments use th:insert, not th:replace. The later may not work
+                        because of processing precedence (e.g. iteration variables are not yet available) */ -->
+        <div th:insert="~{fragments/reference :: refProps(${ref})}" th:remove="tag"></div>
 
 
-        <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
+        <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
             <div class="col-4">
                 <input type="submit" class="btn btn-primary" value="Add">
             </div>
         </div>
-        <th:block th:if="${ #fields.hasAnyErrors() && reference.getId() == null }">
+        <th:block th:if="${ #fields.hasAnyErrors() && @tlUtils.isAddRefFormError(ref, reference) }">
             <!-- Display form if submission failed with errors -->
             <script>
-                const ref_entity_id = "[[${reference.getRefEntityId()}]]";
+                const ref_entity_id = "[[${ref.getRefEntityId()}]]";
                 const modal_selector = "#modal_add_ref_form";
 
                 modalCallbacks.push(function () {

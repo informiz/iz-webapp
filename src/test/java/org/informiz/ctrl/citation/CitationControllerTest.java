@@ -4,6 +4,7 @@ import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
+import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
 import org.informiz.model.Review;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, CitationController.class, ErrorHandlingAdvice.class})
+@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, CitationController.class, ErrorHandlingAdvice.class})
 @ActiveProfiles("test")
 @WebMvcTest(CitationController.class)
 class CitationControllerTest {

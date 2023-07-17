@@ -68,12 +68,12 @@
                         <span class="table-text" th:text="${cur_ref.comment}"></span>
                     </td>
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
-                        <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
-                            <div th:id="'ref_' + ${cur_ref.id}" th:insert="~{fragments/reference :: editRefForm(${action_url}, ${cur_ref})}">
-                            </div>
-                        </div>
-                        <div th:replace="~{fragments/modal :: customModal('Edit Reference', 'ref_' + ${cur_ref.id})}"></div>
                         <td>
+                            <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
+                                <div th:id="'ref_' + ${cur_ref.id}" th:insert="~{fragments/reference :: editRefForm(${action_url}, ${cur_ref})}">
+                                </div>
+                            </div>
+                            <div th:replace="~{fragments/modal :: customModal('Edit Reference', 'ref_' + ${cur_ref.id})}"></div>
                             <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), cur_ref)}"
                                     th:id="'edit_ref_' + ${cur_ref.id}" data-bs-toggle="modal"
                                     th:attr="data-bs-target='#modal_ref_' + ${cur_ref.id}"
@@ -89,7 +89,6 @@
                                        th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),cur_ref)}"/>
                             </form>
                         </td>
-
                     </th:block>
                 </tr>
                 </tbody>
@@ -100,8 +99,7 @@
                 <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
                      TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
                 <div class="d-none">
-                    <div th:id="add_ref_form">
-                        <div th:replace="~{fragments/reference :: referenceForm(${refsUrl}, ${reference}, ${entityId})}"></div>
+                    <div th:id="add_ref_form" th:insert="~{fragments/reference :: referenceForm(${refsUrl}, ${reference}, ${entityId})}">
                     </div>
                 </div>
                 <div th:replace="~{fragments/modal :: customModal('Add Reference', 'add_ref_form')}"></div>
@@ -111,7 +109,6 @@
                             th:attr="data-bs-target='#modal_add_ref_form'"
                             class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
-
             </th:block>
 
             <script>
