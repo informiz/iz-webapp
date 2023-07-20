@@ -23,7 +23,7 @@
                     </form>
                 </div>
             </div>
-            <div th:replace="~{fragments/src-ref-list :: sourceList(${citation.sources}, @{'/citation/source/' + ${citation.id}})}"></div>
+            <div th:replace="~{fragments/src-ref-list :: sourceList(${citation.entityId}, ${citation.sources}, @{'/citation/source-ref/' + ${citation.id}})}"></div>
 
             <div th:replace="~{fragments/review-list :: reviewList(${citation.reviews}, @{'/citation/' + ${citation.id} + '/review/'})}"></div>
         </div>

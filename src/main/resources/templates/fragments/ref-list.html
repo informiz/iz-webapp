@@ -32,7 +32,7 @@
                 });
 
                 $( ".refAutoSelect" ).on( "autocompleteselect", function( event, ui ) {
-                    input_obj = $( "input[name='refEntityId']", event.target.form );
+                    let input_obj = $( "input[name='refEntityId']", event.target.form );
                     input_obj.val(ui.item.id);
                 });
 

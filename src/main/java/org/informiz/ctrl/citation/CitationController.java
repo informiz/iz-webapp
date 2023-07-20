@@ -1,9 +1,11 @@
 package org.informiz.ctrl.citation;
 
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.*;
+import org.informiz.model.CitationBase;
+import org.informiz.model.InformizEntity;
+import org.informiz.model.Review;
+import org.informiz.model.SourceRef;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
@@ -12,10 +14,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -142,59 +142,32 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/source/{citationId}")
+    @PostMapping("/{citationId}/source-ref/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String addSource(@PathVariable("citationId") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
-                            BindingResult result) {
-
-        CitationBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Citation id"));
-
-        SourceBase source = null;
-        if (StringUtils.isNotBlank(srcRef.getSrcEntityId())) {
-            source = sourceRepo.findByEntityId(srcRef.getSrcEntityId());
-        }
-
-        try {
-            SourceRef toAdd = new SourceRef(source, current, srcRef.getLink(), srcRef.getDescription());
-            current.addSource(toAdd);
-
-        } catch (IllegalArgumentException e) {
-            result.addError(new ObjectError("link",
-                    "Please provide either a link, a source or both"));
-        }
-        return getRedirectToEditPage(current.getLocalId());
+    public String addSource(@PathVariable("citationId") @Valid Long id,
+                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            BindingResult result, Model model, Authentication authentication) {
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
 
-    @PostMapping("/source/{citationId}/{srcId}")
+    @PostMapping("/{citationId}/source-ref/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#source.ownerId == authentication.principal.name")
-    // TODO: resolve codes duplicate issue
-    public String editSrcRef(@PathVariable("citationId") @Valid Long id,
-                             @PathVariable("srcId") @Valid Long srcId,
-                             Authentication authentication) {
-
-        return getRedirectToEditPage(id);
+    public String editSourceRef(@PathVariable("citationId") @Valid Long id,
+                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             BindingResult result, Model model, Authentication authentication) {
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
 
-    @PostMapping("/source/{citationId}/del/{refId}")
+    @PostMapping("/source/{citationId}/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
-    // TODO: resolve codes duplicate issue
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("citationId") @Valid Long id,
-                               @PathVariable("refId") @Valid Long refId,
-                               Authentication authentication) {
-
-        CitationBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
-
-        current.removeSource(refId);
-        return getRedirectToEditPage(id);
+                               @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                               BindingResult result, Model model, Authentication authentication) {
+        return deleteSrcReference(id, srcRef.getId(), result, model, authentication);
     }
 
     @Override

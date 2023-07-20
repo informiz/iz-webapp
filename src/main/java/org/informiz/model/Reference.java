@@ -91,6 +91,14 @@ public final class Reference extends InformizEntity implements Serializable {
         this.comment = other.comment;
     }
 
+    public Reference(@NotNull Reference other) {
+        this.factCheckedEntityId = other.getFactCheckedEntityId();
+        this.refEntityId = other.getRefEntityId();
+        this.entailment = other.getEntailment();
+        this.degree = other.getDegree();
+        this.comment = other.getComment();
+    }
+
     public String getFactCheckedEntityId() {
         return factCheckedEntityId;
     }

@@ -2,6 +2,7 @@ package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +27,26 @@ public abstract class FactCheckedEntity extends ChainCodeEntity {
 
 
     public boolean addReference(Reference reference) {
-        boolean bool = false;
+        boolean bool;
         synchronized (references) {
             bool = getReferences().add(reference);
         }
         return bool;
     }
 
-    public boolean removeReference(Reference reference) {
-        boolean bool = false;
+    public boolean removeReference(@NotNull Reference reference) {
+        boolean bool;
         synchronized (references) {
             bool = getReferences().remove(reference);
         }
         return bool;
     }
 
-    public boolean removeReference(Long referenceId) {
+    public boolean removeReference(@NotNull Long referenceId, @NotNull String owner) {
         List<Reference> snapshot = new ArrayList(references);
         Reference ref = snapshot.stream().filter(reference ->
-                referenceId.equals(reference.getId())).findFirst().orElse(null);
+                referenceId.equals(reference.getId()) && owner.equals(reference.getOwnerId()))
+                .findFirst().orElse(null);
 
         if (ref != null)
             return removeReference(ref);

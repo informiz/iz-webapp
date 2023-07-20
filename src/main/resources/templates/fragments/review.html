@@ -3,9 +3,13 @@
 <!-- TODO: can define thymeleaf "macro" to check if errors come from this form?? -->
     <div th:fragment="reviewForm(action_path, cur_review)">
         <form th:id="'rev_form_' + ${cur_review.getId()}" th:action="${action_path}" th:object="${review}" method="post">
-            <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
-            <input type="text" class="d-none" name="id" th:value="${cur_review.getId()}" readonly>
-            <div>
+            <div class="form-row">
+                <div class="col">
+                    <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
+                    <input type="text" class="d-none" name="id" th:value="${cur_review.getId()}" readonly>
+                </div>
+            </div>
+            <div class="form-row">
                 <div class="col-4">
                     <label th:for="'rating' + ${cur_review.getId()}" class="col-form-label">Reliability</label>
                     <input type="number" name="rating" th:value="${cur_review.rating}" min="0" max="1" step="0.01"
@@ -20,7 +24,6 @@
                     <span th:if="${#fields.hasErrors('comment') && @tlUtils.isReviewFormError(cur_review, review)}"
                           th:errors="*{comment}" class="text-danger"></span>
                 </div>
-
             </div>
             <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
                 <div class="col-4">
