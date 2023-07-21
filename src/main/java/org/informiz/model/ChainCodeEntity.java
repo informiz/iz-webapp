@@ -199,6 +199,37 @@ public abstract class ChainCodeEntity extends InformizEntity {
     protected Set<SourceRef> sources = new HashSet<>();
 
 
+    // TODO: Currently only Hypothesis and Citation have sources, need to sort out class-hierarchy
+    public Set<SourceRef> getSources() {
+        return sources;
+    }
+
+    public void setSources(Set<SourceRef> sources) {
+        this.sources = sources;
+    }
+
+    public boolean removeSource(@NotNull Long srcRefId, @NotNull String owner) {
+        List<SourceRef> snapshot = new ArrayList(sources);
+        SourceRef ref = snapshot.stream().filter(reference ->
+                srcRefId.equals(reference.getId()) && owner.equals(reference.getOwnerId()))
+                .findFirst().orElse(null);
+
+        if (ref != null)
+            return sources.remove(ref);
+        return false;
+    }
+
+    public boolean addSource(@NotNull SourceRef srcRef) {
+        boolean bool;
+        // TODO: Source references are considered equal if they have the same well-known source and link.
+        //       This will do nothing if user(s) add the same source multiple times.
+        synchronized (sources) {
+            bool = getSources().add(srcRef);
+        }
+        return bool;
+    }
+
+
 
 
 }

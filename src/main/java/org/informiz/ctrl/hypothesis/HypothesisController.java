@@ -159,7 +159,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return referenceEntity(id, reference, result, model, authentication);
     }
 
-
+// TODO: remove /ref/ from url
     @PostMapping("/reference/{hypothesisId}/ref/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
@@ -170,56 +170,33 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
 
-    @PostMapping("/source/{hypothesisId}")
+    @PostMapping("/source-ref/{hypothesisId}")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String addSource(@PathVariable("hypothesisId") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
-                            BindingResult result, Model model) {
+    public String addSource(@PathVariable("hypothesisId") @Valid Long id,
+                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            BindingResult result, Model model, Authentication authentication) {
 
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
-
-        SourceBase source = null;
-        if (StringUtils.isNotBlank(srcRef.getSrcEntityId())) {
-            source = sourceRepo.findByEntityId(srcRef.getSrcEntityId());
-        }
-
-        try {
-            SourceRef toAdd = new SourceRef(source, current, source.getLink(), source.getDescription());
-            current.addSource(toAdd);
-            model.addAttribute(HYPOTHESIS_ATTR, current);
-            model.addAttribute(SOURCE_ATTR, new SourceRef());
-        } catch (IllegalArgumentException e) {
-            result.addError(new ObjectError("link",
-                    "Please provide either a link, a source or both"));
-        }
-        prepareEditModel(model, current, new Review(), new Reference());
-        return getEditPageTemplate();
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
-    @PostMapping("/source/{hypothesisId}/{srcId}")
+    @PostMapping("/source-ref/{hypothesisId}/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String editSrcRef(@PathVariable("hypothesisId") @Valid Long id,
-                             @PathVariable("srcId") @Valid Long srcId,
-                             @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source,
-                             Authentication authentication) {
-        // TODO: not implemented?
-        return getRedirectToEditPage(id);
+                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             BindingResult result, Model model, Authentication authentication) {
+
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
-    @PostMapping("/source/{hypothesisId}/src-ref/del/")
+    @PostMapping("/source-ref/{hypothesisId}/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("hypothesisId") @Valid Long id,
-                               @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source) {
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+                               @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                               BindingResult result, Model model, Authentication authentication) {
+        return deleteSrcReference(id, srcRef.getId(), result, model, authentication);
 
-        current.removeSource(source.getId());
-        return getRedirectToEditPage(id);
     }
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {

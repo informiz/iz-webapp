@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
+import org.informiz.model.SourceRef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,8 +55,30 @@ public class ThymeLeafConfig {
         public boolean isReviewFormError(@NotNull Review review, @NotNull Review errReview) {
             return request.getRequestURI().contains("/review/") && review.getId() == errReview.getId();
         }
-    }
 
+        /**
+         * Check if there is an error related to editing a source-reference.
+         *
+         * @param sourceRef the source-reference represented by the form
+         * @param errSrcRef the source-reference that caused the error
+         * @return true iff editing the given source-reference is the cause of the error
+         */
+        public boolean isSourceRefFormError(@NotNull SourceRef sourceRef, @NotNull SourceRef errSrcRef) {
+            return request.getRequestURI().contains("/source-ref/") && sourceRef.getId() == errSrcRef.getId();
+        }
+
+        /**
+         * Check if there is an error related to adding a source-reference.
+         *
+         * @param sourceRef the source-reference represented by the form
+         * @param errSrcRef the source-reference that caused the error
+         * @return true iff adding a source-reference is the cause of the error
+         */
+        public boolean isAddSourceRefFormError(@NotNull SourceRef sourceRef, @NotNull SourceRef errSrcRef) {
+            return isSourceRefFormError(sourceRef, errSrcRef) &&
+                    (sourceRef.getId() == null || sourceRef.getId().equals(0l));
+        }
+    }
 
     @Bean(name = "tlUtils")
     static ThymeleafUtils tlUtilsBean() {

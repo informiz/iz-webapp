@@ -69,27 +69,6 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
         this.link = link;
     }
 
-    @OneToMany(cascade = CascadeType.ALL,
-            orphanRemoval=true)
-    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
-    public Set<SourceRef> getSources() {
-        return sources;
-    }
-
-    public void setSources(Set<SourceRef> sources) {
-        this.sources = sources;
-    }
-
-    public boolean removeSource(Long srcRefId) {
-        List<SourceRef> snapshot = new ArrayList(sources);
-        SourceRef ref = snapshot.stream().filter(reference ->
-                srcRefId.equals(reference.getId())).findFirst().orElse(null);
-
-        if (ref != null)
-            return sources.remove(ref);
-        return false;
-    }
-
     public boolean addSource(SourceRef src) {
         // Source references are considered equal if they have the same well-known source and link.
         // If a similar source-reference exists, this method will replace it
