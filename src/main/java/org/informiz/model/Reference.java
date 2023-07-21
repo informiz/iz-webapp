@@ -63,6 +63,7 @@ public final class Reference extends InformizEntity implements Serializable {
     // The entity-id of the claim/citation on the ledger. TODO: validation??
     @Column(name = "ref_entity_id")
     @NotBlank(groups = { UserReference.class, Default.class })
+    @Size(max = 255, groups = { UserReference.class, Default.class })
     private String refEntityId; // either hypothesis or citation
 
     @Enumerated(EnumType.ORDINAL)

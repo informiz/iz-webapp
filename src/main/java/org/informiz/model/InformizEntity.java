@@ -2,13 +2,12 @@ package org.informiz.model;
 
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
+import jdk.jfr.Timestamp;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -29,14 +28,17 @@ public abstract class InformizEntity implements Serializable {
 
     @Column(name = "creator_entity_id", nullable = false, updatable = false)
     @NotBlank
+    @Size(max = 255)
     protected String creatorId;
 
     @Column(name = "owner_entity_id", nullable = false)
     @NotBlank(message = "Owner ID is required", groups = { DeleteEntity.class, Default.class })
+    @Size(max = 255, groups = { DeleteEntity.class, Default.class })
     protected String ownerId;
 
     // Creation time, as UTC timestamp in milliseconds
     @Column(name = "created", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     protected Long createdTs;
 

@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ActiveProfiles("test")
-class ReviewTest {
-
-    @Autowired
-    private TestEntityManager entityManager;
-
-    Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
+class ReviewTest extends IzEntityTestBase<Review> {
     @Test
     public void whenValidReview_thenDefaultValidatorSucceeds() {
         Review review = ModelTestUtils.getPopulatedReview();
@@ -87,5 +82,11 @@ class ReviewTest {
         violations = validator.validate(review, Review.UserReview.class);
         assertEquals(0, violations.size());
 
+    }
+
+    @NotNull
+    @Override
+    protected Review getValidEntity() {
+        return ModelTestUtils.getPopulatedReview();
     }
 }
