@@ -3,6 +3,7 @@ package org.informiz.model;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.groups.Default;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 @ActiveProfiles("test")
 class ReviewTest extends IzEntityTestBase<Review> {
+
+    //Default
     @Test
     public void whenValidReview_thenDefaultValidatorSucceeds() {
         Review review = ModelTestUtils.getPopulatedReview();
@@ -30,6 +33,9 @@ class ReviewTest extends IzEntityTestBase<Review> {
         assertEquals(0, violations.size());
     }
 
+    //ID  !Null, =<255, POSITIVE
+
+    //UserReview
     @Test
     public void whenBadEntityId_thenDefaultValidatorViolation() {
         Review review = ModelTestUtils.getPopulatedReview();
@@ -55,6 +61,8 @@ class ReviewTest extends IzEntityTestBase<Review> {
         violations = validator.validate(review);
         assertEquals(0, violations.size());
     }
+
+    //ReviewEntityID
 
     @Test
     public void whenInvalidRating_thenUserReviewValidatorViolation() {

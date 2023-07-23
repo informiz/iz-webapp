@@ -26,7 +26,7 @@ public class ModelTestUtils {
             review.setReviewedEntityId(reviewed.getEntityId());
         }
         review.setId(id);
-        setMetaData(id, review);
+        setMetaData(review);
         return review;
     }
 
@@ -41,25 +41,76 @@ public class ModelTestUtils {
         ref.setDegree(0.9f);
 
         ref.setId(id);
-        setMetaData(id, ref);
+        setMetaData(ref);
+        return ref;
+    }
+
+    @NotNull
+    public static SourceRef getPopulatedSrcReference(@Nullable Long id) {
+        SourceRef ref = new SourceRef();
+
+        ref.setSourcedId("Test");
+        ref.setSrcEntityId("Test");
+        ref.setLink("https://informiz.org");
+        ref.setDescription("Test");
+
+        ref.setId(id);
+        setMetaData(ref);
         return ref;
     }
 
     @NotNull
     public static InformiBase getPopulatedInformi(@Nullable Long id) {
         InformiBase informi = new InformiBase();
-        informi.setEntityId("TestInformiId");
+        informi.setEntityId("TestInformiIdLongerThanTwentyFive");
         informi.setName("Test Informi");
         informi.setDescription("Test description for Informi");
         informi.setMediaPath("https://server.com/path/to/image.jpg");
 
         informi.setLocalId(id);
-        setMetaData(id, informi);
+        setMetaData(informi);
         return informi;
+    }
+    @NotNull
+    public static HypothesisBase getPopulatedHypothesis(@Nullable Long id) {
+        HypothesisBase hypothesis = new HypothesisBase();
+        hypothesis.setEntityId("TestHypothesisIdLongerThanTwentyFive");
+        hypothesis.setClaim("Test Claim");
+
+        hypothesis.setLocalId(id);
+        setMetaData(hypothesis);
+        return hypothesis;
+    }
+
+    @NotNull
+    public static CitationBase getPopulatedCitation(@Nullable Long id) {
+        CitationBase citation = new CitationBase();
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setLink("https://server.com/path/to/image.jpg");
+        citation.setText("Citation Test");
+
+        citation.setLocalId(id);
+        setMetaData(citation);
+        return citation;
+    }
+
+    @NotNull
+    public static SourceBase getPopulatedSourceBase(@Nullable Long id) {
+        SourceBase sourceBase = new SourceBase();
+        sourceBase.setName("SourceBaseTest");
+        sourceBase.setEntityId("TestSourceBaseIdLongerThanTwentyFive");
+        sourceBase.setLink("https://server.com/path/to/image.jpg");
+        sourceBase.setSrcType(SourceBase.SourceType.PERSON);
+        sourceBase.setDescription("Test Description");
+
+        sourceBase.setLocalId(id);
+        setMetaData(sourceBase);
+        return sourceBase;
     }
 
 
-    private static void setMetaData(@org.jetbrains.annotations.Nullable Long id, InformizEntity izEntity) {
+
+    private static void setMetaData(InformizEntity izEntity) {
         izEntity.setCreatorId("test");
         izEntity.setOwnerId("test");
         izEntity.setCreatedTs(12345l);
