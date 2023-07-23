@@ -28,6 +28,30 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         assertEquals(0, violations.size());
     }
 
+    //factCheckedEntityId  >>  !Blank, =<255
+    //!Blank
+    @Test
+    public void whenfactCheckedEntityIdNotBlank_thenUserReferenceValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setFactCheckedEntityId("");
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+
+    //=<255
+    @Test
+    public void whenfactCheckedEntityIdExceeds_thenUserReferenceValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+
+
     // RefEntityId max 255 characters or null
     @Test
     public void whenLongOrMissingRefID_thenUserReferenceValidatorViolation() {
@@ -43,6 +67,12 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         reference.setRefEntityId(null);
         violations = validator.validate(reference);
         assertEquals(1, violations.size());
+
+        //!Blank
+        reference.setRefEntityId("");
+        violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+
     }
 
     //Testing null Entailment

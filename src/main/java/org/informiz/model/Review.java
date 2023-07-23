@@ -20,6 +20,7 @@ public final class Review extends InformizEntity implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
     @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    //@Size(max = 255)
     @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 

@@ -21,76 +21,77 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     @Autowired
     protected TestEntityManager entityManager;
 
+
     //************* creatorId test
     @Test
     public void whenCreatorIDisNull_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setCreatorId(null);
+        entity.setCreatorId(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
 
     @Test
     public void whenCreatorIdExeeds_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setCreatorId(RandomStringUtils.random(256));
+        entity.setCreatorId(RandomStringUtils.random(256));
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
 
     //*******    OwnerID test
     @Test
     public void whenOwnerIDisNull_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setOwnerId(null);
+        entity.setOwnerId(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, InformizEntity.DeleteEntity.class);
         assertEquals(1, violations.size());
     }
 
     @Test
     public void whenOwnerIdExceeds_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setOwnerId(RandomStringUtils.random(256));
+        entity.setOwnerId(RandomStringUtils.random(256));
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
 
     @Test
     public void whenCreatedTsIsNull_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setCreatedTs(null);
+        entity.setCreatedTs(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
 
     @Test
     @Disabled("Not sure how to test Ts")
     public void whenCreatedTsInvalid_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setCreatedTs(123456L);
+        entity.setCreatedTs(123456L);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
 
     @Test
     public void whenUpdtedTsIsNull_thenCreatorIdValidatorViolation() {
-        T reference = getValidEntity();
+        T entity = getValidEntity();
 
-        reference.setUpdatedTs(null);
+        entity.setUpdatedTs(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(reference);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
     @NotNull
