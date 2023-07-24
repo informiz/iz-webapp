@@ -25,8 +25,7 @@ public class ModelTestUtils {
         } else {
             review.setReviewedEntityId(reviewed.getEntityId());
         }
-        review.setId(id);
-        setMetaData(review);
+        setMetaData(id, review);
         return review;
     }
 
@@ -40,8 +39,7 @@ public class ModelTestUtils {
         ref.setEntailment(Reference.Entailment.SUPPORTS);
         ref.setDegree(0.9f);
 
-        ref.setId(id);
-        setMetaData(ref);
+        setMetaData(id, ref);
         return ref;
     }
 
@@ -54,8 +52,7 @@ public class ModelTestUtils {
         ref.setLink("https://informiz.org");
         ref.setDescription("Test");
 
-        ref.setId(id);
-        setMetaData(ref);
+        setMetaData(id, ref);
         return ref;
     }
 
@@ -67,8 +64,7 @@ public class ModelTestUtils {
         informi.setDescription("Test description for Informi");
         informi.setMediaPath("https://server.com/path/to/image.jpg");
 
-        informi.setLocalId(id);
-        setMetaData(informi);
+        setMetaData(id, informi);
         return informi;
     }
     @NotNull
@@ -77,8 +73,7 @@ public class ModelTestUtils {
         hypothesis.setEntityId("TestHypothesisIdLongerThanTwentyFive");
         hypothesis.setClaim("Test Claim");
 
-        hypothesis.setLocalId(id);
-        setMetaData(hypothesis);
+        setMetaData(id, hypothesis);
         return hypothesis;
     }
 
@@ -89,8 +84,7 @@ public class ModelTestUtils {
         citation.setLink("https://server.com/path/to/image.jpg");
         citation.setText("Citation Test");
 
-        citation.setLocalId(id);
-        setMetaData(citation);
+        setMetaData(id, citation);
         return citation;
     }
 
@@ -102,15 +96,14 @@ public class ModelTestUtils {
         sourceBase.setLink("https://server.com/path/to/image.jpg");
         sourceBase.setSrcType(SourceBase.SourceType.PERSON);
         sourceBase.setDescription("Test Description");
-
-        sourceBase.setLocalId(id);
-        setMetaData(sourceBase);
+        setMetaData(id, sourceBase);
         return sourceBase;
     }
 
 
 
-    private static void setMetaData(InformizEntity izEntity) {
+    private static void setMetaData(@NotNull Long id, InformizEntity izEntity) {
+        izEntity.setId(id);
         izEntity.setCreatorId("test");
         izEntity.setOwnerId("test");
         izEntity.setCreatedTs(12345l);

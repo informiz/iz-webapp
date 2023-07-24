@@ -25,6 +25,7 @@ public final class SourceRef extends InformizEntity implements Serializable {
     public static final String SRC_QUERY = "(SELECT * FROM source s where s.entity_id = src_entity_id)";
 
     @Id
+    @NotNull
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
     protected Long id;
 

@@ -41,6 +41,13 @@ public abstract class ChainCodeEntity extends InformizEntity {
     public void setLocalId(Long id) {
         this.id = id;
     }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     // Unique entity identifier
     @Column(name = "entity_id", unique = true)

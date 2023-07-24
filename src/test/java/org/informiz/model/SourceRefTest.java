@@ -32,7 +32,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //SrcEntity < 256
     @Test
-    public void whenSrcRefExeeds_thenUserReferenceValidatorViolation() {
+    public void whenSrcRefExceeds_thenUserReferenceValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
         //Exceeds 255

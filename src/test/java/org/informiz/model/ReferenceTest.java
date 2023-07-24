@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 class ReferenceTest extends IzEntityTestBase<Reference> {
 
+    //Default
     @Test
     public void whenValidReference_thenDefaultValidatorSucceeds() {
         Reference reference = getValidEntity();

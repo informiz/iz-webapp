@@ -22,9 +22,20 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     protected TestEntityManager entityManager;
 
 
+    //************* ID Test
+    @Test
+    public void whenIDIsNull_thenDefaultValidatorViolation() {
+        T entity = getValidEntity();
+
+        entity.setId(null);
+
+        Set<ConstraintViolation<T>> violations = validator.validate(entity);
+        assertEquals(1, violations.size());
+    }
+
     //************* creatorId test
     @Test
-    public void whenCreatorIDisNull_thenCreatorIdValidatorViolation() {
+    public void whenCreatorIDisNull_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatorId(null);
@@ -34,7 +45,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     }
 
     @Test
-    public void whenCreatorIdExeeds_thenCreatorIdValidatorViolation() {
+    public void whenCreatorIdExceeds_thenCreatorIdValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatorId(RandomStringUtils.random(256));

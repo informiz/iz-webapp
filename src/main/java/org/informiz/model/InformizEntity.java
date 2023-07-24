@@ -126,4 +126,9 @@ public abstract class InformizEntity implements Serializable {
         this.creatorId = creatorId;
     }
 
+    public abstract Long getId();
+
+
+    public abstract void setId(Long id);
+
 }
