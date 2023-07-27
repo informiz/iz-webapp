@@ -3,6 +3,7 @@ package org.informiz.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
 import org.apache.commons.lang3.StringUtils;
@@ -22,18 +23,19 @@ public final class SourceRef extends InformizEntity implements Serializable {
      */
     public interface UserSourceReference {}
 
-    public static final String SRC_QUERY = "(SELECT * FROM source s where s.entity_id = src_entity_id)";
-
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull (message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
+    @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public SourceRef setId(Long id) {
         this.id = id;
+        return this;
     }
 
     @Column(name = "src_entity_id")

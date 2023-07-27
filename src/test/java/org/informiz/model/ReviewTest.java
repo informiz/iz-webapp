@@ -1,16 +1,11 @@
 package org.informiz.model;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.groups.Default;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -32,8 +27,40 @@ class ReviewTest extends IzEntityTestBase<Review> {
         Set<ConstraintViolation<Review>> violations = validator.validate(review);
         assertEquals(0, violations.size());
     }
+    //Todo Add Default revie test for DeleteEntity
 
-    //ID  !Null, =<255, POSITIVE
+    // ID    >>    !Null, Pos{DeleteEntity}
+    //!Null
+    @Test
+    public void whenREVIEwIDisNull_thenDeleteEntityValidatorViolation() {
+        Review review = getValidEntity();
+
+        review.setId(null);
+        Set<ConstraintViolation<Review>>
+                violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
+    //Positive
+    @Test
+    public void whenREVIEwIDisNegative_thenDeleteEntityValidatorViolation() {
+        Review review = getValidEntity();
+
+        review.setId(-1L);
+        Set<ConstraintViolation<Review>>
+                violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    public void whenPreInsertIDisNegative_thenDefaultValidatorViolation() {
+        Review review = getValidEntity();
+
+        review.setId(-1L);
+        Set<ConstraintViolation<Review>>
+                violations = validator.validate(review);
+        assertEquals(1, violations.size());
+    }
 
     //UserReview
     @Test

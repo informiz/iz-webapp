@@ -42,7 +42,7 @@ public final class Reference extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
     @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
@@ -50,8 +50,9 @@ public final class Reference extends InformizEntity implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
+    public Reference setId(Long id) {
         this.id = id;
+        return this;
     }
 
 

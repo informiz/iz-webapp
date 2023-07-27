@@ -1,11 +1,8 @@
 package org.informiz.model;
-
 import jakarta.validation.ConstraintViolation;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-
 import java.util.Set;
-
 import static org.informiz.model.ModelTestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 

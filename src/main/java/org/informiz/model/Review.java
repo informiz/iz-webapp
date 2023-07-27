@@ -19,8 +19,7 @@ public final class Review extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
-    //@Size(max = 255)
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class })
     @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
@@ -28,8 +27,9 @@ public final class Review extends InformizEntity implements Serializable {
         return (id == null) ? 0 : id;
     }
 
-    public void setId(Long id) {
+    public Review setId(Long id) {
         this.id = id;
+        return this;
     }
 
     @DecimalMin(value = "0.0", groups = { UserReview.class, Default.class })

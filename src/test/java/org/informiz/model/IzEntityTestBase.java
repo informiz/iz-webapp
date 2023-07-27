@@ -10,10 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import java.time.Month;
 import java.util.Set;
-
-import static org.informiz.model.ModelTestUtils.getPopulatedInformi;
+import  static org.informiz.model.InformizEntity.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class IzEntityTestBase<T extends InformizEntity> {
@@ -22,9 +20,32 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     protected TestEntityManager entityManager;
 
 
+    //************* ID (POST Insert) Test  >>  !Null, Positive
+    //!Null
+    @Test
+    public void whenIDIsNull_thenPostInsertDefaultValidatorViolation() {
+        T entity = getValidEntity();
+
+        entity.setId(null);
+
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, PostInsertDefault.class);
+        assertEquals(1, violations.size());
+    }
+
+    //!Null
+    @Test
+    public void whenIDIsNull_thenDeleteEntityValidatorViolation() {
+        T entity = getValidEntity();
+
+        entity.setId(null);
+
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
     //************* creatorId test
     @Test
-    public void whenCreatorIDisNull_thenCreatorIdValidatorViolation() {
+    public void whenCreatorIDisNull_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatorId(null);
@@ -34,7 +55,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     }
 
     @Test
-    public void whenCreatorIdExeeds_thenCreatorIdValidatorViolation() {
+    public void whenCreatorIdExceeds_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatorId(RandomStringUtils.random(256));
@@ -45,17 +66,17 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
 
     //*******    OwnerID test
     @Test
-    public void whenOwnerIDisNull_thenCreatorIdValidatorViolation() {
+    public void whenOwnerIDisNull_thenDeleteEntityValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setOwnerId(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(entity, InformizEntity.DeleteEntity.class);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, DeleteEntity.class);
         assertEquals(1, violations.size());
     }
 
     @Test
-    public void whenOwnerIdExceeds_thenCreatorIdValidatorViolation() {
+    public void whenOwnerIdExceeds_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setOwnerId(RandomStringUtils.random(256));
@@ -65,7 +86,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     }
 
     @Test
-    public void whenCreatedTsIsNull_thenCreatorIdValidatorViolation() {
+    public void whenCreatedTsIsNull_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatedTs(null);
@@ -76,7 +97,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
 
     @Test
     @Disabled("Not sure how to test Ts")
-    public void whenCreatedTsInvalid_thenCreatorIdValidatorViolation() {
+    public void whenCreatedTsInvalid_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setCreatedTs(123456L);
@@ -86,7 +107,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
     }
 
     @Test
-    public void whenUpdtedTsIsNull_thenCreatorIdValidatorViolation() {
+    public void whenUpdtedTsIsNull_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setUpdatedTs(null);
