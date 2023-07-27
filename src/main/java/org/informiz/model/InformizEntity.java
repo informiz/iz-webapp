@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
-import jdk.jfr.Timestamp;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -25,6 +25,11 @@ public abstract class InformizEntity implements Serializable {
      * Validation group for deletion requests coming from UI (most fields will not be initialized)
      */
     public interface DeleteEntity {}
+
+    /**
+     * Validation group for Post-Inset Entities in the DB
+     */
+    public interface PostInsertDefault extends Default {}
 
     @Column(name = "creator_entity_id", nullable = false, updatable = false)
     @NotBlank
@@ -128,7 +133,7 @@ public abstract class InformizEntity implements Serializable {
 
     public abstract Long getId();
 
-
-    public abstract void setId(Long id);
+    @Positive(groups = {DeleteEntity.class, Default.class})
+    public abstract InformizEntity setId(Long id);
 
 }

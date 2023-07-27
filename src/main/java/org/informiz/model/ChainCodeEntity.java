@@ -30,7 +30,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
     @Positive(groups = { DeleteEntity.class, Default.class })
     public Long id;
 
@@ -45,8 +45,9 @@ public abstract class ChainCodeEntity extends InformizEntity {
         return id;
     }
 
-    public void setId(Long id) {
+    public ChainCodeEntity setId(Long id) {
         this.id = id;
+        return this;
     }
 
     // Unique entity identifier

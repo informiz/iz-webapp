@@ -30,12 +30,11 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     }
 
 
-    //SrcEntity < 256
+    //SrcEntity >> =< 255
     @Test
-    public void whenSrcRefExceeds_thenUserReferenceValidatorViolation() {
+    public void whenSrcRefExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
-        //Exceeds 255
         sourceRef.setSrcEntityId(RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
@@ -43,14 +42,13 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     }
 
-    //sourcedId !null, <256
+    //SourcedId >>  !Blank, <256
     //!Blank
     @Test
     public void whenSourcedIdIsNull_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
         Set<ConstraintViolation<SourceRef>> violations;
 
-        // !Blank
         sourceRef.setSourcedId("");
         violations = validator.validate(sourceRef);
         assertEquals(1, violations.size());
@@ -58,10 +56,9 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //<256
     @Test
-    public void whenSourcedIdExeeds_thenUserReferenceValidatorViolation() {
+    public void whenSourcedIdExeeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
-        //Exceeds 255
         sourceRef.setSourcedId(RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
@@ -72,12 +69,10 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //link <256
     @Test
-    @Disabled//I think my DataType is wrong
-    public void whenLinkExeeds_thenUserReferenceValidatorViolation() {
+    public void whenLinkExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
-        //Exceeds 255
-        sourceRef.setLink(RandomStringUtils.random(256));
+        sourceRef.setLink("https://"+RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
         assertEquals(1, violations.size());
@@ -87,10 +82,9 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //description <256
     @Test
-    public void whenDescriptionExeeds_thenUserReferenceValidatorViolation() {
+    public void whenDescriptionExeeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
-        //Exceeds 255
         sourceRef.setDescription(RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
