@@ -40,7 +40,8 @@ public final class SourceRef extends InformizEntity implements Serializable {
     @Size(max = 255, groups = { UserSourceReference.class, Default.class })
     private String srcEntityId;
 
-    @Column(name = "fk_sourced_entity_id") // TODO: need to change in DB from id to entity-id
+    // TODO: ------------------------- need to change in DB from id to entity-id -------------------------
+    @Column(name = "sourced_entity_id")
     @NotBlank(groups = { UserSourceReference.class, Default.class })
     @Size(max = 255, groups = { UserSourceReference.class, Default.class })
     private String sourcedId;
