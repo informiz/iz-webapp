@@ -1,8 +1,44 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- TODO: reference-list overflows the container a bit on small screens. Fix this -->
+<!-- /*
+     NOTE:
+     Fragments get the iteration variables, but all forms bind the 'reference' model-object.
+      This means that input values should be taken from the iteration-variable using 'th:value' rather than 'th:field',
+      while errors should just refer to the bound variable's fields (e.g. #fields.hasErrors('entailment') )
+      */ -->
 
-    <div th:fragment="referenceList(references, refsUrl)">
+    <div th:fragment="referenceList(entityId, references, refsUrl)">
+
+        <script>
+            // ********************** TODO: prevent entities referencing themselves **********************
+            const references = [];
+
+            autoSearchCallbacks.push(function() {
+
+                $.each(citations, function(id, citation) {
+                    display_text = citation.text + ' [Citation]';
+                    references.push( { label: display_text, value: display_text, id: citation.entityId } );
+                });
+
+                $.each(claims, function(id, hypothesis) {
+                    display_text = hypothesis.claim + ' [Claim]';
+                    references.push( { label: display_text, value: display_text, id: hypothesis.entityId } );
+                });
+
+
+                $( ".refAutoSelect" ).autocomplete({
+                    source: references
+                });
+
+                $( ".refAutoSelect" ).on( "autocompleteselect", function( event, ui ) {
+                    let input_obj = $( "input[name='refEntityId']", event.target.form );
+                    input_obj.val(ui.item.id);
+                });
+
+            });
+        </script>
+
         <h2 class="mt-5">References</h2>
         <div>
             <table id="references-table" class="table table-striped table-bordered"
@@ -24,37 +60,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr th:each="reference : ${references}">
-                    <td th:text="${reference.refEntityId}"></td>
-                    <td th:text="${reference.entailment.displayValue}"></td>
-                    <td th:text="${reference.degree}"></td>
+                <tr th:each="cur_ref : ${references}">
+                    <td th:text="${cur_ref.refEntityId}"></td>
+                    <td th:text="${cur_ref.entailment.displayValue}"></td>
+                    <td th:text="${cur_ref.degree}"></td>
                     <td>
-                        <span class="table-text" th:text="${reference.comment}"></span>
+                        <span class="table-text" th:text="${cur_ref.comment}"></span>
                     </td>
                     <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
-                        <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
-                            <div th:id="'ref_' + ${reference.id}">
-                                <div th:replace="~{fragments/reference :: editRefForm(${action_url}, ${reference})}"></div>
-                            </div>
-                        </div>
-                        <div th:replace="~{fragments/modal :: customModal('Edit Reference', 'ref_' + ${reference.id})}"></div>
                         <td>
-                            <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), reference)}"
-                                    th:id="'edit_ref_' + ${reference.id}" data-bs-toggle="modal"
-                                    th:attr="data-bs-target='#modal_ref_' + ${reference.id} "
+                            <div th:with="action_url = ${refsUrl} + '/edit/'" class="d-none">
+                                <div th:id="'ref_' + ${cur_ref.id}" th:insert="~{fragments/reference :: editRefForm(${action_url}, ${cur_ref})}">
+                                </div>
+                            </div>
+                            <div th:replace="~{fragments/modal :: customModal('Edit Reference', 'ref_' + ${cur_ref.id})}"></div>
+                            <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), cur_ref)}"
+                                    th:id="'edit_ref_' + ${cur_ref.id}" data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal_ref_' + ${cur_ref.id}"
                                     class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                         </td>
                         <td>
-                            <form th:action="@{${refsUrl}+'/ref/del/'}" th:object="${reference}" method="post">
+                            <form th:action="@{${refsUrl}+'/ref/del/'}" th:object="${cur_ref}" method="post">
                                 <!-- TODO: Button styling does not work -->
-                                <input type="text" class="d-none" name="ownerId" th:value="${reference.ownerId}" readonly/>
-                                <input type="text" class="d-none" name="id" th:value="${reference.id}" readonly/>
+                                <input type="text" class="d-none" name="ownerId" th:value="${cur_ref.ownerId}" readonly/>
+                                <input type="text" class="d-none" name="id" th:value="${cur_ref.id}" readonly/>
                                 <input type="submit" value="X"
                                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
-                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),reference)}"/>
+                                       th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),cur_ref)}"/>
                             </form>
                         </td>
-
                     </th:block>
                 </tr>
                 </tbody>
@@ -62,11 +96,10 @@
 
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(refsUrl)}">
+                <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
+                     TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
                 <div class="d-none">
-                    <div th:id="add_ref_form">
-                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
-                             TODO: (a 'th:with="reference=${T(org.informiz.model.Reference).create()}"' statement actually assigns null to the 'reference' variable) -->
-                        <div th:replace="~{fragments/reference :: referenceForm(${refsUrl}, ${reference})}"></div>
+                    <div th:id="add_ref_form" th:insert="~{fragments/reference :: referenceForm(${refsUrl}, ${reference}, ${entityId})}">
                     </div>
                 </div>
                 <div th:replace="~{fragments/modal :: customModal('Add Reference', 'add_ref_form')}"></div>
@@ -76,7 +109,6 @@
                             th:attr="data-bs-target='#modal_add_ref_form'"
                             class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
-
             </th:block>
 
             <script>

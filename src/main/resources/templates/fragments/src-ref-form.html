@@ -1,88 +1,105 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 
-<div th:fragment="srcRefProps(source)">
-    <div class="row">
-        <div class="col">
-            <label th:for="'link' + ${source.id}" class="col-form-label">Link</label>
-            <input type="url" name="link" th:value="${source.link}" class="form-control" th:id="'link' + ${source.id}"
-                   placeholder="https://www.nasa.com/some/article"
-                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
-            <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
+<div th:fragment="srcRefProps(cur_src_ref)">
+    <div class="form-row">
+        <div class="form-group col">
+            <input type="text" class="d-none" name="id" th:value="${cur_src_ref.id}" readonly>
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <label th:for="'description' + ${source.id}" class="col-form-label">Description</label>
-            <textarea name="description" th:value="${source.description}" class="form-control" th:id="'description' + ${source.id}"
+    <div class="form-row">
+        <div class="form-group col">
+            <label th:for="'link' + ${cur_src_ref.id}" class="col-form-label">Link</label>
+            <input type="text" name="link" th:value="${cur_src_ref.link}" class="form-control" th:id="'link' + ${cur_src_ref.id}"
+                   placeholder="https://www.nasa.com/some/article"
+                   th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
+            <span th:if="${#fields.hasErrors('link') && @tlUtils.isSourceRefFormError(cur_src_ref, source)}" th:errors="*{link}" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col">
+            <label th:for="'description' + ${cur_src_ref.id}" class="col-form-label">Description</label>
+            <textarea name="description" th:text="${cur_src_ref.description}" class="form-control" th:id="'description' + ${cur_src_ref.id}"
                       cols="30" placeholder="Describe the source..."
                       th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"></textarea>
-            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+            <span th:if="${#fields.hasErrors('description') && @tlUtils.isSourceRefFormError(cur_src_ref, source)}" th:errors="*{description}" class="text-danger"></span>
         </div>
     </div>
     <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
-        <div class="col">
-            <input type="submit" class="btn btn-primary" value="Submit"/>
+        <div class="form-row">
+            <div class="col">
+                <input type="submit" class="btn btn-primary" value="Submit"/>
+            </div>
         </div>
     </div>
 </div>
 
 
-<div th:fragment="editSourceForm(actionPath, source)">
-    <div class="row">
-        <div class="col">
-            <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
-                <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
-                <input type="hidden" th:value="${source.srcEntityId}" name="srcEntityId" />
-                <div th:replace="~{fragments/src-ref-form :: srcRefProps(${source})}"></div>
-            </form>
+<div th:fragment="editSourceForm(actionPath, cur_src_ref)">
+    <form th:action="${actionPath}" th:object="${source}" method="post">
+        <div class="form-row">
+            <div class="form-group col">
+                <input type="text" class="d-none" name="ownerId" th:value="${cur_src_ref.ownerId}" readonly/>
+                <input type="text" class="d-none" name="sourcedId" th:value="${cur_src_ref.sourcedId}" readonly>
+                <input type="text" class="d-none" name="srcEntityId" th:value="${cur_src_ref.srcEntityId}" />
+            </div>
         </div>
-    </div>
-</div>
+        <div th:insert="~{fragments/src-ref-form :: srcRefProps(${cur_src_ref})}" th:remove="tag"></div>
 
-
-
-<div th:fragment="addSourceForm(actionPath, source)">
-    <div class="row">
-        <div class="col">
-            <form action="#" th:action="@{${actionPath}}" th:object="${source}" method="post">
-                <div class="row">
-                    <div class="form-group col">
-                        <input type="text" class="d-none" name="srcEntityId" readonly/>
-                        <label th:for="'srcSelect' + ${source.id}" class="col-form-label">Source</label>
-                        <input th:id="'srcSelect' + ${source.id}" class="form-control src-auto-select" placeholder="Start typing to search..."
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
-                        <span th:if="${#fields.hasErrors('srcEntityId')}" th:errors="*{srcEntityId}" class="text-danger"></span>
-                    </div>
-                </div>
-                <div th:replace="~{fragments/src-ref-form :: srcRefProps(${source})}"></div>
-            </form>
+        <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isSourceRefFormError(cur_src_ref, source) }">
+            <!-- Display form if submission failed with errors -->
             <script>
-
-                var sources_info = []
-
-                autoSearchCallbacks.push(function() {
-                    $.each(sources, function(id, source) {
-                        sources_info.push( { id: source.entityId, value: source.name } );
-                    });
-
-                    $('.src-auto-select').autocomplete({
-                        source: sources_info,
-                    });
-
-                    $( ".src-auto-select" ).on( "autocompleteselect", function( event, ui ) {
-                        src_id = ui.item.id;
-                        src = sources[src_id];
-                        $( "input[name='srcEntityId']", "#modal_add_src_ref" ).val(src_id);
-                        $( "input[name='link']", "#modal_add_src_ref" ).val(src.link);
-                        $( "textarea[name='description']", "#modal_add_src_ref" ).val(src.description);
-                    });
-
+                loadCompleteCallbacks.push(function() {
+                    // trigger containing modal to display form
+                    const modal_selector = "#modal_src_ref_" + "[[${cur_src_ref.getId()}]]";
+                    $(modal_selector).modal('show');
                 });
-
-
             </script>
+        </th:block>
+    </form>
+</div>
+
+
+
+<div th:fragment="addSourceForm(actionPath, src_ref, entityId)">
+    <form action="#" th:action="${actionPath}" th:object="${source}" method="post">
+        <div class="form-row">
+            <div class="form-group col">
+                <input type="text" class="d-none" name="sourcedId" th:value="${entityId}" readonly>
+                <input type="text" class="d-none" name="srcEntityId" readonly/>
+                <label for="source-ref-select" class="col-form-label">Source</label>
+                <input id="source-ref-select" class="form-control src-auto-select" placeholder="Start typing to search..."
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
+                <span th:if="${#fields.hasErrors('srcEntityId') && @tlUtils.isAddSourceRefFormError(src_ref, source)}" th:errors="*{srcEntityId}" class="text-danger"></span>
+            </div>
         </div>
-    </div>
+        <div th:insert="~{fragments/src-ref-form :: srcRefProps(${src_ref})}" th:remove="tag"></div>
+
+        <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isAddSourceRefFormError(src_ref, source) }">
+            <script>
+                const src_ref_entity_id = "[[${source.getSrcEntityId()}]]";
+                const modal_selector = "#modal_add_src_ref";
+
+                modalCallbacks.push(function () {
+                    if ( src_ref_entity_id ) {
+                        let src_ref = sources_info.find(obj => {
+                            return obj.id === src_ref_entity_id;
+                        })
+                        if (src_ref) {
+                            // if user already chose a source - select it when modal pops up
+                            $(modal_selector).one('shown.bs.modal', function() {
+                                $('.src-auto-select').autocomplete('search', src_ref.value)
+                                let menu = $(".src-auto-select").autocomplete("widget");
+                                let found = $(menu[0].children[0]);
+                                if (found) found.click();
+                            });
+                        }
+                    }
+                    // trigger containing modal to display form
+                    $(modal_selector).modal('show');
+                })
+            </script>
+        </th:block>
+    </form>
 </div>
 </html>

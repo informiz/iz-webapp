@@ -1,6 +1,8 @@
 package org.informiz.ctrl.checker;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.model.FactCheckerBase;
+import org.informiz.model.Utils;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ public class CheckerRestController {
     }
 
     @GetMapping(path = {"/", "/all"})
+    @JsonView(Utils.Views.EntityDefaultView.class)
     public List<FactCheckerBase> getAllCheckers() {
         return StreamSupport
                 .stream(checkerRepo.findAll().spliterator(), false)

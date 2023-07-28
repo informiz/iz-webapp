@@ -47,23 +47,25 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
 
         <script>
-            var checkers = {};
-            var checkersCallbacks = []
+            const checkers = {};
+            const checkersCallbacks = []
 
-            var sources = {};
-            var sourcesCallbacks = []
+            const sources = {};
+            const sourcesCallbacks = []
 
-            var claims = {};
-            var claimsCallbacks = []
+            const claims = {};
+            const claimsCallbacks = []
 
-            var citations = {};
-            var citationsCallbacks = []
+            const citations = {};
+            const citationsCallbacks = []
 
-            var informiz = {};
-            var informizCallbacks = []
+            const informiz = {};
+            const informizCallbacks = []
 
-            var loadCompleteCallbacks = []
-            var autoSearchCallbacks = []
+            const loadCompleteCallbacks = []
+            const autoSearchCallbacks = []
+
+            const modalCallbacks = [];
         </script>
         <script type="text/javascript" th:src="@{/js/util.js}"></script>
         <script type="text/javascript" th:src="@{/js/load_data.js}"></script>

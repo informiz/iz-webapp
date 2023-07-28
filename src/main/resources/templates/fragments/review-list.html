@@ -23,32 +23,37 @@
 
                 </thead>
                 <tbody>
-                    <tr th:each="review : ${reviews}">
-                        <td th:text="${review.creatorId}"></td>
-                        <td th:text="${review.rating}"></td>
+                    <tr th:each="cur_review : ${reviews}">
+                        <td th:text="${cur_review.creatorId}"></td>
+                        <td th:text="${cur_review.rating}"></td>
                         <td>
-                            <span class="table-text" th:text="${review.comment}"></span>
+                            <span class="table-text" th:text="${cur_review.comment}"></span>
                         </td>
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
-                            <div class="d-none">
-                                <div th:id="'rev_' + ${review.id}">
-                                    <div th:replace="~{fragments/review :: reviewForm(${link} + 'edit/', ${review})}"></div>
-                                </div>
-                            </div>
-                            <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_' + ${review.id})}"></div>
                             <td>
-                                <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), review)}"
-                                        th:id="'edit_rev_' + ${review.id}" data-bs-toggle="modal"
-                                        th:attr="data-bs-target='#modal_rev_' + ${review.id}"
+                                <div class="d-none">
+                                    <!-- IMPORTANT: iteration variables are not yet available at the time of
+                                    th:replace. When passing iteration variables to fragments use th:insert -->
+                                    <div th:id="'rev_' + ${cur_review.getId()}"
+                                        th:insert="~{fragments/review :: reviewForm(${link} + 'edit/', ${cur_review})}">
+                                    </div>
+                                </div>
+                                <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_' + ${cur_review.getId()})}"></div>
+
+                                <button type="button" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), cur_review)}"
+                                        th:id="'edit_rev_' + ${cur_review.getId()}" data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#modal_rev_' + ${cur_review.getId()}"
                                         class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"></button>
                             </td>
                             <td>
                                 <form th:action="@{${link}+'del/'}" th:object="${review}" method="post">
-                                    <input type="text" class="d-none" name="ownerId" th:value="${review.ownerId}" readonly/>
-                                    <input type="text" class="d-none" name="id" th:value="${review.id}" readonly/>
+                                    <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId}" readonly/>
+                                    <span th:if="${#fields.hasErrors('ownerId')}" th:errors="*{ownerId}" class="text-danger"></span>
+                                    <input type="text" class="d-none" name="id" th:value="${cur_review.id}" readonly/>
+                                    <span th:if="${#fields.hasErrors('id')}" th:errors="*{id}" class="text-danger"></span>
                                     <input type="submit" value="X"
                                            class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-times"
-                                           th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(),review)}"/>
+                                           th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), cur_review)}"/>
                                 </form>
                             </td>
                         </th:block>
@@ -58,20 +63,19 @@
             </table>
 
             <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
+            <!-- TODO: No add button if user already reviewed the entity -->
                 <div class="d-none">
-                    <div th:id="add_rev_form">
-                        <!-- TODO: Thymeleaf 3.0.15 won't allow object creation here, must provide it in model
-                             TODO: (a 'th:with="review=${new org.informiz.model.Review()}"' statement actually assigns null to the 'review' variable) -->
-                        <div th:replace="~{fragments/review :: reviewForm(${link}, ${review})}"></div>
+                    <div th:id="rev_0">
+                        <div th:insert="~{fragments/review :: reviewForm(${link}, ${review})}"></div>
                     </div>
                 </div>
                 <div
-                    th:replace="~{fragments/modal :: customModal('Add Review', 'add_rev_form')}">
+                    th:replace="~{fragments/modal :: customModal('Add Review', 'rev_0')}">
                 </div>
 
                 <div class="mt-2">
                     <button type="button" th:id="add_rev" data-bs-toggle="modal"
-                            th:attr="data-bs-target='#modal_add_rev_form'"
+                            th:attr="data-bs-target='#modal_rev_0'"
                             class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-plus"></button>
                 </div>
 

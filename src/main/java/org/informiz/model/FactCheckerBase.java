@@ -1,11 +1,13 @@
 package org.informiz.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
 import org.informiz.auth.AuthUtils;
 
@@ -15,6 +17,7 @@ import java.util.function.Consumer;
 
 @Table(name="fact_checker")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraph(
         name= FactCheckerBase.FACT_CHECKER_DATA,
         attributeNodes={
@@ -30,10 +33,15 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
     @NotBlank(message = "Name is mandatory")
     private String name;
 
-    @Email(message = "Please provide a valid email address")
+    /**
+     * Validation group for add/edit fact-checker through the UI (most fields will not be initialized)
+     */
+    public interface FactCheckerFromUI {}
+
+    @Email(message = "Please provide a valid email address", groups = {FactCheckerFromUI.class, Default.class})
     private String email;
 
-    @URL(message = "Please provide a valid profile-link")
+    @URL(message = "Please provide a valid profile-link", groups = {FactCheckerFromUI.class, Default.class})
     private String link;
 
     public FactCheckerBase() {}

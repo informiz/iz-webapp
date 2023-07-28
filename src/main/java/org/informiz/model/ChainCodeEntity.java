@@ -1,20 +1,25 @@
 package org.informiz.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 
 import java.util.*;
 import java.util.function.Consumer;
 
+import static org.informiz.model.Score.CONFIDENCE_BOOST;
+
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@JsonView(Utils.Views.EntityDefaultView.class)
 //@MappedSuperclass
 public abstract class ChainCodeEntity extends InformizEntity {
 
@@ -26,6 +31,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
+    @Positive(groups = { DeleteEntity.class, Default.class })
     public Long id;
 
     public Long getLocalId() {
@@ -35,27 +42,28 @@ public abstract class ChainCodeEntity extends InformizEntity {
     public void setLocalId(Long id) {
         this.id = id;
     }
+    public Long getId() {
+        return id;
+    }
 
-    // The entity's id on the ledger
-/*  TODO: deprecate local-id?
-    @Id
-    @GeneratedValue(generator = "entity-id-generator")
-    @GenericGenerator(name = "entity-id-generator",
-            strategy = "org.informiz.model.EntityIdGenerator")
-*/
+    public ChainCodeEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    // Unique entity identifier
     @Column(name = "entity_id", unique = true)
     @Access(AccessType.PROPERTY)
+    @NotNull(message = "Please provide an entity-ID", groups = { DeleteEntity.class, Default.class })
+    @Size(message = "Entity-ID is expected to be 25-255 characters long", min = 25, max = 255, groups = { DeleteEntity.class, Default.class })
     protected String entityId;
 
     @NotNull(message = "Locale is mandatory")
     private Locale locale = Locale.ENGLISH; // Default to English
 
-    @OneToMany(mappedBy = "reviewed",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+    @OneToMany(cascade = CascadeType.ALL,
             orphanRemoval=true)
-    @Fetch(FetchMode.SUBSELECT)
-    @JsonIgnore
+    @JoinColumn(name = "reviewed_entity_id", referencedColumnName = "entity_id")
     protected Set<Review> reviews = new HashSet<>();
 
     @Embedded
@@ -125,7 +133,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
         int numReviews = snapshot.size();
         if (numReviews > 0) {
             Double sumRatings = snapshot.stream().mapToDouble(review -> review.getRating()).sum();
-            score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, 0.15f * numReviews));
+            score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, CONFIDENCE_BOOST * numReviews));
         }
 
         return score;
@@ -181,4 +189,56 @@ public abstract class ChainCodeEntity extends InformizEntity {
             throw new IllegalArgumentException(String.format("Failed to deserialize entity of type %s", clazz), e);
         }
     }
+
+    // TODO: can't target sub-classes with entity_id as ref-column, fixed in Hibernate 6.3
+    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501, move collections to subclasses when 6.3 available
+
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "fact_checked_entity_id", referencedColumnName = "entity_id")
+    @JsonView(Utils.Views.EntityData.class)
+    protected Set<Reference> references = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval=true,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
+    @JsonView(Utils.Views.EntityData.class)
+    protected Set<SourceRef> sources = new HashSet<>();
+
+
+    // TODO: Currently only Hypothesis and Citation have sources, need to sort out class-hierarchy
+    public Set<SourceRef> getSources() {
+        return sources;
+    }
+
+    public void setSources(Set<SourceRef> sources) {
+        this.sources = sources;
+    }
+
+    public boolean removeSource(@NotNull Long srcRefId, @NotNull String owner) {
+        List<SourceRef> snapshot = new ArrayList(sources);
+        SourceRef ref = snapshot.stream().filter(reference ->
+                srcRefId.equals(reference.getId()) && owner.equals(reference.getOwnerId()))
+                .findFirst().orElse(null);
+
+        if (ref != null)
+            return sources.remove(ref);
+        return false;
+    }
+
+    public boolean addSource(@NotNull SourceRef srcRef) {
+        boolean bool;
+        // TODO: Source references are considered equal if they have the same well-known source and link.
+        //       This will do nothing if user(s) add the same source multiple times.
+        synchronized (sources) {
+            bool = getSources().add(srcRef);
+        }
+        return bool;
+    }
+
+
+
+
 }

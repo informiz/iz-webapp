@@ -6,6 +6,7 @@ import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.informiz.repo.source.SourceRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,17 +16,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(path= HypothesisController.PREFIX)
+@Validated
 public class HypothesisController extends ChaincodeEntityController<HypothesisBase> {
 
     public static final String PREFIX = "/hypothesis";
     public static final String HYPOTHESIS_ATTR = "hypothesis"; // singular
     public static final String HYPOTHESES_ATTR = "hypotheses"; // plural
-    public static final String REFERENCE_ATTR = "reference";
-    public static final String SOURCE_ATTR = "source";
 
     private final SourceRepository sourceRepo;
 
@@ -50,7 +51,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @PostMapping("/add")
     @Secured("ROLE_MEMBER")
-    public String addHypothesis(@Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+    public String addHypothesis(@Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return "hypothesis/add-hypothesis.html";
@@ -60,10 +61,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete/{hypothesisId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteHypothesis(@PathVariable("id") @Valid Long id, @RequestParam String ownerId) {
+    public String deleteHypothesis(@PathVariable("hypothesisId") @Valid Long id, @RequestParam String ownerId) {
         HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
         // TODO: set inactive
@@ -71,183 +72,131 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("redirect:%s/all", PREFIX);
     }
 
-    @GetMapping("/view/{id}")
-    public String viewHypothesis(@PathVariable("id") @Valid Long id, Model model) {
+    @GetMapping("/view/{hypothesisId}")
+    public String viewHypothesis(@PathVariable("hypothesisId") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
-                .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
-        if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
+                .orElseThrow(() ->new IllegalArgumentException("Invalid Hypothesis id"));
 
         model.addAttribute(HYPOTHESIS_ATTR, hypothesis);
         return String.format("%s/view-hypothesis.html", PREFIX);
     }
 
     // TODO: Remove references to deleted hypothesis
-    @GetMapping("/details/{id}")
+    @GetMapping("/details/{hypothesisId}")
     @Secured("ROLE_MEMBER")
-    public String getHypothesis(@PathVariable("id") @Valid Long id, Model model) {
+    public String getHypothesis(@PathVariable("hypothesisId") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
                 .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
         if (hypothesis == null) return String.format("redirect:%s/all", PREFIX);
 
         prepareEditModel(model, hypothesis, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
+        return getEditPageTemplate();
     }
 
-    @PostMapping("/details/{id}")
+    @PostMapping("/details/{hypothesisId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#hypothesis.ownerId == authentication.principal.name")
-    public String updateHypothesis(@PathVariable("id") @Valid Long id,
-                                    @Valid @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+    public String updateHypothesis(@PathVariable("hypothesisId") @Valid Long id,
+                                    @Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
         if (result.hasErrors()) {
             prepareEditModel(model, hypothesis, new Review(), new Reference());
-            return String.format("%s/update-hypothesis.html", PREFIX);
+            return getEditPageTemplate();
         }
 
         HypothesisBase current = entityRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
         current.edit(hypothesis);
         entityRepo.save(current);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return getRedirectToEditPage( id);
     }
 
-    @PostMapping("/{id}/review/")
+    @PostMapping("/{hypothesisId}/review/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String reviewHypothesis(@PathVariable("id") @Valid Long id,
-                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication) {
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String reviewHypothesis(@PathVariable("hypothesisId") @Valid Long id,
+                                   @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                   BindingResult result, Model model, Authentication authentication) {
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/edit/")
+    @PostMapping("/{hypothesisId}/review/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String editReview(@PathVariable("id") @Valid Long id,
-                                   @Valid @ModelAttribute(REVIEW_ATTR) Review review,
-                                   BindingResult result, Authentication authentication) {
+    public String editReview(@PathVariable("hypothesisId") @Valid Long id,
+                             @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                             BindingResult result, Model model, Authentication authentication) {
 
-        reviewEntity(id, review, authentication, result);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return reviewEntity(id, review, result, model, authentication);
     }
 
-    @PostMapping("/{id}/review/del/")
+    @PostMapping("/{hypothesisId}/review/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#review.ownerId == authentication.principal.name")
-    public String deleteReview (@PathVariable("id") @Valid Long id,
-                                      @ModelAttribute(REVIEW_ATTR) Review review,
-                                  Authentication authentication) {
-
-        deleteReview(id, review.getId(), authentication);
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String deleteReview (@PathVariable("hypothesisId") @Valid Long id,
+                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                BindingResult result, Model model, Authentication authentication) {
+        return deleteReview(id, review.getId(), result, model, authentication);
     }
 
 
-    @PostMapping("/reference/{id}")
+    @PostMapping("/reference/{hypothesisId}")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String addReference(@PathVariable("id") @Valid Long id,
-                               @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+    public String addReference(@PathVariable("hypothesisId") @Valid Long id,
+                               @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result,Authentication authentication, Model model) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return referenceEntity(id, reference, result, model, authentication);
     }
 
 
-    @PostMapping("/reference/{id}/ref/del")
+    @PostMapping("/reference/{hypothesisId}/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
     @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String deleteReference(@PathVariable("id") @Valid Long id,
-                                        @ModelAttribute(REFERENCE_ATTR) Reference reference) {
-
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
-
-        current.removeReference(reference.getId());
-
-        return String.format("redirect:%s/details/%s", PREFIX, id);
-    }
-    @PostMapping("/reference/{id}/edit/")
-    @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
-    public String editReference(@PathVariable("id") @Valid Long id,
-                                @Valid @ModelAttribute(REFERENCE_ATTR) Reference reference,
+    public String editReference(@PathVariable("hypothesisId") @Valid Long id,
+                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                 BindingResult result, Authentication authentication, Model model) {
 
-        return handleReference(id, reference, result, authentication, model);
+        return referenceEntity(id, reference, result, model, authentication);
     }
 
-
-    @PostMapping("/source/{id}")
+// TODO: remove /ref/ from url
+    @PostMapping("/reference/{hypothesisId}/ref/del/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    public String addSource(@PathVariable("id") @Valid Long id, @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
-                            BindingResult result, Model model) {
-
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
-
-        SourceBase source = null;
-        if (StringUtils.isNotBlank(srcRef.getSrcEntityId())) {
-            source = sourceRepo.findByEntityId(srcRef.getSrcEntityId());
-        }
-
-        try {
-            SourceRef toAdd = new SourceRef(source, current, source.getLink(), source.getDescription());
-            current.addSource(toAdd);
-            model.addAttribute(HYPOTHESIS_ATTR, current);
-            model.addAttribute(SOURCE_ATTR, new SourceRef());
-        } catch (IllegalArgumentException e) {
-            result.addError(new ObjectError("link",
-                    "Please provide either a link, a source or both"));
-        }
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("%s/update-hypothesis.html", PREFIX);
-    }
-
-    private String handleReference(Long id, Reference reference, BindingResult result,
-                                   Authentication authentication, Model model) {
-
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid claim id"));
-
-        if ( ! result.hasFieldErrors() ) {
-            referenceEntity(current, reference, authentication);
-        }
-        // TODO: error handling in modal? Where will the error be visible?
-        prepareEditModel(model, current, new Review(), new Reference());
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    public String deleteReference(@PathVariable("hypothesisId") @Valid Long id,
+                                  @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                  BindingResult result, Model model, Authentication authentication) {
+        return deleteReference(id, reference.getId(), result, model, authentication);
     }
 
 
-    @PostMapping("/source/{id}/{srcId}")
+    @PostMapping("/source-ref/{hypothesisId}")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
-    public String editSrcRef(@PathVariable("id") @Valid Long id,
-                             @PathVariable("srcId") @Valid Long srcId,
-                             @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source,
-                             Authentication authentication) {
-        // TODO: not implemented?
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+    public String addSource(@PathVariable("hypothesisId") @Valid Long id,
+                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            BindingResult result, Model model, Authentication authentication) {
+
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
-    @PostMapping("/source/{id}/src-ref/del/")
+    @PostMapping("/source-ref/{hypothesisId}/edit/")
     @Secured("ROLE_CHECKER")
-    @Transactional
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
-    public String deleteSrcRef(@PathVariable("id") @Valid Long id,
-                               @Valid @ModelAttribute(SOURCE_ATTR) SourceRef source) {
-        HypothesisBase current = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Claim id"));
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    public String editSrcRef(@PathVariable("hypothesisId") @Valid Long id,
+                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             BindingResult result, Model model, Authentication authentication) {
 
-        current.removeSource(source.getId());
-        return String.format("redirect:%s/details/%s", PREFIX, id);
+        return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
+    }
+
+    @PostMapping("/source-ref/{hypothesisId}/del/")
+    @Secured("ROLE_CHECKER")
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    public String deleteSrcRef(@PathVariable("hypothesisId") @Valid Long id,
+                               @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                               BindingResult result, Model model, Authentication authentication) {
+        return deleteSrcReference(id, srcRef.getId(), result, model, authentication);
+
     }
 
     private void prepareEditModel(Model model, HypothesisBase hypothesis, Review review, Reference ref) {
@@ -256,4 +205,15 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         model.addAttribute(REFERENCE_ATTR, ref);
         model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
+
+    protected void modelForError(@NotNull Model model, HypothesisBase current) {
+        super.modelForError(model, current);
+        model.addAttribute(HYPOTHESIS_ATTR, current);
+        if (! model.containsAttribute(REFERENCE_ATTR)) model.addAttribute(REFERENCE_ATTR, new Reference());
+        if (! model.containsAttribute(SOURCE_ATTR)) model.addAttribute(SOURCE_ATTR, new SourceRef());
+    }
+
+    protected String getEditPageTemplate() { return String.format("%s/update-hypothesis.html", PREFIX); }
+    protected String getRedirectToEditPage(Long id) { return String.format("redirect:%s/details/%s", PREFIX, id); }
+
 }

@@ -41,15 +41,23 @@ $(document).ready(function() {
     p4 = processCitations();
     p5 = processInformiz();
 
-    deferred = $.when( p1, p2, p3, p4, p5 ).done(function ( res1, res2, res3, res4, res5 ) {
-        $.each(loadCompleteCallbacks, function(i, func) {
+    let deferred = $.when(p1, p2, p3, p4, p5).done(function (res1, res2, res3, res4, res5) {
+        $.each(loadCompleteCallbacks, function (i, func) {
             func.apply();
         });
     });
 
+    let deferred2 = null;
     if (autoSearchCallbacks.length > 0) {
-        $.when(deferred).done(function (res) {
+        deferred2 = $.when(deferred).done(function (res) {
             $.each(autoSearchCallbacks, function(i, func) { func.apply(); })
+        });
+    }
+
+    if (modalCallbacks.length > 0) {
+        let last_process = deferred2 ? deferred2 : deferred;
+        $.when(last_process).done(function (res) {
+            $.each(modalCallbacks, function(i, func) { func.apply(); })
         });
     }
 });

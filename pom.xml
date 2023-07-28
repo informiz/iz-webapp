@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.1</version>
+		<version>3.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.informiz</groupId>
@@ -18,12 +18,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
         <spring.security.version>6.0.1</spring.security.version>
-        <jackson.version>2.14.1</jackson.version> <!-- jackson version compatible with spring -->
+        <jackson.version>2.14.2</jackson.version> <!-- jackson version compatible with spring -->
 		<junit.version>5.9.2</junit.version>
 		<jmockit.version>1.49</jmockit.version>
-        <h2.version>2.1.210</h2.version>
+        <h2.version>2.2.220</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible. -->
 		<thymeleaf.version>3.1.1.RELEASE</thymeleaf.version>
 		<thymeleaf.sec.version>3.1.1.RELEASE</thymeleaf.sec.version>
@@ -102,8 +102,24 @@
 
 
 	<dependencies>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.0</version>
+		</dependency>
 
-        <dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>8.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+
+		<dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
@@ -167,7 +183,7 @@
         <dependency>
 			<groupId>org.hyperledger.fabric</groupId>
 			<artifactId>fabric-gateway-java</artifactId>
-			<version>2.2.7</version>
+			<version>2.2.8</version>
 		</dependency>
 
 		<dependency>
@@ -257,6 +273,14 @@
             <scope>test</scope>
             <version>${h2.version}</version>
         </dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-micrometer</artifactId>
+			<version>6.2.7.Final</version>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>

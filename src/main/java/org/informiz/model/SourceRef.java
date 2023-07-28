@@ -1,12 +1,14 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Formula;
 import org.hibernate.validator.constraints.URL;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,95 +18,70 @@ public final class SourceRef extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
-    public static final String SRC_QUERY = "(SELECT * FROM source s where s.entity_id = src_entity_id)";
-
-    // TODO: replace fk_sourced_entity_id (local id) with actual sourced_entity_id
-    public static final String QUERY = "(IF (select count(c) = 1 from claim c where id = fk_sourced_entity_id) " +
-            "SELECT * FROM claim c where c.id = fk_sourced_entity_id " +
-            "ELSE " +
-            "SELECT * FROM citation c where c.id = fk_sourced_entity_id)";
-/*
-    public static final String QUERY = "(IF sourced_entity_id like CLAIM_% " +
-            "SELECT * FROM claim c where c.entity_id = sourced_entity_id " +
-            "ELSE " +
-            "SELECT * FROM citation c where c.entity_id = sourced_entity_id)";
-*/
+    /**
+     * Validation group for incoming source-reference from UI (most fields will not be initialized)
+     */
+    public interface UserSourceReference {}
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull (message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
+    @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public SourceRef setId(Long id) {
         this.id = id;
+        return this;
     }
 
-    // Mapping both srcEntityId and source to same column - value is not insertable/updatable
-    @Column(name = "src_entity_id", insertable=false, updatable=false)
+    @Column(name = "src_entity_id")
+    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
     private String srcEntityId;
 
+    // TODO: ------------------------- need to change in DB from id to entity-id -------------------------
+    @Column(name = "sourced_entity_id")
+    @NotBlank(groups = { UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
+    private String sourcedId;
 
-    // TODO: can't target SourceBase with entity_id as ref-column, fixed in Hibernate 6.3
-    // TODO: see https://hibernate.atlassian.net/browse/HHH-16501
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Nullable
-    @JoinColumn(name = "src_entity_id", referencedColumnName = "entity_id")
-    @Formula(value=SRC_QUERY)
-    @JsonIgnore
-    private ChainCodeEntity source;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_sourced_entity_id") // TODO: need to change in DB
-    @Formula(value=QUERY)
-    @JsonIgnore
-    private ChainCodeEntity sourced;
-
-    @URL
+    @URL(groups = { UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
     private String link;
 
+    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
     private String description;
 
 
     public SourceRef() {}
 
-
-    public SourceRef(SourceBase src, ChainCodeEntity sourced, String link, String description) {
-        if (src == null && StringUtils.isBlank(link)) {
+    public SourceRef(@NotNull SourceRef other) {
+        if (StringUtils.isBlank(other.getSrcEntityId()) && StringUtils.isBlank(other.getLink())) {
             throw new IllegalArgumentException("Please provide either a link, a source or both");
         }
-        this.sourced = sourced;
-        this.source = src;
-        if (src != null) srcEntityId = src.getEntityId();
-        this.link = link;
-        this.description = description;
+        this.sourcedId = other.getSourcedId();
+        this.srcEntityId = other.getSrcEntityId();
+        this.link = other.getLink();
+        this.description = other.getDescription();
     }
 
-    @Nullable
-    public ChainCodeEntity getSource() {
-        return source;
+    public String getSourcedId() {
+        return sourcedId;
     }
 
-    public void setSource(@Nullable SourceBase source) {
-        this.source = source;
+    public void setSourcedId(String sourcedId) {
+        this.sourcedId = sourcedId;
     }
 
     public String getSrcEntityId() {
-        return (source == null) ? srcEntityId : source.entityId;
+        return srcEntityId;
     }
 
     public void setSrcEntityId(String srcEntityId) {
         this.srcEntityId = srcEntityId;
-    }
-
-    public ChainCodeEntity getSourced() {
-        return sourced;
-    }
-
-    public void setSourced(ChainCodeEntity sourced) {
-        this.sourced = sourced;
     }
 
     public String getLink() {
@@ -125,17 +102,13 @@ public final class SourceRef extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", getSrcEntityId(), sourced.getEntityId(), link).hashCode();
+        return String.format("%s-%s-%s", getSrcEntityId(), srcEntityId, link).hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if ( ! (obj instanceof SourceRef other)) return false;
-
-        boolean sameLink = Objects.equals(link, other.link);
-        boolean sameSrc = getSrcEntityId() == null ?
-                other.getSrcEntityId() == null :
-                getSrcEntityId().equals(other.getSrcEntityId());
-        return (sourced.equals(other.sourced) && sameLink && sameSrc);
+        return Objects.equals(sourcedId, other.getSourcedId()) && Objects.equals(link, other.getLink()) &&
+                Objects.equals(srcEntityId, other.getSrcEntityId()) && Objects.equals(ownerId, other.getOwnerId());
     }
 }

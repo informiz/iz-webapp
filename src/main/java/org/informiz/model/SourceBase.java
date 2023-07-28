@@ -1,16 +1,17 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="source")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraph(
         name= SourceBase.SOURCE_DATA,
         attributeNodes={
@@ -22,6 +23,12 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     static final long serialVersionUID = 3L ;
 
     public static final String SOURCE_DATA = "source-data";
+
+    /**
+     * Validation group for add/edit source through the UI (most fields will not be initialized)
+     */
+    public interface SourceFromUI {}
+
     // TODO: additional details per source-type?
     public enum SourceType {
         UNIVERSITY("University"),
@@ -51,15 +58,15 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     }
 
-    @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "Name is mandatory", groups = {SourceFromUI.class, Default.class})
     private String name;
 
-    @URL(message = "Please provide a valid link")
+    @URL(message = "Please provide a valid link", groups = {SourceFromUI.class, Default.class})
     @NotBlank(message = "Link is mandatory")
     private String link;
 
     @Enumerated(EnumType.ORDINAL)
-    @NotNull(message = "Type is mandatory")
+    @NotNull(message = "Type is mandatory", groups = {SourceFromUI.class, Default.class})
     private SourceType srcType;
 
     private String description;

@@ -1,6 +1,8 @@
 package org.informiz.ctrl.informi;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.model.InformiBase;
+import org.informiz.model.Utils;
 import org.informiz.repo.informi.InformiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +23,8 @@ public class InformiRestController {
     @Autowired
     private InformiRepository informiRepo;
 
-    // TODO: what DTOs do we actually need in the front-end? Json shouldn't include everything...
     @GetMapping(path = {"/", "/all"})
+    @JsonView(Utils.Views.EntityDefaultView.class)
     public List<InformiBase> getAllInformiz() {
         return StreamSupport
                 .stream(informiRepo.findAll().spliterator(), false)

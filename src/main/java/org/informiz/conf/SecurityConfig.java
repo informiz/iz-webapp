@@ -27,7 +27,6 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.WebUtils;
 
 import java.util.List;
@@ -35,6 +34,7 @@ import java.util.UUID;
 
 import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
 import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 
 @Configuration
@@ -70,13 +70,16 @@ public class SecurityConfig {
                         configurer.principal("viewer").authorities(minAuth))
                 .csrf(configurer -> configurer
                         .csrfTokenRepository(repo))
-                .authorizeHttpRequests()
-                .requestMatchers("/oauth/login", "/oauth/logout").permitAll()
-                .requestMatchers(HttpMethod.GET).hasRole("VIEWER")
-                .requestMatchers(HttpMethod.HEAD).hasRole("VIEWER")
-                .requestMatchers(HttpMethod.OPTIONS).hasRole("VIEWER")
-                .requestMatchers(HttpMethod.TRACE).hasRole("VIEWER")
-                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(antMatcher("/oauth/login"),
+                            antMatcher("/oauth/logout")).permitAll();
+                    auth.requestMatchers(antMatcher(HttpMethod.GET)).hasRole("VIEWER");
+                    auth.requestMatchers(antMatcher(HttpMethod.HEAD)).hasRole("VIEWER");
+                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS)).hasRole("VIEWER");
+                    auth.requestMatchers(antMatcher(HttpMethod.TRACE)).hasRole("VIEWER");
+                    auth.anyRequest().authenticated();
+                })
+
         ;
         return http.build();
     }
@@ -158,6 +161,6 @@ public class SecurityConfig {
         return (web) -> web
                 .expressionHandler(webSecurityExpressionHandler())
                 .ignoring()
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**"));
+                .requestMatchers(antMatcher("/h2-console/**"));
     }
 }

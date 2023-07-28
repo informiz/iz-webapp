@@ -1,11 +1,8 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Formula;
+import jakarta.validation.constraints.*;
+import jakarta.validation.groups.Default;
 
 import java.io.Serializable;
 
@@ -14,49 +11,49 @@ import java.io.Serializable;
 public final class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
-    public static final String QUERY = "(IF reviewed_entity_id like FACT_CHECKER_% " +
-            "SELECT * FROM fact_checker fc where fc.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like CITATION_% " +
-            "SELECT * FROM citation c where c.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like SOURCE_% " +
-            "SELECT * FROM source s where s.entity_id = reviewed_entity_id " +
-            "ELSE IF reviewed_entity_id like CLAIM_% " +
-            "SELECT * FROM claim c where c.entity_id = reviewed_entity_id " +
-            "ELSE " +
-            "SELECT * FROM informi i where i.entity_id = reviewed_entity_id)";
+
+    /**
+     * Validation group for incoming review from UI (most fields will not be initialized)
+     */
+    public interface UserReview {}
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class })
+    @Positive(groups = { DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
-        return id;
+        return (id == null) ? 0 : id;
     }
 
-    public void setId(Long id) {
+    public Review setId(Long id) {
         this.id = id;
+        return this;
     }
 
-    @DecimalMin("0.0")
-    @DecimalMax("1.0")
-    @NotNull
+    @DecimalMin(value = "0.0", groups = { UserReview.class, Default.class })
+    @DecimalMax(value = "1.0", groups = { UserReview.class, Default.class })
+    @NotNull(groups = { UserReview.class, Default.class }, message = "Please submit rating between 0.0 and 1.0")
+    @Column(name = "rating", nullable = false)
     private Float rating;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Formula(value=QUERY)
-    @JoinColumn(name = "reviewed_entity_id", referencedColumnName = "entity_id")
-    @JsonIgnore
-    private ChainCodeEntity reviewed;
 
-    @Column
+    @Column(name = "reviewed_entity_id")
+    @NotBlank
+    @Size(max = 255)
+    private String reviewedEntityId;
+
+    @Column(name = "comment")
+    @Size(max = 255)
     private String comment;
 
     public static Review create() { return new Review(); }
 
     public Review() {}
 
-    public Review(ChainCodeEntity reviewed, Float rating, String comment) {
-        this.reviewed = reviewed;
+    public Review(@NotNull ChainCodeEntity reviewed, Float rating, String comment) {
+        this.reviewedEntityId = reviewed.getEntityId();
         this.rating = rating;
         this.comment = comment;
     }
@@ -69,12 +66,12 @@ public final class Review extends InformizEntity implements Serializable {
         this.rating = rating;
     }
 
-    public ChainCodeEntity getReviewed() {
-        return reviewed;
+    public String getReviewedEntityId() {
+        return reviewedEntityId;
     }
 
-    public void setReviewed(ChainCodeEntity reviewed) {
-        this.reviewed = reviewed;
+    public void setReviewedEntityId(String reviewedEntityId) {
+        this.reviewedEntityId = reviewedEntityId;
     }
 
     public String getComment() {
@@ -87,7 +84,7 @@ public final class Review extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s", creatorId, reviewed.getEntityId()).hashCode();
+        return String.format("%s-%s", creatorId, reviewedEntityId).hashCode();
     }
 
     @Override
@@ -95,6 +92,6 @@ public final class Review extends InformizEntity implements Serializable {
         if (obj == null || ! (obj instanceof Review)) return false;
         Review other = (Review) obj;
         return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
-                this.reviewed.getEntityId().equals(other.reviewed.getEntityId()));
+                this.reviewedEntityId.equals(other.reviewedEntityId));
     }
 }

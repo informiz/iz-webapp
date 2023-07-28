@@ -1,9 +1,10 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
@@ -17,9 +18,9 @@ import java.io.Serializable;
  * - reviews by fact-checkers
  * Any additional metadata should be saved on a separate CMS
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Table(name="informi")
 @Entity
+@JsonView(Utils.Views.EntityDefaultView.class)
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name= InformiBase.INFORMI_PREVIEW,
@@ -44,15 +45,21 @@ public final class InformiBase extends FactCheckedEntity implements Serializable
 
     public static final String INFORMI_PREVIEW = "informi-with-reviews";
     public static final String INFORMI_DATA = "informi-full-data";
-    @NotBlank(message = "Name is mandatory")
+
+    /**
+     * Validation group for add/edit informi through the UI (most fields will not be initialized)
+     */
+    public interface InformiFromUI {}
+
+    @NotBlank(message = "Name is mandatory", groups = {InformiFromUI.class, Default.class})
     private String name;
 
-    @NotBlank(message = "Description is mandatory")
+    @NotBlank(message = "Description is mandatory", groups = {InformiFromUI.class, Default.class})
     @Column(length = 1500)
     @Size(max = 1500)
     private String description;
 
-    @URL(message = "A valid link to a media file is mandatory")
+    @URL(message = "A valid link to a media file is mandatory", groups = {InformiFromUI.class, Default.class})
     private String mediaPath;
 
     public String getName() {

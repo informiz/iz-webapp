@@ -1,31 +1,47 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <div th:fragment="reviewForm(action_path, review)">
-        <!-- TODO:   Thymeleaf 3.0.15 issue with binding form-objects during list-iteration: only works if there's a
-             TODO:   "review" object in the model (even though it's not the one getting bound to the form).
-             TODO:   'th:field' syntax doesn't populate the inputs  -->
-        <form th:action="${action_path}" th:object="${review}" method="post">
-            <div class="row">
+<!-- TODO: can define thymeleaf "macro" to check if errors come from this form?? -->
+    <div th:fragment="reviewForm(action_path, cur_review)">
+        <form th:id="'rev_form_' + ${cur_review.getId()}" th:action="${action_path}" th:object="${review}" method="post">
+            <div class="form-row">
+                <div class="col">
+                    <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
+                    <input type="text" class="d-none" name="id" th:value="${cur_review.getId()}" readonly>
+                </div>
+            </div>
+            <div class="form-row">
                 <div class="col-4">
-                    <label th:for="'rating' + ${review.id}" class="col-form-label">Reliability</label>
-                    <input type="text" class="d-none" name="ownerId" th:value="${review.ownerId}" readonly/>
-                    <input type="number" name="rating" th:value="${review.rating}" min="0" max="1" step="0.01"
-                           class="form-control" th:id="'rating' + ${review.id}" placeholder="0.9"/>
-                    <span th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}" class="text-danger"></span>
+                    <label th:for="'rating' + ${cur_review.getId()}" class="col-form-label">Reliability</label>
+                    <input type="number" name="rating" th:value="${cur_review.rating}" min="0" max="1" step="0.01"
+                           class="form-control" th:id="'rating' + ${cur_review.getId()}" placeholder="0.9"/>
+                    <span th:if="${#fields.hasErrors('rating') && @tlUtils.isReviewFormError(cur_review, review)}"
+                          th:errors="*{rating}" class="text-danger"></span>
                 </div>
                 <div class="col-8">
-                    <label th:for="'comment' + ${review.id}" class="col-form-label">Comment</label>
-                    <textarea name="comment" th:text="${review.comment}" class="form-control" th:id="'comment' + ${review.id}" cols="30"
+                    <label th:for="'comment' + ${cur_review.getId()}" class="col-form-label">Comment</label>
+                    <textarea name="comment" th:text="${cur_review.comment}" class="form-control" th:id="'comment' + ${cur_review.getId()}" cols="30"
                               placeholder="Explain your review..."></textarea>
-                    <span th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}" class="text-danger"></span>
-                </div>
-
-            </div>
-            <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="row mt-2">
-                <div class="col">
-                    <input type="submit" class="btn btn-primary" value="Submit"/>
+                    <span th:if="${#fields.hasErrors('comment') && @tlUtils.isReviewFormError(cur_review, review)}"
+                          th:errors="*{comment}" class="text-danger"></span>
                 </div>
             </div>
+            <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
+                <div class="col-4">
+                    <input type="submit" th:id="'rev_form_submit_' + ${cur_review.getId()}" class="btn btn-primary"
+                           value="Submit">
+                    </a>
+                </div>
+            </div>
+            <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isReviewFormError(cur_review, review)}">
+                <!-- Display form if submission failed with errors -->
+                <script>
+                    loadCompleteCallbacks.push(function() {
+                        const modal_selector = "#modal_rev_" + ("[[${cur_review.getId()}]]" ? "[[${cur_review.getId()}]]" : "0");
+                        // trigger containing modal to display form
+                        $(modal_selector).modal('show');
+                    });
+                </script>
+            </th:block>
         </form>
     </div>
 </html>
