@@ -1,9 +1,9 @@
 package org.informiz.repo;
 
 import org.informiz.WithCustomAuth;
-import org.informiz.model.InformiBase;
+import org.informiz.model.HypothesisBase;
 import org.informiz.model.ModelTestUtils;
-import org.informiz.repo.informi.InformiRepository;
+import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_MEMBER;
-import static org.informiz.model.ModelTestUtils.getPopulatedInformi;
+import static org.informiz.model.ModelTestUtils.getPopulatedHypothesis;
 import static org.informiz.model.Score.CONFIDENCE_BOOST;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class InformiRepositoryTest extends ChaincodeEntityRepoTest<InformiBase, InformiRepository> {
+public class HypothesisRepositoryTest extends ChaincodeEntityRepoTest<HypothesisBase, HypothesisRepository> {
 
     protected void initEntities() {
-        chaincodeEntity = getPopulatedInformi(null);
+        chaincodeEntity = getPopulatedHypothesis(null);
         rev = ModelTestUtils.getPopulatedReview(chaincodeEntity, null);
         chaincodeEntity.addReview(rev);
     }
@@ -29,36 +29,23 @@ public class InformiRepositoryTest extends ChaincodeEntityRepoTest<InformiBase, 
     @Test
     @Disabled("Query Count is Zero, Fix Test")
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByID_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
+    public void whenFindByID_thenReturnPersistedHypothesisFullData() {
+        HypothesisBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
 
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
+        verifyLoading(found, 1, new String[]{"reviews", "references", "sources"}, new String[]{});
         verifyInformi(found);
     }
-
-
-    //FindByName
-
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByName_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findByName(((InformiBase) chaincodeEntity).getName());
-
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
-        verifyInformi(found);
-    }
-
 
     //FindAll
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindAll_thenReturnPersistedInformiPreviewData() {
-        List<InformiBase> all = StreamSupport
+    public void whenFindAll_thenReturnPersistedHypothesisPreviewData() {
+        List<HypothesisBase> all = StreamSupport
                 .stream(chaincodeEntityRepo.findAll().spliterator(), false)
                 .collect(Collectors.toList());
 
         assertEquals(all.size(), 1);
-        InformiBase found = all.get(0);
+        HypothesisBase found = all.get(0);
 
         verifyLoading(found, 1, new String[]{"reviews"}, new String[]{"references", "sources"});
         verifyInformi(found);
@@ -67,22 +54,22 @@ public class InformiRepositoryTest extends ChaincodeEntityRepoTest<InformiBase, 
     //FindByEntityId
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByEntityId_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findByEntityId(chaincodeEntity.getEntityId());
+    public void whenFindByEntityId_thenReturnPersistedHypothesisFullData() {
+        HypothesisBase found = chaincodeEntityRepo.findByEntityId(chaincodeEntity.getEntityId());
 
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
+        verifyLoading(found, 1, new String[]{"reviews", "references", "sources"}, new String[]{});
         verifyInformi(found);
     }
 
 
-    private void verifyInformi(InformiBase found) {
-        assertEquals(chaincodeEntity.getName(), found.getName());
+    private void verifyInformi(HypothesisBase found) {
+        assertEquals(chaincodeEntity.getClaim(), found.getClaim());
         assertEquals(1, found.getReviews().size());
         assertEquals(rev.getRating(), found.getScore().getReliability().floatValue(), 0.001);
         assertEquals(CONFIDENCE_BOOST, found.getScore().getConfidence().floatValue(), 0.001);
     }
 
-    private void verifyLoading(InformiBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
+    private void verifyLoading(HypothesisBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
         assertEquals(expectedQueryCount, statistics.getQueryExecutionCount());
         for (String prop : loaded)
             assertTrue(unitUtil.isLoaded(found, prop), String.format("%s not loaded", prop));

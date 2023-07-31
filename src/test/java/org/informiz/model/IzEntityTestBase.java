@@ -20,9 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class IzEntityTestBase<T extends InformizEntity> {
     protected Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @Configuration
-    static class Config {
-    }
+    static class Config {}
 
 
     //************* ID (POST Insert) Test  >>  !Null, Positive
