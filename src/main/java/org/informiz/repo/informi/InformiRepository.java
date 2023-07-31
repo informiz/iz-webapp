@@ -20,7 +20,7 @@ public interface InformiRepository extends ChaincodeEntityRepo<InformiBase> {
     InformiBase findByName(String name); // TODO: remove?
 
     @Override
-    @EntityGraph(value = INFORMI_PREVIEW, type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"reviews", "score"})
+    @EntityGraph(value = INFORMI_PREVIEW)
 //    @EntityGraph(value = INFORMI_DATA)
     Iterable<InformiBase> findAll();
 

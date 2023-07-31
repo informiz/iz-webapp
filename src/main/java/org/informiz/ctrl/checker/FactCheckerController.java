@@ -94,7 +94,7 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
             model.addAttribute(CHECKER_ATTR, current);
             return getRedirectToEditPage(null);
         }
-        return getEditPageTemplate();
+        return failedEdit(model, result, checker, checker);
     }
 
     @Override

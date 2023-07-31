@@ -102,9 +102,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                                  @Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute(REVIEW_ATTR, new Review());
-            model.addAttribute(SOURCE_ATTR, new SourceRef());
-            return EDIT_PAGE_TEMPLATE;
+            return failedEdit(model, result, citation, citation);
         }
 
         CitationBase current = entityRepo.findById(id)
@@ -142,7 +140,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/{citationId}/source-ref/")
+    @PostMapping("/source-ref/{citationId}")
     @Secured("ROLE_CHECKER")
     public String addSource(@PathVariable("citationId") @Valid Long id,
                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
@@ -151,9 +149,9 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/{citationId}/source-ref/edit/")
+    @PostMapping("/source-ref/{citationId}/edit/")
     @Secured("ROLE_CHECKER")
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String editSourceRef(@PathVariable("citationId") @Valid Long id,
                              @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
@@ -161,7 +159,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/source/{citationId}/del/")
+    @PostMapping("/source-ref/{citationId}/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("citationId") @Valid Long id,

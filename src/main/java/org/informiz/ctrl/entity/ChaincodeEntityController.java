@@ -1,6 +1,5 @@
 package org.informiz.ctrl.entity;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.*;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
@@ -10,7 +9,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
 
 public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
@@ -30,7 +28,6 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
     protected String getEditPageTemplate() { return null; }
 
     protected void modelForError(Model model, T current) {
-        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
         if (! model.containsAttribute(REVIEW_ATTR)) model.addAttribute(REVIEW_ATTR, new Review());
     };
 

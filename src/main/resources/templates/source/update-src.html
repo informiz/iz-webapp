@@ -5,23 +5,15 @@
     <div layout:fragment="content">
         <div class="my-5">
             <h1 class="mb-5">Update Source</h1>
-            <div class="row">
-                <div class="col">
-                    <form action="#" th:action="@{/source/details/{id}(id=${source.id.toString()})}" th:object="${source}" method="post">
-                        <input type="number" class="d-none" name="id" th:value="${source.id}" readonly/>
-                        <input type="text" class="d-none" name="entityId" th:value="${source.entityId}" readonly/>
-                        <input type="text" class="d-none" name="ownerId" th:value="${source.ownerId}" readonly/>
-
-                        <div th:replace="~{fragments/source :: source('false')}"></div>
-                        <div class="row">
-                            <div class="col mt-5">
-                                <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
-                                       class="btn btn-primary" value="Update"/>
-                            </div>
-                        </div>
-                    </form>
+            <form th:action="@{/source/details/{id}(id=${source.id.toString()})}" th:object="${source}" method="post">
+                <div class="row" th:insert="~{fragments/source :: sourceProps(${source}, 'false')}"></div>
+                <div class="row">
+                    <div class="col mt-5">
+                        <input type="submit" th:disabled="${ @sUtils.getDisabled(#authentication.getPrincipal(), source)}"
+                               class="btn btn-primary" value="Update"/>
+                    </div>
                 </div>
-            </div>
+            </form>
             <div th:replace="~{fragments/review-list :: reviewList(${source.reviews}, @{'/source/' + ${source.id} + '/review/'})}"></div>
         </div>
     </div>

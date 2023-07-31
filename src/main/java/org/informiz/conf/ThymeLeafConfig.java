@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Objects;
+
 
 /**
  * A helper class for HTML rendering, contains helper-methods used in Thymeleaf templates
@@ -28,7 +30,8 @@ public class ThymeLeafConfig {
          * @return true iff editing the given reference is the cause of the error
          */
         public boolean isRefFormError(@NotNull Reference reference, @NotNull Reference errReference) {
-            return request.getRequestURI().contains("/reference/") && reference.getId() == errReference.getId();
+            return request.getRequestURI().contains("/reference/") &&
+                    Objects.equals(reference.getId(), errReference.getId());
         }
 
         /**
@@ -44,18 +47,28 @@ public class ThymeLeafConfig {
         }
 
         /**
-         * Check if there is an error related to review add/edit.
-         * @implNote An error while editing a review also causes the "add review" modal to "show", but it actually
-         * triggers the same modal with the same content.
+         * Check if there is an error related to adding a review.
          *
          * @param review the review represented by the form
          * @param errReview the review that caused the error
-         * @return true if the given review (form) is the cause of the error
+         * @return true iff adding a review (form) is the cause of the error
          */
-        public boolean isReviewFormError(@NotNull Review review, @NotNull Review errReview) {
-            return request.getRequestURI().contains("/review/") && review.getId() == errReview.getId();
+        public boolean isAddReviewError(@NotNull Review review, @NotNull Review errReview) {
+            return isReviewFormError(review, errReview) &&
+                    (review.getId() == null || review.getId().equals(0l));
         }
 
+        /**
+         * Check if there is an error related to editing a review.
+         *
+         * @param review the review represented by the form
+         * @param errReview the review that caused the error
+         * @return true iff the given review (form) is the cause of the error
+         */
+        public boolean isReviewFormError(@NotNull Review review, @NotNull Review errReview) {
+            return request.getRequestURI().contains("/review/") &&
+                    Objects.equals(review.getId(), errReview.getId());
+        }
         /**
          * Check if there is an error related to editing a source-reference.
          *
@@ -64,7 +77,8 @@ public class ThymeLeafConfig {
          * @return true iff editing the given source-reference is the cause of the error
          */
         public boolean isSourceRefFormError(@NotNull SourceRef sourceRef, @NotNull SourceRef errSrcRef) {
-            return request.getRequestURI().contains("/source-ref/") && sourceRef.getId() == errSrcRef.getId();
+            return request.getRequestURI().contains("/source-ref/") &&
+                    Objects.equals(sourceRef.getId(), errSrcRef.getId());
         }
 
         /**

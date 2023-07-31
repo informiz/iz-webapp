@@ -16,7 +16,8 @@ import java.io.Serializable;
         name= SourceBase.SOURCE_DATA,
         attributeNodes={
                 @NamedAttributeNode("reviews"),
-                @NamedAttributeNode("score")
+                @NamedAttributeNode("score"),
+                @NamedAttributeNode("srcType")
         })
 public final class SourceBase extends ChainCodeEntity implements Serializable {
 
@@ -62,7 +63,7 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     private String name;
 
     @URL(message = "Please provide a valid link", groups = {SourceFromUI.class, Default.class})
-    @NotBlank(message = "Link is mandatory")
+    @NotBlank(message = "Link is mandatory", groups = {SourceFromUI.class, Default.class})
     private String link;
 
     @Enumerated(EnumType.ORDINAL)
@@ -109,5 +110,9 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
         this.setLink(other.getLink());
         this.setSrcType(other.getSrcType());
         this.setDescription(other.getDescription());
+    }
+
+    public static SourceType[] sourceTypes() {
+        return SourceType.values();
     }
 }

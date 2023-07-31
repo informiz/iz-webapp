@@ -158,4 +158,10 @@ public final class Reference extends InformizEntity implements Serializable {
                 // creatorId is only set when persisting the reference to db.
                 ( (this.creatorId == null && other.creatorId == null) ||
                         this.creatorId.equals(other.creatorId)));
-    }}
+    }
+
+    public static Entailment[] entailmentTypes() {
+        return Entailment.values();
+    }
+
+}

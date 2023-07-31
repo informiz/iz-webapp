@@ -100,8 +100,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                                     @Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
         if (result.hasErrors()) {
-            prepareEditModel(model, hypothesis, new Review(), new Reference());
-            return getEditPageTemplate();
+            return failedEdit(model, result, hypothesis, hypothesis);
         }
 
         HypothesisBase current = entityRepo.findById(id)

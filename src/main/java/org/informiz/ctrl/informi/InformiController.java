@@ -1,10 +1,12 @@
 package org.informiz.ctrl.informi;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import org.informiz.auth.AuthUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.*;
+import org.informiz.model.InformiBase;
+import org.informiz.model.InformizEntity;
+import org.informiz.model.Reference;
+import org.informiz.model.Review;
 import org.informiz.repo.informi.InformiRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +105,6 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
         model.addAttribute(INFORMI_ATTR, informi);
-        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
         return String.format("%s/view-informi.html", PREFIX);
     }
 
@@ -121,14 +122,14 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @PreAuthorize("#informi.getOwnerId() == principal.getAttributes().get('eid')")
     public String updateInformi(@PathVariable("informiId") @Valid Long id,
                                     @Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
-                                    BindingResult result) {
+                                    BindingResult result, Model model) {
         if (! result.hasErrors()) {
             InformiBase current = entityRepo.loadByLocalId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
         }
-        return getRedirectToEditPage(id);
+        return failedEdit(model, result, informi, informi);
     }
 
     @PostMapping("/{informiId}/review/")
@@ -187,7 +188,6 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         model.addAttribute(INFORMI_ATTR, informi);
         model.addAttribute(REVIEW_ATTR, review);
         model.addAttribute(REFERENCE_ATTR, ref);
-        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
     }
 
     @Override

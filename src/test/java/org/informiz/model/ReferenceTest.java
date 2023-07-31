@@ -1,19 +1,15 @@
 package org.informiz.model;
+
 import jakarta.validation.ConstraintViolation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import java.util.Set;
+
 import static org.informiz.model.ModelTestUtils.getPopulatedInformi;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-@DataJpaTest
-@ActiveProfiles("test")
 class ReferenceTest extends IzEntityTestBase<Reference> {
 
     //Default
@@ -124,7 +120,7 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         //reference.setId(null);
 
         Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference , Reference.UserReference.class);
+                violations = validator.validate(reference, Reference.UserReference.class);
         assertEquals(1, violations.size());
     }
 
@@ -157,7 +153,7 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         // value > 0.0
         reference.setDegree(0.00f);
         violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(0, violations.size(),"Expected Zero Degree Violation");
+        assertEquals(0, violations.size(), "Expected Zero Degree Violation");
 
 
         // valid, no more errors
@@ -173,7 +169,7 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
 
         reference.setComment(RandomStringUtils.random(256));
         Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference , Reference.UserReference.class);
+                violations = validator.validate(reference, Reference.UserReference.class);
         assertEquals(1, violations.size());
     }
 
@@ -225,7 +221,7 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
 
     //*******************
     @NotNull
-    protected  Reference getValidEntity() {
+    protected Reference getValidEntity() {
         InformiBase informi = getPopulatedInformi(1l);
         Reference reference = ModelTestUtils.getPopulatedReference(informi, "TestReference", 1l);
         return reference;
