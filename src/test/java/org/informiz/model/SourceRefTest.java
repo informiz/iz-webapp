@@ -3,21 +3,14 @@ package org.informiz.model;
 import jakarta.validation.ConstraintViolation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Set;
 
 import static org.informiz.model.ModelTestUtils.getPopulatedSrcReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-@DataJpaTest
-@ActiveProfiles("test")
+
 public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //Default
@@ -72,7 +65,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     public void whenLinkExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
-        sourceRef.setLink("https://"+RandomStringUtils.random(256));
+        sourceRef.setLink("https://server.com/"+RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
         assertEquals(1, violations.size());

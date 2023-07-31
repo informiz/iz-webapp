@@ -1,9 +1,9 @@
 package org.informiz.repo;
 
 import org.informiz.WithCustomAuth;
-import org.informiz.model.InformiBase;
+import org.informiz.model.CitationBase;
 import org.informiz.model.ModelTestUtils;
-import org.informiz.repo.informi.InformiRepository;
+import org.informiz.repo.citation.CitationRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -12,77 +12,68 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_MEMBER;
-import static org.informiz.model.ModelTestUtils.getPopulatedInformi;
+import static org.informiz.model.ModelTestUtils.getPopulatedCitation;
 import static org.informiz.model.Score.CONFIDENCE_BOOST;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class InformiRepositoryTest extends ChaincodeEntityRepoTest<InformiBase, InformiRepository> {
+public class CitationsRepositoryTest extends ChaincodeEntityRepoTest<CitationBase, CitationRepository> {
 
     protected void initEntities() {
-        chaincodeEntity = getPopulatedInformi(null);
+        chaincodeEntity = getPopulatedCitation(null);
         rev = ModelTestUtils.getPopulatedReview(chaincodeEntity, null);
         chaincodeEntity.addReview(rev);
     }
+
 
     //FindByID
     @Test
     @Disabled("Query Count is Zero, Fix Test")
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByID_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
+    public void whenFindByID_thenReturnPersistedCitationFullData() {
+        CitationBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
 
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
-        verifyInformi(found);
+        verifyLoading(found, 1, new String[]{"reviews", "sources"}, new String[]{"references"});
+        verifyCitation(found);
     }
 
-
-    //FindByName
-
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByName_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findByName(((InformiBase) chaincodeEntity).getName());
-
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
-        verifyInformi(found);
-    }
-
+    //No FindByName
 
     //FindAll
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindAll_thenReturnPersistedInformiPreviewData() {
-        List<InformiBase> all = StreamSupport
+    public void whenFindAll_thenReturnPersistedCitationPreviewData() {
+        List<CitationBase> all = StreamSupport
                 .stream(chaincodeEntityRepo.findAll().spliterator(), false)
                 .collect(Collectors.toList());
 
         assertEquals(all.size(), 1);
-        InformiBase found = all.get(0);
+        CitationBase found = all.get(0);
 
         verifyLoading(found, 1, new String[]{"reviews"}, new String[]{"references", "sources"});
-        verifyInformi(found);
+        verifyCitation(found);
     }
 
     //FindByEntityId
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    public void whenFindByEntityId_thenReturnPersistedInformiFullData() {
-        InformiBase found = chaincodeEntityRepo.findByEntityId(chaincodeEntity.getEntityId());
+    public void whenFindByEntityId_thenReturnPersistedCitationFullData() {
+        CitationBase found = chaincodeEntityRepo.findByEntityId(chaincodeEntity.getEntityId());
 
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
-        verifyInformi(found);
+        verifyLoading(found, 1, new String[]{"reviews", "sources"}, new String[]{"references"});
+        verifyCitation(found);
     }
 
 
-    private void verifyInformi(InformiBase found) {
-        assertEquals(chaincodeEntity.getName(), found.getName());
+    private void verifyCitation(CitationBase found) {
+        assertEquals(chaincodeEntity.getLink(), found.getLink());
+        assertEquals(chaincodeEntity.getText(), found.getText());
         assertEquals(1, found.getReviews().size());
         assertEquals(rev.getRating(), found.getScore().getReliability().floatValue(), 0.001);
         assertEquals(CONFIDENCE_BOOST, found.getScore().getConfidence().floatValue(), 0.001);
     }
 
-    private void verifyLoading(InformiBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
+    private void verifyLoading(CitationBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
         assertEquals(expectedQueryCount, statistics.getQueryExecutionCount());
         for (String prop : loaded)
             assertTrue(unitUtil.isLoaded(found, prop), String.format("%s not loaded", prop));

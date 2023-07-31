@@ -1,19 +1,15 @@
 package org.informiz.model;
+
 import jakarta.validation.ConstraintViolation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import java.util.Set;
+
 import static org.informiz.model.ModelTestUtils.getPopulatedInformi;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-@DataJpaTest
-@ActiveProfiles("test")
 public class InformiBaseTest extends IzEntityTestBase<InformiBase> {
 
     //Default
@@ -59,8 +55,6 @@ public class InformiBaseTest extends IzEntityTestBase<InformiBase> {
         assertEquals(1, violations.size());
 
     }
-
-
 
 
     @NotNull

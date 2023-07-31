@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.informiz.model.ModelTestUtils.getPopulatedCitation;
 import static org.informiz.model.ModelTestUtils.getPopulatedSourceBase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

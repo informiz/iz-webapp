@@ -25,7 +25,6 @@ import java.util.Set;
         ),
         @NamedEntityGraph(
                 name = CitationBase.CITATION_DATA,
-                //includeAllAttributes=true,
                 attributeNodes = {
                         @NamedAttributeNode("reviews"),
                         @NamedAttributeNode("score"),
