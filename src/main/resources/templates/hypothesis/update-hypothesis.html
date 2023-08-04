@@ -26,7 +26,7 @@
 
             <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.entityId}, ${hypothesis.references}, @{'/hypothesis/reference/' + ${hypothesis.id}})}"></div>
 
-            <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.reviews}, @{'/hypothesis/' + ${hypothesis.id} + '/review/'})}"></div>
+            <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.entityId}, ${hypothesis.reviews}, @{'/hypothesis/' + ${hypothesis.id} + '/review/'})}"></div>
 
         </div>
     </div>

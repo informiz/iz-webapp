@@ -20,12 +20,12 @@ class ReviewTest extends IzEntityTestBase<Review> {
         Set<ConstraintViolation<Review>> violations = validator.validate(review);
         assertEquals(0, violations.size());
     }
-    //Todo Add Default revie test for DeleteEntity
+    //Todo Add Default review test for DeleteEntity
 
     // ID    >>    !Null, Pos{DeleteEntity}
     //!Null
     @Test
-    public void whenREVIEwIDisNull_thenDeleteEntityValidatorViolation() {
+    public void whenReviewIdIsNull_thenDeleteEntityValidatorViolation() {
         Review review = getValidEntity();
 
         review.setId(null);
@@ -36,7 +36,7 @@ class ReviewTest extends IzEntityTestBase<Review> {
 
     //Positive
     @Test
-    public void whenREVIEwIDisNegative_thenDeleteEntityValidatorViolation() {
+    public void whenReviewIdIsNegative_thenDeleteEntityValidatorViolation() {
         Review review = getValidEntity();
 
         review.setId(-1L);

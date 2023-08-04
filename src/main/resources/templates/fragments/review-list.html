@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div th:fragment="reviewList(reviews, link)">
+    <div th:fragment="reviewList(entityId, reviews, link)">
         <h3 class="mt-5">Reviews</h3>
         <div>
             <table id="reviews-table"
@@ -35,7 +35,7 @@
                                     <!-- IMPORTANT: iteration variables are not yet available at the time of
                                     th:replace. When passing iteration variables to fragments use th:insert -->
                                     <div th:id="'rev_' + ${cur_review.getId()}"
-                                        th:insert="~{fragments/review :: reviewForm(${link} + 'edit/', ${cur_review})}">
+                                        th:insert="~{fragments/review :: reviewForm(${entityId}, ${link} + 'edit/', ${cur_review})}">
                                     </div>
                                 </div>
                                 <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_' + ${cur_review.getId()})}"></div>
@@ -47,6 +47,7 @@
                             </td>
                             <td>
                                 <form th:action="@{${link}+'del/'}" th:object="${review}" method="post">
+                                    <input type="text" class="d-none" name="reviewedEntityId" th:value="${entityId}" readonly/>
                                     <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId}" readonly/>
                                     <span th:if="${#fields.hasErrors('ownerId')}" th:errors="*{ownerId}" class="text-danger"></span>
                                     <input type="text" class="d-none" name="id" th:value="${cur_review.id}" readonly/>
@@ -66,7 +67,7 @@
             <!-- TODO: No add button if user already reviewed the entity -->
                 <div class="d-none">
                     <div th:id="rev_0">
-                        <div th:insert="~{fragments/review :: reviewForm(${link}, ${review})}"></div>
+                        <div th:insert="~{fragments/review :: reviewForm(${entityId}, ${link}, ${review})}"></div>
                     </div>
                 </div>
                 <div

@@ -94,7 +94,8 @@
                 <input name="reference-select" class="form-control refAutoSelect"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                        placeholder="Start typing to search..." >
-                <input type="text" class="d-none" name="refEntityId" th:value="${ref.getRefEntityId()}">
+                <input type="text" class="d-none" name="refEntityId" th:value="${ref.getRefEntityId()}" readonly>
+                <input type="text" class="d-none" name="ownerId" th:value="${#authentication.principal.name}" readonly>
                 <input type="text" class="d-none" name="factCheckedEntityId" th:value="${entityId}" readonly>
                 <span th:if="${#fields.hasErrors('refEntityId') && @tlUtils.isAddRefFormError(ref, reference) }"
                       th:errors="*{refEntityId}" class="text-danger"></span>

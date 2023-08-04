@@ -65,8 +65,9 @@
     <form action="#" th:action="${actionPath}" th:object="${source}" method="post">
         <div class="form-row">
             <div class="form-group col">
+                <input type="text" class="d-none" name="ownerId" th:value="${#authentication.principal.name}" readonly>
                 <input type="text" class="d-none" name="sourcedId" th:value="${entityId}" readonly>
-                <input type="text" class="d-none" name="srcEntityId" readonly/>
+                <input type="text" class="d-none" name="srcEntityId">
                 <label for="source-ref-select" class="col-form-label">Source</label>
                 <input id="source-ref-select" class="form-control src-auto-select" placeholder="Start typing to search..."
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">

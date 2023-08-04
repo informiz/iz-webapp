@@ -48,6 +48,9 @@
                         <td>
                             <form th:action="@{${link}+'/del/'}" th:object="${source}" method="post">
                                 <!-- TODO: Button styling does not work -->
+                                <input type="text" class="d-none" name="sourcedId" th:value="${src_ref.sourcedId}" readonly/>
+                                <input type="text" class="d-none" name="srcEntityId" th:value="${src_ref.srcEntityId}" readonly/>
+                                <input type="text" class="d-none" name="link" th:value="${src_ref.link}" readonly/>
                                 <input type="text" class="d-none" name="ownerId" th:value="${src_ref.ownerId}" readonly/>
                                 <input type="text" class="d-none" name="id" th:value="${src_ref.id}" readonly/>
                                 <input type="submit" value="X"
