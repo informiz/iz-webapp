@@ -4,7 +4,6 @@ import org.informiz.WithCustomAuth;
 import org.informiz.model.ModelTestUtils;
 import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,12 +27,11 @@ public class SourceRepositoryTest extends ChaincodeEntityRepoTest<SourceBase, So
 
     //FindByID
     @Test
-    @Disabled("Query Count is Zero, Fix Test")
     @WithCustomAuth(role = {ROLE_MEMBER})
     public void whenFindByID_thenReturnPersistedSourceFullData() {
         SourceBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
 
-        verifyLoading(found, 1, new String[]{"reviews", "references"}, new String[]{"sources"});
+        verifyLoading(found, 1, new String[]{"reviews"}, new String[]{"sources", "references"});
         verifyInformi(found);
     }
 
@@ -82,7 +80,7 @@ public class SourceRepositoryTest extends ChaincodeEntityRepoTest<SourceBase, So
     }
 
     private void verifyLoading(SourceBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
-        assertEquals(expectedQueryCount, statistics.getQueryExecutionCount());
+        assertEquals(expectedQueryCount, statistics.getPrepareStatementCount());
         for (String prop : loaded)
             assertTrue(unitUtil.isLoaded(found, prop), String.format("%s not loaded", prop));
 

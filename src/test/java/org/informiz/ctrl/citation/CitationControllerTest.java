@@ -54,11 +54,13 @@ class CitationControllerTest {
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerReviewsCitation_thenSucceeds() throws Exception {
 
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
+        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
+        given(repo.loadByLocalId(1l)).willReturn(citation);
 
         mockMvc.perform(post("/citation/1/review/")
                         .secure(true).with(csrf())
                         .param("rating", "0.82")
+                        .param("reviewedEntityId", citation.get().getEntityId())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }
@@ -117,6 +119,7 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/edit/")
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .param("rating", "0.82")
                         .param("comment", "Changed Comment")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -127,6 +130,7 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/edit/")
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .param("rating", "0.82")
                         .param("comment", "Changed Comment")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -167,6 +171,7 @@ class CitationControllerTest {
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
                         .param("id", review.getId().toString())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
 
@@ -176,6 +181,7 @@ class CitationControllerTest {
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
                         .param("id", review.getId().toString())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }

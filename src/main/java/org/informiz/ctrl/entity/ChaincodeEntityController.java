@@ -58,7 +58,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         if (! result.hasErrors()) {
             String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
 
-            Review current = entity.getCheckerReview(checker);
+            Review current = entity.getCheckerReview(checker, review.getId());
             if (current != null) {
                 current.setRating(review.getRating());
                 current.setComment(review.getComment());
@@ -87,7 +87,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
 
         if (! result.hasErrors()) {
             String checker = authentication.getName();
-            Review current = entity.getCheckerReview(checker);
+            Review current = entity.getCheckerReview(checker, revId);
             if (current != null && current.getId().equals(revId)) {
                 entity.removeReview(current);
                 entityRepo.save(entity);

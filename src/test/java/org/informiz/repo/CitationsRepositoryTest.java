@@ -4,7 +4,6 @@ import org.informiz.WithCustomAuth;
 import org.informiz.model.CitationBase;
 import org.informiz.model.ModelTestUtils;
 import org.informiz.repo.citation.CitationRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,7 +27,6 @@ public class CitationsRepositoryTest extends ChaincodeEntityRepoTest<CitationBas
 
     //FindByID
     @Test
-    @Disabled("Query Count is Zero, Fix Test")
     @WithCustomAuth(role = {ROLE_MEMBER})
     public void whenFindByID_thenReturnPersistedCitationFullData() {
         CitationBase found = chaincodeEntityRepo.findById(chaincodeEntity.getId()).get();
@@ -74,7 +72,7 @@ public class CitationsRepositoryTest extends ChaincodeEntityRepoTest<CitationBas
     }
 
     private void verifyLoading(CitationBase found, int expectedQueryCount, String[] loaded, String[] unLoaded) {
-        assertEquals(expectedQueryCount, statistics.getQueryExecutionCount());
+        assertEquals(expectedQueryCount, statistics.getPrepareStatementCount());
         for (String prop : loaded)
             assertTrue(unitUtil.isLoaded(found, prop), String.format("%s not loaded", prop));
 

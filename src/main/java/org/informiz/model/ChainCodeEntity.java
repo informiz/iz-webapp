@@ -120,11 +120,12 @@ public abstract class ChainCodeEntity extends InformizEntity {
         getScore();
     }
 
-    public Review getCheckerReview(String fcid) {
+    public Review getCheckerReview(@NotNull String fcid, Long revId) {
         // TODO: more efficient way?
         List<Review> snapshot = new ArrayList(reviews);
         Review byChecker = snapshot.stream().filter(review ->
-                fcid.equals(review.getCreatorId())).findFirst().orElse(null);
+                fcid.equals(review.getOwnerId()) && (revId == null || revId.equals(review.getId())))
+                .findFirst().orElse(null);
         return byChecker;
     }
 
@@ -134,6 +135,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
         if (numReviews > 0) {
             Double sumRatings = snapshot.stream().mapToDouble(review -> review.getRating()).sum();
             score = new Score(sumRatings.floatValue()/numReviews, Math.min(0.99f, CONFIDENCE_BOOST * numReviews));
+        } else {
+            score = new Score();
         }
 
         return score;
