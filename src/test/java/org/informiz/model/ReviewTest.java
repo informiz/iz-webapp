@@ -55,9 +55,9 @@ class ReviewTest extends IzEntityTestBase<Review> {
         assertEquals(1, violations.size());
     }
 
-    //UserReview
+    //ReviewedEntityId {Default}
     @Test
-    public void whenBadEntityId_thenDefaultValidatorViolation() {
+    public void whenInvalidEntityId_thenDefaultValidatorViolation() {
         Review review = ModelTestUtils.getPopulatedReview();
         Set<ConstraintViolation<Review>> violations;
 
@@ -82,7 +82,85 @@ class ReviewTest extends IzEntityTestBase<Review> {
         assertEquals(0, violations.size());
     }
 
-    //ReviewEntityID
+    //ReviewedEntityId {DeleteEntity}
+    @Test
+    public void whenInvalidEntityId_thenDeleteEntityValidatorViolation() {
+        Review review = ModelTestUtils.getPopulatedReview();
+        Set<ConstraintViolation<Review>> violations;
+
+        // not null
+        review.setReviewedEntityId(null);
+        violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+        // not empty
+        review.setReviewedEntityId("");
+        violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+        // max 255 characters
+        review.setReviewedEntityId(RandomStringUtils.random(256));
+        violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+        // valid - no more errors
+        review.setReviewedEntityId("SomeEntityIdOfReasonableLength");
+        violations = validator.validate(review, InformizEntity.DeleteEntity.class);
+        assertEquals(0, violations.size());
+    }
+
+    //ReviewedEntityId {UserReview}
+    @Test
+    public void whenInvalidEntityId_thenUserReviewValidatorViolation() {
+        Review review = ModelTestUtils.getPopulatedReview();
+        Set<ConstraintViolation<Review>> violations;
+
+        // not null
+        review.setReviewedEntityId(null);
+        violations = validator.validate(review, Review.UserReview.class);
+        assertEquals(1, violations.size());
+
+        // not empty
+        review.setReviewedEntityId("");
+        violations = validator.validate(review, Review.UserReview.class);
+        assertEquals(1, violations.size());
+
+        // max 255 characters
+        review.setReviewedEntityId(RandomStringUtils.random(256));
+        violations = validator.validate(review, Review.UserReview.class);
+        assertEquals(1, violations.size());
+
+        // valid - no more errors
+        review.setReviewedEntityId("SomeEntityIdOfReasonableLength");
+        violations = validator.validate(review, Review.UserReview.class);
+        assertEquals(0, violations.size());
+    }
+
+    //Comment Exceeds {Default}
+    @Test
+    public void whenReviewCommentExceeds_thenDefaultValidatorViolation() {
+        Review review = ModelTestUtils.getPopulatedReview();
+        Set<ConstraintViolation<Review>> violations;
+
+        review.setComment(RandomStringUtils.random(256));
+        violations = validator.validate(review);
+        assertEquals(1, violations.size());
+    }
+
+    //Comment Exceeds {UserReview}
+    @Test
+    public void whenReviewCommentExceeds_thenUserReviewValidatorViolation() {
+        Review review = ModelTestUtils.getPopulatedReview();
+        Set<ConstraintViolation<Review>> violations;
+
+        review.setComment(RandomStringUtils.random(256));
+        violations = validator.validate(review, Review.UserReview.class);
+        assertEquals(1, violations.size());
+    }
+
+
+
+    //ReviewRating
 
     @Test
     public void whenInvalidRating_thenUserReviewValidatorViolation() {

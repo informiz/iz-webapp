@@ -22,9 +22,9 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     }
 
 
-    //SrcEntity >> =< 255
+    //SrcEntityId {Default} >> =< 255
     @Test
-    public void whenSrcRefExceeds_thenDefaultValidatorViolation() {
+    public void whenSrcEntityIdExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
         sourceRef.setSrcEntityId(RandomStringUtils.random(256));
@@ -34,10 +34,34 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     }
 
-    //SourcedId >>  !Blank, <256
+    //SrcEntityId {DeleteEntity} >> =< 255
+    @Test
+    public void whenSrcEntityIdExceeds_thenDeleteEntityValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setSrcEntityId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+    }
+
+    //SrcEntityId {UserSource} >> =< 255
+    @Test
+    public void whenSrcEntityIdExceeds_thenUserSourceReferenceValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setSrcEntityId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, SourceRef.UserSourceReference.class);
+        assertEquals(1, violations.size());
+
+    }
+
+    //SourcedEntityId {Default} >>  !Blank, <256
     //!Blank
     @Test
-    public void whenSourcedIdIsNull_thenDefaultValidatorViolation() {
+    public void whenSourcedEntityIdIsBlank_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
         Set<ConstraintViolation<SourceRef>> violations;
 
@@ -58,7 +82,57 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     }
 
+    //SourcedEntityId {DeleteEntity} >>  !Blank, <256
+    //!Blank
+    @Test
+    public void whenSourcedEntityIdIsBlank_thenDeleteEntityValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+        Set<ConstraintViolation<SourceRef>> violations;
 
+        sourceRef.setSourcedId("");
+        violations = validator.validate(sourceRef, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
+    //<256
+    @Test
+    public void whenSourcedIdExeeds_thenDeleteEntityValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setSourcedId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+    }
+
+
+    //SourcedEntityId {UserSourceReference} >>  !Blank, <256
+    //!Blank
+    @Test
+    public void whenSourcedEntityIdIsBlank_thenUserSourceReferenceValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+        Set<ConstraintViolation<SourceRef>> violations;
+
+        sourceRef.setSourcedId("");
+        violations = validator.validate(sourceRef, SourceRef.UserSourceReference.class);
+        assertEquals(1, violations.size());
+    }
+
+    //<256
+    @Test
+    public void whenSourcedIdExeeds_thenUserSourceReferenceValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setSourcedId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, SourceRef.UserSourceReference.class);
+        assertEquals(1, violations.size());
+
+    }
+
+
+    //Link {Default} >> URL<255
     //link <256
     @Test
     public void whenLinkExceeds_thenDefaultValidatorViolation() {
@@ -67,6 +141,33 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
         sourceRef.setLink("https://server.com/" + RandomStringUtils.random(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
+        assertEquals(1, violations.size());
+
+    }
+
+    //Link {DeleteEntity} >> URL<255
+    //link <256
+    @Test
+    public void whenLinkExceeds_thenDeleteEntityValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setLink("https://server.com/" + RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+
+    }
+
+
+    //Link {UserSourceReference} >> URL<255
+    //link <256
+    @Test
+    public void whenLinkExceeds_thenUserSourceReferenceValidatorViolation() {
+        SourceRef sourceRef = getValidEntity();
+
+        sourceRef.setLink("https://server.com/" + RandomStringUtils.random(256));
+        Set<ConstraintViolation<SourceRef>>
+                violations = validator.validate(sourceRef, SourceRef.UserSourceReference.class);
         assertEquals(1, violations.size());
 
     }

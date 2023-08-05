@@ -1,5 +1,6 @@
 package org.informiz.ctrl.citation;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
@@ -52,20 +53,24 @@ class CitationControllerTest {
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerReviewsCitation_thenSucceeds() throws Exception {
+    void whenAddValidReviewToCitation_thenSucceeds() throws Exception {
 
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
+        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
+        given(repo.loadByLocalId(1l)).willReturn(citation);
 
         mockMvc.perform(post("/citation/1/review/")
                         .secure(true).with(csrf())
                         .param("rating", "0.82")
+                        .param("reviewedEntityId", citation.get().getEntityId())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }
 
+
+    //Add Review No Rating
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerReviewsCitationNoRating_thenErrorMsg() throws Exception {
+    void whenAddReviewToCitationNoRating_thenErrorMsg() throws Exception {
 
         given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
 
@@ -76,7 +81,23 @@ class CitationControllerTest {
                 .andExpect(content().string(new StringContains("Please submit rating between 0.0 and 1.0")));
     }
 
+    //Add Comment Exceeds
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenReviewCommentExceeds_thenErrorMsg() throws Exception {
 
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
+
+        mockMvc.perform(post("/citation/1/review/")
+                        .secure(true).with(csrf())
+                        .param("rating", "0.82")
+                        .param("comment", RandomStringUtils.random(256))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new StringContains("Comment must be under 255 characters")));
+    }
+
+    //Add Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerReviewsCitation_thenForbidden() throws Exception {
@@ -91,6 +112,7 @@ class CitationControllerTest {
     }
 
 
+    //Edit Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerEditsReviewOfCitation_thenForbidden() throws Exception {
@@ -104,6 +126,7 @@ class CitationControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    //Edit Review OwnerId
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerEditsReviewOfCitation_succeedIfOwner() throws Exception {
@@ -112,6 +135,7 @@ class CitationControllerTest {
         Review review = getPopulatedReview(citation);
         citation.addReview(review);
         given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
 
         // Initially review owner-id not the same as authenticated user
         mockMvc.perform(post("/citation/1/review/edit/")
@@ -127,12 +151,64 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/edit/")
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .param("rating", "0.82")
                         .param("comment", "Changed Comment")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }
 
+    //Edit Review No Rating
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenEditReviewNoRating_thenErrorMsg() throws Exception {
+        //CitationBase citation = getPopulatedCitation(1L) //todo remove
+        //Review rev = ModelTestUtils.getPopulatedReview(chaincodeEntity, 1L);
+        //rev.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        //given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        CitationBase citation = getPopulatedCitation();
+        Review review = getPopulatedReview(citation);
+        citation.addReview(review);
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        mockMvc.perform(post("/citation/1/review/edit/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new StringContains("Please submit rating between 0.0 and 1.0")));
+    }
+
+
+    //Edit Review Exceeds 255
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenEditReviewExceeds255_thenErrorMsg() throws Exception {
+        //CitationBase citation = getPopulatedCitation(1L) //todo add review
+        //Review rev = ModelTestUtils.getPopulatedReview(chaincodeEntity, 1L);
+        //rev.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        //given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        CitationBase citation = getPopulatedCitation();
+        Review review = getPopulatedReview(citation);
+        citation.addReview(review);
+        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
+
+        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
+        mockMvc.perform(post("/citation/1/review/edit/")
+                        .secure(true).with(csrf())
+                        .param("ownerId", review.getOwnerId())
+                        .param("rating", "0.82")
+                        .param("comment", RandomStringUtils.random(256))
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new StringContains("Comment must be under 255 characters")));
+    }
+
+
+    //Delete No Id
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerDeletesReviewOfCitationNoId_thenErrorMessage() throws Exception {
@@ -152,7 +228,7 @@ class CitationControllerTest {
     }
 
 
-
+    //Delete Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerDeletesReviewOfCitation_succeedIfOwner() throws Exception {
@@ -175,11 +251,11 @@ class CitationControllerTest {
         mockMvc.perform(post("/citation/1/review/del/")
                         .secure(true).with(csrf())
                         .param("ownerId", review.getOwnerId())
+                        .param("reviewedEntityId", review.getReviewedEntityId())
                         .param("id", review.getId().toString())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
     }
-
 
 
     @NotNull
