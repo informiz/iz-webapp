@@ -3,6 +3,9 @@ package org.informiz.ctrl.entity;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.*;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
+import org.informiz.repo.reference.ReferenceRepository;
+import org.informiz.repo.review.ReviewRepository;
+import org.informiz.repo.src_ref.SourceRefRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,18 +13,30 @@ import org.springframework.validation.FieldError;
 
 import javax.annotation.Nullable;
 
-
+// TODO: refactor entity-class hierarchy
 public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
     public static final String REVIEW_ATTR = "review";
     public static final String REFERENCE_ATTR = "reference";
     public static final String SOURCE_ATTR = "source";
 
     protected final ChaincodeEntityRepo<T> entityRepo;
+
+    protected final ReviewRepository reviewRepo;
+
+    protected final ReferenceRepository referenceRepo;
+
+    protected final SourceRefRepository srcRefRepo;
+
     // TODO: chaincode DAO
 
 
-    public ChaincodeEntityController(ChaincodeEntityRepo<T> entityRepo) {
+    public ChaincodeEntityController(ChaincodeEntityRepo<T> entityRepo, ReviewRepository reviewRepo,
+                                     ReferenceRepository referenceRepo,
+                                     SourceRefRepository srcRefRepo) {
         this.entityRepo = entityRepo;
+        this.reviewRepo = reviewRepo;
+        this.srcRefRepo = srcRefRepo;
+        this.referenceRepo = referenceRepo;
     }
 
     protected String getRedirectToEditPage(Long id) { return null; }
@@ -88,9 +103,10 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         if (! result.hasErrors()) {
             String checker = authentication.getName();
             Review current = entity.getCheckerReview(checker, revId);
-            if (current != null && current.getId().equals(revId)) {
-                entity.removeReview(current);
-                entityRepo.save(entity);
+            if (current != null) {
+                if (entity.removeReview(current))
+                    reviewRepo.delete(current);
+                entityRepo.save(entity); // TODO: delete Review entity
             } // TODO: warn if no review or different id?
             return null;
         }
@@ -124,7 +140,8 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
             Reference toAdd = new Reference(reference);
 
             if (reference.getId() != null)
-                entity.removeReference(reference.getId(), authentication.getName());
+                if (entity.removeReference(reference.getId(), authentication.getName()))
+                    referenceRepo.delete(reference);
 
             entity.addReference(toAdd);
             entityRepo.save((T)entity);
@@ -157,7 +174,8 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
 
         if (! result.hasErrors()) {
             String owner = authentication.getName();
-            entity.removeReference(refId, owner);
+            if (entity.removeReference(refId, owner))
+                referenceRepo.deleteById(refId);
             entityRepo.save((T)entity);
             return null;
         }
@@ -182,7 +200,8 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
                 SourceRef toAdd = new SourceRef(srcRef);
 
                 if (srcRef.getId() != null)
-                    entity.removeSource(srcRef.getId(), authentication.getName());
+                    if (entity.removeSource(srcRef.getId(), authentication.getName()))
+                        srcRefRepo.delete(srcRef);
 
                 entity.addSource(toAdd);
                 entityRepo.save(entity);
@@ -209,7 +228,8 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         String owner = authentication.getName();
 
         if (! result.hasErrors()) {
-            entity.removeSource(srcRefId, owner);
+            if (entity.removeSource(srcRefId, owner))
+                srcRefRepo.deleteById(srcRefId);
             entityRepo.save(entity);
             return null;
         }

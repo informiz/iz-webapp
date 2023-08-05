@@ -9,6 +9,7 @@ import org.informiz.conf.SecurityConfig;
 import org.informiz.ctrl.checker.FactCheckerController;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
+import org.informiz.repo.review.ReviewRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,9 @@ public class FactCheckerControllerTest {
 
     @MockBean
     private FactCheckerRepository repo;
+
+    @MockBean
+    private ReviewRepository reviewRepo;
 
     @MockBean
     private SecurityConfig.ClientIdService googleOAuthService;

@@ -2,6 +2,7 @@ package org.informiz.ctrl.checker;
 
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.FactCheckerBase;
+import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -24,8 +25,8 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
     // TODO: chaincode DAO
 
     @Autowired
-    public FactCheckerController(FactCheckerRepository repository) {
-        super(repository);
+    public FactCheckerController(FactCheckerRepository repository, ReviewRepository reviewRepo) {
+        super(repository, reviewRepo, null, null);
     }
 
     @GetMapping(path = {"/", "/all"})

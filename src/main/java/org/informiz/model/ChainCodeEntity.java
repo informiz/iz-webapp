@@ -106,18 +106,22 @@ public abstract class ChainCodeEntity extends InformizEntity {
     }
 
     // TODO: check: safe for concurrent reviewing?
-    public void addReview(Review review) {
+    public boolean addReview(Review review) {
+        boolean added;
         synchronized (reviews) {
-            getReviews().add(review);
+            added = getReviews().add(review);
         }
         getScore();
+        return added;
     }
 
-    public void removeReview(Review review) {
+    public boolean removeReview(Review review) {
+        boolean removed;
         synchronized (reviews) {
-            getReviews().remove(review);
+            removed = getReviews().remove(review);
         }
         getScore();
+        return removed;
     }
 
     public Review getCheckerReview(@NotNull String fcid, Long revId) {

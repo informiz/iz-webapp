@@ -5,6 +5,7 @@ import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.InformizEntity;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
+import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,8 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     public static final String SOURCES_ATTR = "sources";
 
     @Autowired
-    public SourceController(SourceRepository repository) {
-        super(repository);
+    public SourceController(SourceRepository repository, ReviewRepository reviewRepo) {
+        super(repository, reviewRepo, null, null);
     }
 
     @GetMapping(path = {"/", "/all"})

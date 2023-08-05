@@ -1,21 +1,21 @@
 package org.informiz.ctrl.hypothesis;
 
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
+import org.informiz.repo.reference.ReferenceRepository;
+import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.informiz.repo.source.SourceRepository;
+import org.informiz.repo.src_ref.SourceRefRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +31,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     private final SourceRepository sourceRepo;
 
     @Autowired
-    public HypothesisController(HypothesisRepository repository, SourceRepository sourceRepo) {
-        super(repository);
+    public HypothesisController(HypothesisRepository repository, SourceRepository sourceRepo, ReviewRepository reviewRepo,
+                                ReferenceRepository refRepo, SourceRefRepository srcRefRepo) {
+        super(repository, reviewRepo, refRepo, srcRefRepo);
         this.sourceRepo = sourceRepo;
     }
 
