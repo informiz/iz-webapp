@@ -6,10 +6,8 @@ import org.informiz.model.CitationBase;
 import org.informiz.model.InformizEntity;
 import org.informiz.model.Review;
 import org.informiz.model.SourceRef;
-import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
-import org.informiz.repo.src_ref.SourceRefRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -36,9 +34,8 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     private final SourceRepository sourceRepo;
 
     @Autowired
-    public CitationController(CitationRepository repository, SourceRepository sourceRepo,
-                              ReviewRepository reviewRepo, SourceRefRepository srcRefRepo) {
-        super(repository, reviewRepo, null, srcRefRepo);
+    public CitationController(CitationRepository repository, SourceRepository sourceRepo) {
+        super(repository);
         this.sourceRepo = sourceRepo;
     }
 

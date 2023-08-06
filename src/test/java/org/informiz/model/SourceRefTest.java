@@ -5,9 +5,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
 import static org.informiz.model.ModelTestUtils.getPopulatedSrcReference;
+import static org.informiz.model.ModelTestUtils.getValidUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SourceRefTest extends IzEntityTestBase<SourceRef> {
@@ -58,21 +60,21 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     }
 
-    //SourcedEntityId {Default} >>  !Blank, <256
-    //!Blank
+    //SourcedEntityId {Default} >>  Blank, <256
+    //Blank
     @Test
-    public void whenSourcedEntityIdIsBlank_thenDefaultValidatorViolation() {
+    public void whenSourcedEntityIdIsBlank_thenDefaultValidatorSucceeds() {
         SourceRef sourceRef = getValidEntity();
         Set<ConstraintViolation<SourceRef>> violations;
 
         sourceRef.setSourcedId("");
         violations = validator.validate(sourceRef);
-        assertEquals(1, violations.size());
+        assertEquals(0, violations.size());
     }
 
     //<256
     @Test
-    public void whenSourcedIdExeeds_thenDefaultValidatorViolation() {
+    public void whenSourcedIdExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
 
         sourceRef.setSourcedId(RandomStringUtils.random(256));
@@ -135,10 +137,10 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     //Link {Default} >> URL<255
     //link <256
     @Test
-    public void whenLinkExceeds_thenDefaultValidatorViolation() {
+    public void whenLinkExceeds_thenDefaultValidatorViolation() throws UnsupportedEncodingException {
         SourceRef sourceRef = getValidEntity();
 
-        sourceRef.setLink("https://server.com/" + RandomStringUtils.random(256));
+        sourceRef.setLink(getValidUrl(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef);
         assertEquals(1, violations.size());
@@ -148,10 +150,10 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     //Link {DeleteEntity} >> URL<255
     //link <256
     @Test
-    public void whenLinkExceeds_thenDeleteEntityValidatorViolation() {
+    public void whenLinkExceeds_thenDeleteEntityValidatorViolation() throws UnsupportedEncodingException {
         SourceRef sourceRef = getValidEntity();
 
-        sourceRef.setLink("https://server.com/" + RandomStringUtils.random(256));
+        sourceRef.setLink(getValidUrl(256));
         Set<ConstraintViolation<SourceRef>>
                 violations = validator.validate(sourceRef, InformizEntity.DeleteEntity.class);
         assertEquals(1, violations.size());

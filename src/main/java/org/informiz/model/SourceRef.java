@@ -43,8 +43,9 @@ public final class SourceRef extends InformizEntity implements Serializable {
     private String srcEntityId;
 
     // TODO: ------------------------- need to change in DB from id to entity-id -------------------------
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's sources, then deletes the source-ref
     @Column(name = "sourced_entity_id")
-    @NotBlank(groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
+    @NotBlank(groups = { DeleteEntity.class, UserSourceReference.class })
     @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
     private String sourcedId;
 

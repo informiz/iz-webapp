@@ -54,16 +54,16 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         assertEquals(1, violations.size());
     }
 
-    //FactCheckedEntityId  >>  !Blank, =<255
-    //!Blank
+    //FactCheckedEntityId  >>  Blank, =<255
+    //Blank
     @Test
-    public void whenFactCheckedEntityIdNotBlank_thenDefaultValidatorViolation() {
+    public void whenFactCheckedEntityIdIsBlank_thenDefaultValidatorSucceeds() {
         Reference reference = getValidEntity();
 
         reference.setFactCheckedEntityId("");
         Set<ConstraintViolation<Reference>>
                 violations = validator.validate(reference);
-        assertEquals(1, violations.size());
+        assertEquals(0, violations.size());
     }
 
     //=<255

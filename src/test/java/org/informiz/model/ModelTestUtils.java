@@ -1,8 +1,12 @@
 package org.informiz.model;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class ModelTestUtils {
 
@@ -106,5 +110,12 @@ public class ModelTestUtils {
         izEntity.setOwnerId("test");
         izEntity.setCreatedTs(12345l);
         izEntity.setUpdatedTs(12345l);
+    }
+
+
+    public static String getValidUrl(int length) throws UnsupportedEncodingException {
+        return String.format("https://www.server.com/%s",
+                URLEncoder.encode(RandomStringUtils.random(length),
+                        StandardCharsets.UTF_8.toString()));
     }
 }

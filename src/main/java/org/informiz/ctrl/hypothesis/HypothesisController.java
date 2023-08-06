@@ -3,11 +3,8 @@ package org.informiz.ctrl.hypothesis;
 import jakarta.validation.Valid;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
-import org.informiz.repo.reference.ReferenceRepository;
-import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.informiz.repo.source.SourceRepository;
-import org.informiz.repo.src_ref.SourceRefRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -31,9 +28,8 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     private final SourceRepository sourceRepo;
 
     @Autowired
-    public HypothesisController(HypothesisRepository repository, SourceRepository sourceRepo, ReviewRepository reviewRepo,
-                                ReferenceRepository refRepo, SourceRefRepository srcRefRepo) {
-        super(repository, reviewRepo, refRepo, srcRefRepo);
+    public HypothesisController(HypothesisRepository repository, SourceRepository sourceRepo) {
+        super(repository);
         this.sourceRepo = sourceRepo;
     }
 
