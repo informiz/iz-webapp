@@ -33,6 +33,7 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static org.informiz.auth.CookieUtils.*;
+
 @RestController
 @RequestMapping(path = AccessRestController.PREFIX)
 public class AccessRestController {
@@ -65,21 +66,26 @@ public class AccessRestController {
     /**
      * Log-in a user. Receive a Google ID-token from the browser and grant access accordingly.
      * This authorization process is protected by CSRF and nonce tokens.
-     * @hidden TODO: Will we gain security by using the auth-code flow? Or use redirect instead of popup (no browser but also no CSRF)?
-     * @hidden https://developers.google.com/identity/protocols/oauth2/web-server
      *
-     * @param referer the page that invoked login
-     * @param nonce the expected nonce value
-     * @param response HTTP response to set cookies on
-     * @param credential Google ID-token
-     * @throws IOException
+     * @param referer      the page that invoked login
+     * @param nonce        the expected nonce value
+     * @param gCsrf        the expected Google CSRF token value
+     * @param response     current HTTP response
+     * @param request      current HTTP request
+     * @param credential   Google ID-token
+     * @param g_csrf_token Google CSRF token
+     * @throws IOException in case of unexpected error while redirecting
      */
-    @PostMapping(path = LOGIN_PATH, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}) //
+    @PostMapping(path = LOGIN_PATH, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public void login(@RequestHeader("referer") Optional<String> referer,
-                        @CookieValue(name = NONCE_COOKIE_NAME) String nonce,
-                        HttpServletResponse response,
-                        HttpServletRequest request,
-                        String credential) throws IOException {
+                      @CookieValue(name = NONCE_COOKIE_NAME) String nonce,
+                      @CookieValue(name = GOOGLE_CSRF_COOKIE_NAME) String gCsrf,
+                      HttpServletResponse response,
+                      HttpServletRequest request,
+                      String credential,
+                      String g_csrf_token) throws IOException {
+
+        Assert.isTrue(Objects.equals(g_csrf_token, gCsrf), "Wrong CSRF value");
         try {
             GoogleIdToken.Payload idToken = getIdToken(credential, nonce);
 
@@ -97,7 +103,7 @@ public class AccessRestController {
             attributes.put("name", entityId);
 
             OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities, attributes, "name"),
-                authorities, clientId);
+                    authorities, clientId);
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -110,18 +116,18 @@ public class AccessRestController {
             // TODO: revoke other cookies? reset g_state cookie?
             CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
         }
-        String path  = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
+        String path = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
         response.sendRedirect(path);
     }
 
     private GoogleIdToken.Payload getIdToken(final String credential, @NotBlank String nonce) throws GeneralSecurityException, IOException {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(), // TODO: right transport? No client certificate
+                GoogleNetHttpTransport.newTrustedTransport(), // TODO: use client certificate from truststore for biTLS?
                 JacksonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(clientId)).build();
         GoogleIdToken.Payload idToken = verifier.verify(credential).getPayload();
         Assert.isTrue(Strings.isNotEmpty(idToken.getNonce()), "Missing nonce from ID-token");
-        Assert.isTrue(idToken.getNonce().equals(nonce), "Wrong nonce value");
+        Assert.isTrue(Objects.equals(idToken.getNonce(), nonce), "Wrong nonce value");
 
         return idToken;
     }
