@@ -61,15 +61,15 @@ class ReviewTest extends IzEntityTestBase<Review> {
         Review review = ModelTestUtils.getPopulatedReview();
         Set<ConstraintViolation<Review>> violations;
 
-        // not null
+        // allows null
         review.setReviewedEntityId(null);
         violations = validator.validate(review);
-        assertEquals(1, violations.size());
+        assertEquals(0, violations.size());
 
-        // not empty
+        // allows empty
         review.setReviewedEntityId("");
         violations = validator.validate(review);
-        assertEquals(1, violations.size());
+        assertEquals(0, violations.size());
 
         // max 255 characters
         review.setReviewedEntityId(RandomStringUtils.random(256));

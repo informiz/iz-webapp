@@ -7,8 +7,6 @@ import org.informiz.model.InformiBase;
 import org.informiz.model.InformizEntity;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
-import org.informiz.repo.reference.ReferenceRepository;
-import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.informi.InformiRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +34,8 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     public static final String INFORMIZ_ATTR = "informiz";
 
     @Autowired
-    public InformiController(InformiRepository repository, ReviewRepository reviewRepo, ReferenceRepository refRepo) {
-        super(repository, reviewRepo, refRepo, null);
+    public InformiController(InformiRepository repository) {
+        super(repository);
     }
 
     @GetMapping(path = {"/", "/all"})

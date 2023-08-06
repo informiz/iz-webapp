@@ -210,7 +210,7 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @OneToMany(cascade = CascadeType.ALL,
             orphanRemoval=true,
             fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_sourced_entity_id", referencedColumnName = "entity_id")
+    @JoinColumn(name = "sourced_entity_id", referencedColumnName = "entity_id")
     @JsonView(Utils.Views.EntityData.class)
     protected Set<SourceRef> sources = new HashSet<>();
 

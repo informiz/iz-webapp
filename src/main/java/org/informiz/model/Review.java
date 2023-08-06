@@ -39,9 +39,10 @@ public final class Review extends InformizEntity implements Serializable {
     private Float rating;
 
 
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's reviews, then deletes the review
     @Column(name = "reviewed_entity_id")
-    @NotBlank(groups = { UserReview.class, Default.class, DeleteEntity.class })
-    @Size(max = 255, groups = { UserReview.class, Default.class, DeleteEntity.class })
+    @NotBlank(groups = { UserReview.class, DeleteEntity.class })
+    @Size(max = 255, groups = { UserReview.class, DeleteEntity.class, Default.class })
     private String reviewedEntityId;
 
     @Column(name = "comment")

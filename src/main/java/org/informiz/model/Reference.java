@@ -56,8 +56,9 @@ public final class Reference extends InformizEntity implements Serializable {
     }
 
 
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's references, then deletes the reference
     @Column(name = "fact_checked_entity_id")
-    @NotBlank(groups = { DeleteEntity.class, UserReference.class, Default.class })
+    @NotBlank(groups = { DeleteEntity.class, UserReference.class })
     @Size(max = 255, groups = { DeleteEntity.class, UserReference.class, Default.class })
     private String factCheckedEntityId;
 

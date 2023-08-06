@@ -10,10 +10,7 @@ import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
 import org.informiz.model.Review;
 import org.informiz.repo.citation.CitationRepository;
-import org.informiz.repo.reference.ReferenceRepository;
-import org.informiz.repo.review.ReviewRepository;
 import org.informiz.repo.source.SourceRepository;
-import org.informiz.repo.src_ref.SourceRefRepository;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,15 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @WebMvcTest(CitationController.class)
 class CitationControllerTest {
-    @MockBean
-    private ReviewRepository reviewRepo;
-
-    @MockBean
-    private ReferenceRepository referenceRepo;
-
-    @MockBean
-    private SourceRefRepository srcRefRepo;
-
     @MockBean
     private CitationRepository repo;
 
