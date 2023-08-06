@@ -29,10 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
-import static org.informiz.auth.InformizGrantedAuthority.ROLE_CHECKER;
-import static org.informiz.auth.InformizGrantedAuthority.ROLE_VIEWER;
+import static org.informiz.auth.InformizGrantedAuthority.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -62,7 +62,43 @@ class CitationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+
+
+    //AddCitation (Viewer)
     @Test
+    @WithCustomAuth(role = {ROLE_VIEWER})
+    void whenViewerViewsAddCitation_thenForbidden() throws Exception {
+
+
+        mockMvc.perform(get("/citation/add")
+                        .secure(true))
+                .andExpect(status().isForbidden());
+    }
+
+    //AddCitation (Checker)
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerViewsAddCitation_thenForbidden() throws Exception {
+
+
+        mockMvc.perform(get("/citation/add")
+                        .secure(true))
+                .andExpect(status().isForbidden());
+    }
+
+    //AddCitation (Member)
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenMemberViewsAddCitation_thenAllowed() throws Exception {
+
+
+        mockMvc.perform(get("/citation/add")
+                        .secure(true))
+                .andExpect(status().isOk());
+    }
+
+    //Add a valid Review
+    // @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenAddValidReviewToCitation_thenSucceeds() throws Exception {
 
@@ -136,6 +172,10 @@ class CitationControllerTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isForbidden());
     }
+
+
+
+
 
     //Edit Review OwnerId
     @Test
