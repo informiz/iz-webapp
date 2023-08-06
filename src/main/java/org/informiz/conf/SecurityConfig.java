@@ -32,8 +32,7 @@ import org.springframework.web.util.WebUtils;
 import java.util.List;
 import java.util.UUID;
 
-import static org.informiz.auth.CookieUtils.NONCE_COOKIE_NAME;
-import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
+import static org.informiz.auth.CookieUtils.*;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 
@@ -69,6 +68,7 @@ public class SecurityConfig {
                 .anonymous(configurer ->
                         configurer.principal("viewer").authorities(minAuth))
                 .csrf(configurer -> configurer
+                        .ignoringRequestMatchers(antMatcher("/oauth/login")) // csrf token sent in Google cookie/param
                         .csrfTokenRepository(repo))
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(antMatcher("/oauth/login"),
@@ -87,9 +87,8 @@ public class SecurityConfig {
     private static CookieCsrfTokenRepository csrfTokenRepo() {
         CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
         // repo.setCookieDomain(cookieDomain); // TODO: add spring property
-        repo.setParameterName("iz_csrf");
-        repo.setCookieName("IZ_CSRF_TOKEN");
-        repo.setParameterName("IZ_CSRF_TOKEN");
+        repo.setCookieName(CSRF_COOKIE_NAME);
+        repo.setParameterName(CSRF_COOKIE_NAME);
         repo.setSecure(true);
         repo.setCookieHttpOnly(true);
         return repo;
