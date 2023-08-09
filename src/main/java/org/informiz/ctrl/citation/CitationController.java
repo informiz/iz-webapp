@@ -38,11 +38,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         super(repository);
         this.sourceRepo = sourceRepo;
     }
-
-    @GetMapping(path = {"/", "/all"})
-    public String getAllCitations(Model model) {
-        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
-        return String.format("%s/all-citations.html", PREFIX);
+    @GetMapping("/view/{citationId}")
+    public String viewCitation(@PathVariable("citationId") @Valid Long id, Model model) {
+        CitationBase citation = entityRepo.loadByLocalId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+        model.addAttribute(CITATION_ATTR, citation);
+        return String.format("%s/view-citation.html", PREFIX);
     }
 
     @GetMapping("/add")
@@ -65,25 +66,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     }
 
-    @PostMapping("/delete/{citationId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
-        CitationBase citation = entityRepo.findById(Long.valueOf(id))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
-        // TODO: set inactive
-        entityRepo.delete(citation);
-        return String.format("redirect:%s/all", PREFIX);
-    }
-
-    @GetMapping("/view/{citationId}")
-    public String viewCitation(@PathVariable("citationId") @Valid Long id, Model model) {
-        CitationBase citation = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
-        model.addAttribute(CITATION_ATTR, citation);
-        return String.format("%s/view-citation.html", PREFIX);
-    }
-
     @GetMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     public String getCitation(@PathVariable("citationId") Long id, Model model) {
@@ -93,6 +75,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         model.addAttribute(REVIEW_ATTR, new Review());
         model.addAttribute(SOURCE_ATTR, new SourceRef());
         return EDIT_PAGE_TEMPLATE;
+    }
+
+    @GetMapping(path = {"/", "/all"})
+    public String getAllCitations(Model model) {
+        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
+        return String.format("%s/all-citations.html", PREFIX);
     }
 
     @PostMapping("/details/{citationId}")
@@ -111,6 +99,19 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         entityRepo.save(current);
         return getRedirectToEditPage(current.getLocalId());
     }
+
+    @PostMapping("/delete/{citationId}")
+    @Secured("ROLE_MEMBER")
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
+        CitationBase citation = entityRepo.findById(Long.valueOf(id))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+        // TODO: set inactive
+        entityRepo.delete(citation);
+        return String.format("redirect:%s/all", PREFIX);
+    }
+
+
 
     @PostMapping("/{citationId}/review/")
     @Secured("ROLE_CHECKER")

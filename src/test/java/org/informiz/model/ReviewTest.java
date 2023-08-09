@@ -34,7 +34,7 @@ class ReviewTest extends IzEntityTestBase<Review> {
         assertEquals(1, violations.size());
     }
 
-    //Positive
+    //Positive {DeleteEntity}
     @Test
     public void whenReviewIdIsNegative_thenDeleteEntityValidatorViolation() {
         Review review = getValidEntity();
