@@ -37,6 +37,10 @@ spec:
           value: <PROFILE>
         - name: iz.channel.name
           value: <CHANNEL_NAME>
+        - name: iz.channel.id
+          value: <CHANNEL_NAME>.informiz.org
+        - name: iz.channel.media.folder
+          value: <CHANNEL_NAME>.informiz.org
         - name: iz.webapp.token.issuer
           value: <CHANNEL_NAME>
         - name: iz.webapp.token.audience

@@ -50,6 +50,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/upload-media.html", PREFIX);
     }
 
+    // TODO: improve user-experience (upload inside add-informi form)
     //@PostMapping("/upload")
     @RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Secured("ROLE_MEMBER")
