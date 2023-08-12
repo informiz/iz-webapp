@@ -56,15 +56,16 @@ public final class Reference extends InformizEntity implements Serializable {
     }
 
 
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's references, then deletes the reference
     @Column(name = "fact_checked_entity_id")
-    @NotBlank()
-    @Size(max = 255)
+    @NotBlank(groups = { DeleteEntity.class, UserReference.class })
+    @Size(max = 255, groups = { DeleteEntity.class, UserReference.class, Default.class })
     private String factCheckedEntityId;
 
     // The entity-id of the claim/citation on the ledger. TODO: validation??
     @Column(name = "ref_entity_id")
-    @NotBlank(groups = { UserReference.class, Default.class })
-    @Size(max = 255, groups = { UserReference.class, Default.class })
+    @NotBlank(groups = { DeleteEntity.class, UserReference.class, Default.class })
+    @Size(max = 255, groups = { DeleteEntity.class, UserReference.class, Default.class })
     private String refEntityId; // either hypothesis or citation
 
     @Enumerated(EnumType.ORDINAL)
@@ -143,7 +144,7 @@ public final class Reference extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", factCheckedEntityId, refEntityId, creatorId).hashCode();
+        return String.format("%s-%s-%s", factCheckedEntityId, refEntityId, ownerId).hashCode();
     }
 
     @Override
@@ -155,7 +156,13 @@ public final class Reference extends InformizEntity implements Serializable {
         // considered equal if same entity, claim/citation and creator
         return (this.factCheckedEntityId.equals(other.factCheckedEntityId) &&
                 this.refEntityId.equals(other.refEntityId) &&
-                // creatorId is only set when persisting the reference to db.
-                ( (this.creatorId == null && other.creatorId == null) ||
-                        this.creatorId.equals(other.creatorId)));
-    }}
+                // ownerId is only set when persisting the reference to db.
+                ( (this.ownerId == null && other.ownerId == null) ||
+                        this.ownerId.equals(other.ownerId)));
+    }
+
+    public static Entailment[] entailmentTypes() {
+        return Entailment.values();
+    }
+
+}

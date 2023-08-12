@@ -1,10 +1,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <!-- TODO: can define thymeleaf "macro" to check if errors come from this form?? -->
-    <div th:fragment="reviewForm(action_path, cur_review)">
+    <div th:fragment="reviewForm(entityId, action_path, cur_review)">
         <form th:id="'rev_form_' + ${cur_review.getId()}" th:action="${action_path}" th:object="${review}" method="post">
             <div class="form-row">
                 <div class="col">
+                    <input type="text" class="d-none" name="reviewedEntityId" th:value="${entityId}" readonly/>
                     <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
                     <input type="text" class="d-none" name="id" th:value="${cur_review.getId()}" readonly>
                 </div>
@@ -34,13 +35,23 @@
             </div>
             <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isReviewFormError(cur_review, review)}">
                 <!-- Display form if submission failed with errors -->
-                <script>
-                    loadCompleteCallbacks.push(function() {
-                        const modal_selector = "#modal_rev_" + ("[[${cur_review.getId()}]]" ? "[[${cur_review.getId()}]]" : "0");
-                        // trigger containing modal to display form
-                        $(modal_selector).modal('show');
-                    });
-                </script>
+                <th:block th:if="${@tlUtils.isAddReviewError(cur_review, review)}">
+                    <script>
+                        loadCompleteCallbacks.push(function() {
+                            // trigger containing modal to display form
+                            $("#modal_rev_0").modal('show');
+                        });
+                    </script>
+                </th:block>
+                <th:block th:unless="${@tlUtils.isAddReviewError(cur_review, review)}">
+                    <script>
+                        loadCompleteCallbacks.push(function() {
+                            const modal_selector = "#modal_rev_" + "[[${cur_review.getId()}]]";
+                            // trigger containing modal to display form
+                            $(modal_selector).modal('show');
+                        });
+                    </script>
+                </th:block>
             </th:block>
         </form>
     </div>

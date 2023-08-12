@@ -1,26 +1,28 @@
 package org.informiz.ctrl.entity;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.informiz.auth.AuthUtils;
 import org.informiz.model.*;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
-
+// TODO: refactor entity-class hierarchy
 public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
     public static final String REVIEW_ATTR = "review";
     public static final String REFERENCE_ATTR = "reference";
     public static final String SOURCE_ATTR = "source";
 
     protected final ChaincodeEntityRepo<T> entityRepo;
+
     // TODO: chaincode DAO
 
+    private static final Logger logger = LoggerFactory.getLogger(ChaincodeEntityController.class);
 
     public ChaincodeEntityController(ChaincodeEntityRepo<T> entityRepo) {
         this.entityRepo = entityRepo;
@@ -30,7 +32,6 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
     protected String getEditPageTemplate() { return null; }
 
     protected void modelForError(Model model, T current) {
-        model.addAttribute(JsonView.class.getName(), Utils.Views.EntityData.class);
         if (! model.containsAttribute(REVIEW_ATTR)) model.addAttribute(REVIEW_ATTR, new Review());
     };
 
@@ -61,7 +62,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         if (! result.hasErrors()) {
             String checker = AuthUtils.getUserEntityId(authentication.getAuthorities());
 
-            Review current = entity.getCheckerReview(checker);
+            Review current = entity.getCheckerReview(checker, review.getId());
             if (current != null) {
                 current.setRating(review.getRating());
                 current.setComment(review.getComment());
@@ -90,8 +91,8 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
 
         if (! result.hasErrors()) {
             String checker = authentication.getName();
-            Review current = entity.getCheckerReview(checker);
-            if (current != null && current.getId().equals(revId)) {
+            Review current = entity.getCheckerReview(checker, revId);
+            if (current != null) {
                 entity.removeReview(current);
                 entityRepo.save(entity);
             } // TODO: warn if no review or different id?
@@ -124,7 +125,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         }
 
         if (! result.hasErrors()) {
-            Reference toAdd = new Reference(reference);
+            Reference toAdd = new Reference(reference); // TODO: update ref if exists
 
             if (reference.getId() != null)
                 entity.removeReference(reference.getId(), authentication.getName());
@@ -182,7 +183,7 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
 
         if (! result.hasErrors()) {
             try {
-                SourceRef toAdd = new SourceRef(srcRef);
+                SourceRef toAdd = new SourceRef(srcRef); // TODO: update if exists
 
                 if (srcRef.getId() != null)
                     entity.removeSource(srcRef.getId(), authentication.getName());

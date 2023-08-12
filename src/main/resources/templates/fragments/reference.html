@@ -22,9 +22,9 @@
             <select name="entailment" th:value="${ref.entailment}" class="form-control" th:id="'entailment' + ${ref.id}"
                     th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                 <option value=""> -- </option>
-                <option th:each="entailmentOpt : ${T(org.informiz.model.Reference.Entailment).values()}"
+                <option th:each="entailmentOpt : ${ref.entailmentTypes()}"
                         th:value="${entailmentOpt}" th:text="${entailmentOpt.getDisplayValue()}"
-                        th:selected="${entailmentOpt.equals(ref.entailment)}"></option>
+                        th:selected="${entailmentOpt.getDisplayValue().equals(ref.entailment?.getDisplayValue())}"></option>
             </select>
             <div th:if="${#fields.hasErrors('entailment') && @tlUtils.isRefFormError(ref, reference)}">
                 <span th:errors="*{entailment}" class="text-danger"></span>
@@ -78,7 +78,7 @@
             <script>
                 loadCompleteCallbacks.push(function() {
                     // trigger containing modal to display form
-                    const modal_selector = "#modal_ref_" + "[[${reference.getId()}]]";
+                    const modal_selector = "#modal_ref_" + "[[${cur_ref.getId()}]]";
                     $(modal_selector).modal('show');
                 });
             </script>
@@ -94,7 +94,8 @@
                 <input name="reference-select" class="form-control refAutoSelect"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                        placeholder="Start typing to search..." >
-                <input type="text" class="d-none" name="refEntityId" th:value="${ref.getRefEntityId()}">
+                <input type="text" class="d-none" name="refEntityId" th:value="${ref.getRefEntityId()}" readonly>
+                <input type="text" class="d-none" name="ownerId" th:value="${#authentication.principal.name}" readonly>
                 <input type="text" class="d-none" name="factCheckedEntityId" th:value="${entityId}" readonly>
                 <span th:if="${#fields.hasErrors('refEntityId') && @tlUtils.isAddRefFormError(ref, reference) }"
                       th:errors="*{refEntityId}" class="text-danger"></span>

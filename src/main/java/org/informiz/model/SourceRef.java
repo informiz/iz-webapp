@@ -39,17 +39,18 @@ public final class SourceRef extends InformizEntity implements Serializable {
     }
 
     @Column(name = "src_entity_id")
-    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
     private String srcEntityId;
 
     // TODO: ------------------------- need to change in DB from id to entity-id -------------------------
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's sources, then deletes the source-ref
     @Column(name = "sourced_entity_id")
-    @NotBlank(groups = { UserSourceReference.class, Default.class })
-    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
+    @NotBlank(groups = { DeleteEntity.class, UserSourceReference.class })
+    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
     private String sourcedId;
 
-    @URL(groups = { UserSourceReference.class, Default.class })
-    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
+    @URL(groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
     private String link;
 
     @Size(max = 255, groups = { UserSourceReference.class, Default.class })
@@ -102,7 +103,7 @@ public final class SourceRef extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s-%s", getSrcEntityId(), srcEntityId, link).hashCode();
+        return String.format("%s-%s-%s", getOwnerId(), sourcedId, srcEntityId, link).hashCode();
     }
 
     @Override

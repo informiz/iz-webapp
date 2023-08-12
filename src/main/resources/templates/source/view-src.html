@@ -14,6 +14,6 @@
             <b>Reliability:</b> <span th:text="@{ {value}, (value=*{score.reliability})}"/>
             <b>Confidence:</b> <span th:text="@{ {value}(value=*{score.confidence})}"/>
         </span>
-        <div th:replace="~{fragments/review-list :: reviewList(${source.reviews}, '')}"></div>
+        <div th:replace="~{fragments/review-list :: reviewList(${source.entityId}, ${source.reviews}, '')}"></div>
     </div>
 </html>

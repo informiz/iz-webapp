@@ -9,9 +9,6 @@ import java.util.UUID;
 @Service
 public class Utils {
 
-    @Value("${iz.channel.name}")
-    private String channelName;
-
     private static String CHANNEL_NAME;
 
     @Value("${iz.channel.name}")

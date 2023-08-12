@@ -13,6 +13,6 @@
 
         <div th:replace="~{fragments/ref-list :: referenceList(${hypothesis.entityId}, ${hypothesis.references}, '')}"></div>
 
-        <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.reviews}, '')}"></div>
+        <div th:replace="~{fragments/review-list :: reviewList(${hypothesis.entityId}, ${hypothesis.reviews}, '')}"></div>
     </div>
 </html>

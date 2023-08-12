@@ -39,13 +39,14 @@ public final class Review extends InformizEntity implements Serializable {
     private Float rating;
 
 
+    // TODO: Allow null in db - Hibernate sets to null on remove from parent's reviews, then deletes the review
     @Column(name = "reviewed_entity_id")
-    @NotBlank
-    @Size(max = 255)
+    @NotBlank(groups = { UserReview.class, DeleteEntity.class })
+    @Size(max = 255, groups = { UserReview.class, DeleteEntity.class, Default.class })
     private String reviewedEntityId;
 
     @Column(name = "comment")
-    @Size(max = 255)
+    @Size(max = 255, groups = { UserReview.class, Default.class }, message = "Comment must be under 255 characters")
     private String comment;
 
     public static Review create() { return new Review(); }
@@ -84,14 +85,14 @@ public final class Review extends InformizEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return String.format("%s-%s", creatorId, reviewedEntityId).hashCode();
+        return String.format("%s-%s", ownerId, reviewedEntityId).hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null || ! (obj instanceof Review)) return false;
         Review other = (Review) obj;
-        return (this.creatorId.equalsIgnoreCase(other.creatorId) &&
+        return (this.ownerId.equalsIgnoreCase(other.ownerId) &&
                 this.reviewedEntityId.equals(other.reviewedEntityId));
     }
 }

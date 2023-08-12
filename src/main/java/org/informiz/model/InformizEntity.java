@@ -39,7 +39,7 @@ public abstract class InformizEntity implements Serializable {
     @Column(name = "owner_entity_id", nullable = false)
     @NotBlank(message = "Owner ID is required", groups = { DeleteEntity.class, Default.class })
     @Size(max = 255, groups = { DeleteEntity.class, Default.class })
-    protected String ownerId;
+    protected String ownerId;//todo required also in user-input validation groups
 
     // Creation time, as UTC timestamp in milliseconds
     @Column(name = "created", nullable = false, updatable = false)

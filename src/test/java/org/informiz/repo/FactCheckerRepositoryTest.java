@@ -1,6 +1,5 @@
 package org.informiz.repo;
 
-import com.google.api.client.util.Lists;
 import org.informiz.WithCustomAuth;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.model.ModelTestUtils;
@@ -16,6 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_MEMBER;
 import static org.informiz.model.Score.CONFIDENCE_BOOST;
@@ -83,7 +84,8 @@ public class FactCheckerRepositoryTest {
     public void whenFindAll_thenReturnCheckersWithReviews() {
         Iterable<FactCheckerBase> checkers = factCheckerRepo.findAll();
 
-        List<FactCheckerBase> asList =  Lists.newArrayList(checkers);
+        List<FactCheckerBase> asList =  StreamSupport.stream(checkers.spliterator(), false)
+                .collect(Collectors.toList());
 
         assertEquals(1, asList.size());
         validateChuck(asList.get(0));

@@ -16,7 +16,6 @@ import java.util.Set;
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name= HypothesisBase.CLAIM_PREVIEW,
-                includeAllAttributes=true,
                 attributeNodes={
                         @NamedAttributeNode("reviews"),
                         @NamedAttributeNode("score")
@@ -24,7 +23,6 @@ import java.util.Set;
         ),
         @NamedEntityGraph(
                 name= HypothesisBase.CLAIM_DATA,
-                includeAllAttributes=true,
                 attributeNodes={
                         @NamedAttributeNode("reviews"),
                         @NamedAttributeNode("score"),

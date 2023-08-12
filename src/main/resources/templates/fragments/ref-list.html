@@ -82,6 +82,8 @@
                         <td>
                             <form th:action="@{${refsUrl}+'/ref/del/'}" th:object="${cur_ref}" method="post">
                                 <!-- TODO: Button styling does not work -->
+                                <input type="text" class="d-none" name="refEntityId" th:value="${cur_ref.getRefEntityId()}" readonly>
+                                <input type="text" class="d-none" name="factCheckedEntityId" th:value="${cur_ref.getFactCheckedEntityId()}" readonly>
                                 <input type="text" class="d-none" name="ownerId" th:value="${cur_ref.ownerId}" readonly/>
                                 <input type="text" class="d-none" name="id" th:value="${cur_ref.id}" readonly/>
                                 <input type="submit" value="X"

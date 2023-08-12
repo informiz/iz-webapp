@@ -14,8 +14,10 @@ import org.apache.commons.io.FileUtils;
 import org.hyperledger.fabric.gateway.Identity;
 import org.hyperledger.fabric.gateway.Wallet;
 import org.informiz.repo.CryptoUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -32,6 +34,7 @@ import java.util.*;
 
 import static org.informiz.auth.InformizGrantedAuthority.*;
 
+@Service
 public class AuthUtils {
 
     static RoleHierarchy roleHierarchy = InformizGrantedAuthority.roleHierarchy();
@@ -92,11 +95,11 @@ public class AuthUtils {
         authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId));
 
         // TODO: get current channel name
-        if (isChannelMember(email, userWallet, channelId)) {
+        if (isChannelMember(email, userWallet, CHANNEL_ID)) {
             authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId));
         }
 
-        if (isChannelAdmin(email, userWallet, channelId)) {
+        if (isChannelAdmin(email, userWallet, CHANNEL_ID)) {
             authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId));
         }
 
@@ -138,7 +141,25 @@ public class AuthUtils {
     private static final String keyId = "beta-channel";
     private static final String izBucket = "informiz";
     private static final String idsFolder = "identities";
-    private static final String channelId = "beta-channel.informiz.org";
+
+    // Used for checking identities for memberships in channel
+    private static String CHANNEL_ID;
+
+    @Value("${iz.channel.id}")
+    public void setChannelName(String cid){
+        // workaround for assigning property-value to static field
+        AuthUtils.CHANNEL_ID = cid;
+    }
+
+    // Used for uploading media to channels
+    private static String CHANNEL_MEDIA_FOLDER;
+
+    @Value("${iz.channel.media.folder}")
+    public void setChannelMediaFolder(String folder){
+        // workaround for assigning property-value to static field
+        AuthUtils.CHANNEL_MEDIA_FOLDER = folder;
+    }
+
     private static final String checkersChannelId = "checkers.informiz.org";
 
     private static final String certFilename = "cert.pem";
@@ -151,7 +172,7 @@ public class AuthUtils {
     private static final Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 
     public static String uploadMedia(InputStream inputStream, String filename) throws IOException {
-        String path = String.format("%s/%s/%s", mediaFolder, channelId, filename);
+        String path = String.format("%s/%s/%s", mediaFolder, CHANNEL_MEDIA_FOLDER, filename);
         BlobId blobId = BlobId.of(mediaBucket, path);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build(); // TODO: content-type? MD5?
         Blob current = storage.get(blobId);
@@ -187,7 +208,7 @@ public class AuthUtils {
             byte[] bytes = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
 
             BlobId certBlobId = BlobId.of(izBucket,
-                    String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, channelId, filename));
+                    String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, CHANNEL_ID, filename));
             BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
             storage.create(blobInfo, bytes);
         } catch (IOException e) {
@@ -203,11 +224,11 @@ public class AuthUtils {
 
         // TODO: check for admin identity
         blobs = storage.list(izBucket,
-                Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, channelId)),
+                Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, CHANNEL_ID)),
                 Storage.BlobListOption.pageSize(1));
 
         if (blobs.getValues().iterator().hasNext()) {
-            return getWalletForIdentity(userEntityId, "member", channelId);
+            return getWalletForIdentity(userEntityId, "member", CHANNEL_ID);
         } else {
             // All fact-checkers should have crypto-material for checker identity
             return getWalletForIdentity(userEntityId, "member", checkersChannelId);
@@ -228,7 +249,7 @@ public class AuthUtils {
         PrivateKey key = CryptoUtils.getPKCS8Key(keyContent.toString(StandardCharsets.UTF_8), CryptoUtils.ALGORITHM);
 
         // TODO: same MSP for all organizations?
-        return CryptoUtils.setUpWallet(String.format("%s:%s:%s", userEntityId, role, channelId),
+        return CryptoUtils.setUpWallet(String.format("%s:%s:%s", userEntityId, role, channel),
                 CryptoUtils.ORG_1_MSP, cert, key);
     }
 

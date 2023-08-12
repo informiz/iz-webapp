@@ -7,17 +7,20 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Set;
-import  static org.informiz.model.InformizEntity.*;
+
+import static org.informiz.model.InformizEntity.DeleteEntity;
+import static org.informiz.model.InformizEntity.PostInsertDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringJUnitConfig(IzEntityTestBase.Config.class)
 public abstract class IzEntityTestBase<T extends InformizEntity> {
     protected Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    @Autowired
-    protected TestEntityManager entityManager;
+
+    static class Config {}
 
 
     //************* ID (POST Insert) Test  >>  !Null, Positive
@@ -115,6 +118,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
         Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
     }
+
     @NotNull
     protected abstract T getValidEntity();
 }

@@ -1,30 +1,39 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <fieldset th:fragment="source(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), source)}">
-        <div class="row">
-            <div class="form-group col">
-                <label for="name" class="col-form-label">Name</label>
-                <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="Nasa"
-                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
-                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+    <div class="col" th:fragment="sourceProps(src, is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), src)}">
+        <div class="row" th:if="${(! is_new)}">
+            <div class="col">
+                <input type="number" class="d-none" name="id" th:value="${src.id}" readonly/>
+                <input type="text" class="d-none" name="entityId" th:value="${src.entityId}" readonly/>
+                <input type="text" class="d-none" name="ownerId" th:value="${src.ownerId}" readonly/>
             </div>
         </div>
-        <div class="row">
+
+        <div class="row mb-3">
             <div class="form-group col">
-                <label for="srcType" class="col-form-label">Type</label>
-                <select th:field="*{srcType}" id="srcType"
+                <label for="srcType" class="col-form-label">Type: </label>
+                <select name="srcType" th:value="${src.srcType}" id="srcType"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
                     <option value=""> -- </option>
-                    <option th:each="typeOpt : ${T(org.informiz.model.SourceBase.SourceType).values()}"
-                            th:value="${typeOpt}" th:text="${typeOpt.displayValue}"></option>
+                    <option th:each="typeOpt : ${src.sourceTypes()}"
+                            th:value="${typeOpt}" th:text="${typeOpt.displayValue}"
+                            th:selected="${typeOpt.getDisplayValue().equals(src.srcType?.getDisplayValue())}"></option>
                 </select>
                 <span th:if="${#fields.hasErrors('srcType')}" th:errors="*{srcType}" class="text-danger"></span>
             </div>
         </div>
         <div class="row">
             <div class="form-group col">
+                <label for="name" class="col-form-label">Name</label>
+                <input type="text" name="name" th:value="${src.name}" class="form-control" id="name" placeholder="Nasa"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col">
                 <label for="link" class="col-form-label">Link</label>
-                <input type="url" th:field="*{link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"
+                <input type="url" name="link" th:value="${src.link}" class="form-control" id="link" placeholder="https://www.nasa.gov/"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
                 <span th:if="${#fields.hasErrors('link')}" th:errors="*{link}" class="text-danger"></span>
             </div>
@@ -32,12 +41,12 @@
         <div class="row">
             <div class="form-group col">
                 <label for="description" class="col-form-label">Description</label>
-                <textarea rows="5" th:field="*{description}" class="form-control" id="description"
+                <textarea rows="5" name="description" th:text="${src.description}" class="form-control" id="description"
                           placeholder="US space agency"
-                          th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+                          th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"></textarea>
                 <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
             </div>
         </div>
         <div th:replace="~{fragments/score :: score}"></div>
-    </fieldset>
+    </div>
 </html>

@@ -2,7 +2,9 @@ package org.informiz.ctrl.source;
 
 import jakarta.validation.Valid;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
-import org.informiz.model.*;
+import org.informiz.model.InformizEntity;
+import org.informiz.model.Review;
+import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +101,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
             model.addAttribute(SOURCE_ATTR, current);
             return getRedirectToEditPage(current.getLocalId());
         }
-        return getEditPageTemplate();
+        return failedEdit(model, result, source, source);
     }
 
     @PostMapping("/{sourceId}/review/")
@@ -135,4 +137,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     protected String getEditPageTemplate() { return String.format("%s/update-src.html", PREFIX); }
     protected String getRedirectToEditPage(Long id) { return String.format("redirect:%s/details/%s", PREFIX, id); }
+
+
+    //TODO: @ModelAttribute method e.g. 'void uiModel(@PathVariable("sourceId") long sourceId, Model model) { ... }'
 }

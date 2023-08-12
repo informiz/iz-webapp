@@ -6,12 +6,11 @@
             <img class="img-fluid float-left" th:src="@{/style/logo-sm.jpg}" alt="">
         </div>
 
-
         <div id="sign_in_div" class="col d-flex align-items-center justify-content-end">
             <div id="g_id_onload"
                  th:data-client_id="${@googleOAuthService.getClientId()}"
                  th:data-nonce="${@sUtils.getNonce()}"
-                 data-callback="usrSignIn"
+                 th:data-login_uri="@{/oauth/login}"
                  data-auto_prompt="false">
             </div>
             <div class="border border-success rounded d-flex align-items-center">
@@ -25,13 +24,7 @@
                 </div>
             </div>
             <div class="d-none">
-                <form id="login-form" th:action="@{/oauth/login}" action="#" method="post">
-                    <input name="credential" type="text" value="">
-                    <input type="submit" value="Login">
-                </form>
-            </div>
-            <div class="d-none">
-                <form id="logout-form" th:action="@{/oauth/logout}" action="#" method="post">
+                <form id="logout-form" th:action="@{/oauth/logout}" method="post">
                     <input type="submit" value="Logout">
                 </form>
             </div>
@@ -65,12 +58,6 @@
         </div>
     </div>
     <script>
-            function usrSignIn(cred_response) {
-                // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
-                $( "input[name='credential']", "#login-form" ).val(cred_response.credential);
-                $( "#login-form" ).submit();
-            }
-
             function usrSignOut() {
                 // Calling login endpoint by submitting a form, to go through Spring's CSRF-token handling.
                 $( "#logout-form" ).submit();

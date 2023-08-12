@@ -37,6 +37,10 @@ spec:
           value: <PROFILE>
         - name: iz.channel.name
           value: <CHANNEL_NAME>
+        - name: iz.channel.id
+          value: <CHANNEL_NAME>.informiz.org
+        - name: iz.channel.media.folder
+          value: <CHANNEL_NAME>.informiz.org
         - name: iz.webapp.token.issuer
           value: <CHANNEL_NAME>
         - name: iz.webapp.token.audience
@@ -83,7 +87,7 @@ spec:
       - name: cloud-sql-proxy
         # It is recommended to use the latest version of the Cloud SQL proxy
         # Make sure to update on a regular schedule!
-        image: gcr.io/cloudsql-docker/gce-proxy:2.4.0
+        image: gcr.io/cloudsql-docker/gce-proxy:1.33.9
         command:
           - "/cloud_sql_proxy"
           - "-log_debug_stdout"

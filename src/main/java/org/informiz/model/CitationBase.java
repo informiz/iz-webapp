@@ -25,7 +25,6 @@ import java.util.Set;
         ),
         @NamedEntityGraph(
                 name = CitationBase.CITATION_DATA,
-                //includeAllAttributes=true,
                 attributeNodes = {
                         @NamedAttributeNode("reviews"),
                         @NamedAttributeNode("score"),
@@ -46,11 +45,11 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
 
     @NotBlank(message = "Text is mandatory", groups = {CitationFromUI.class, Default.class})
     @Column(length = 500)
-    @Size(max = 500)
+    @Size(max = 500, groups = {CitationFromUI.class, Default.class})
     private String text;
 
     @NotBlank(message = "Citations must be sourced", groups = {CitationFromUI.class, Default.class})
-    @URL(message = "Please provide a link to the source of the citation")
+    @URL(message = "Please provide a link to the source of the citation", groups = {CitationFromUI.class, Default.class})
     private String link;
 
     public String getText() {

@@ -16,6 +16,6 @@
 
         <div th:replace="~{fragments/ref-list :: referenceList(${informi.entityId}, ${informi.references}, '')}"></div>
 
-        <div th:replace="~{fragments/review-list :: reviewList(${informi.reviews}, '')}"></div>
+        <div th:replace="~{fragments/review-list :: reviewList(${informi.entityId}, ${informi.reviews}, '')}"></div>
     </div>
 </html>

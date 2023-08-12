@@ -38,11 +38,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         super(repository);
         this.sourceRepo = sourceRepo;
     }
-
-    @GetMapping(path = {"/", "/all"})
-    public String getAllCitations(Model model) {
-        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
-        return String.format("%s/all-citations.html", PREFIX);
+    @GetMapping("/view/{citationId}")
+    public String viewCitation(@PathVariable("citationId") @Valid Long id, Model model) {
+        CitationBase citation = entityRepo.loadByLocalId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+        model.addAttribute(CITATION_ATTR, citation);
+        return String.format("%s/view-citation.html", PREFIX);
     }
 
     @GetMapping("/add")
@@ -65,25 +66,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     }
 
-    @PostMapping("/delete/{citationId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
-    public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
-        CitationBase citation = entityRepo.findById(Long.valueOf(id))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
-        // TODO: set inactive
-        entityRepo.delete(citation);
-        return String.format("redirect:%s/all", PREFIX);
-    }
-
-    @GetMapping("/view/{citationId}")
-    public String viewCitation(@PathVariable("citationId") @Valid Long id, Model model) {
-        CitationBase citation = entityRepo.loadByLocalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
-        model.addAttribute(CITATION_ATTR, citation);
-        return String.format("%s/view-citation.html", PREFIX);
-    }
-
     @GetMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     public String getCitation(@PathVariable("citationId") Long id, Model model) {
@@ -95,6 +77,12 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return EDIT_PAGE_TEMPLATE;
     }
 
+    @GetMapping(path = {"/", "/all"})
+    public String getAllCitations(Model model) {
+        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
+        return String.format("%s/all-citations.html", PREFIX);
+    }
+
     @PostMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#citation.ownerId == authentication.principal.name")
@@ -102,9 +90,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                                  @Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute(REVIEW_ATTR, new Review());
-            model.addAttribute(SOURCE_ATTR, new SourceRef());
-            return EDIT_PAGE_TEMPLATE;
+            return failedEdit(model, result, citation, citation);
         }
 
         CitationBase current = entityRepo.findById(id)
@@ -113,6 +99,19 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         entityRepo.save(current);
         return getRedirectToEditPage(current.getLocalId());
     }
+
+    @PostMapping("/delete/{citationId}")
+    @Secured("ROLE_MEMBER")
+    @PreAuthorize("#ownerId == authentication.principal.name")
+    public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
+        CitationBase citation = entityRepo.findById(Long.valueOf(id))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
+        // TODO: set inactive
+        entityRepo.delete(citation);
+        return String.format("redirect:%s/all", PREFIX);
+    }
+
+
 
     @PostMapping("/{citationId}/review/")
     @Secured("ROLE_CHECKER")
@@ -142,7 +141,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/{citationId}/source-ref/")
+    @PostMapping("/source-ref/{citationId}")
     @Secured("ROLE_CHECKER")
     public String addSource(@PathVariable("citationId") @Valid Long id,
                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
@@ -151,9 +150,9 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/{citationId}/source-ref/edit/")
+    @PostMapping("/source-ref/{citationId}/edit/")
     @Secured("ROLE_CHECKER")
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String editSourceRef(@PathVariable("citationId") @Valid Long id,
                              @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
@@ -161,7 +160,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/source/{citationId}/del/")
+    @PostMapping("/source-ref/{citationId}/del/")
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("citationId") @Valid Long id,

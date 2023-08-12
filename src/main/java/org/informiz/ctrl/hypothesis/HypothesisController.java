@@ -1,7 +1,6 @@
 package org.informiz.ctrl.hypothesis;
 
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
 import org.informiz.repo.hypothesis.HypothesisRepository;
@@ -12,10 +11,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,8 +97,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
                                     @Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
         if (result.hasErrors()) {
-            prepareEditModel(model, hypothesis, new Review(), new Reference());
-            return getEditPageTemplate();
+            return failedEdit(model, result, hypothesis, hypothesis);
         }
 
         HypothesisBase current = entityRepo.findById(id)
