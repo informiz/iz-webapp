@@ -1,6 +1,5 @@
 package org.informiz.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -107,19 +106,13 @@ public abstract class ChainCodeEntity extends InformizEntity {
 
     // TODO: check: safe for concurrent reviewing?
     public boolean addReview(Review review) {
-        boolean added;
-        synchronized (reviews) {
-            added = getReviews().add(review);
-        }
+        boolean added = getReviews().add(review);
         getScore();
         return added;
     }
 
     public boolean removeReview(Review review) {
-        boolean removed;
-        synchronized (reviews) {
-            removed = getReviews().remove(review);
-        }
+        boolean removed = getReviews().remove(review);
         getScore();
         return removed;
     }
@@ -236,13 +229,9 @@ public abstract class ChainCodeEntity extends InformizEntity {
     }
 
     public boolean addSource(@NotNull SourceRef srcRef) {
-        boolean bool;
         // TODO: Source references are considered equal if they have the same well-known source and link.
         //       This will do nothing if user(s) add the same source multiple times.
-        synchronized (sources) {
-            bool = getSources().add(srcRef);
-        }
-        return bool;
+        return getSources().add(srcRef);
     }
 
 
