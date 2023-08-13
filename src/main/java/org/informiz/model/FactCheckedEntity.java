@@ -27,19 +27,11 @@ public abstract class FactCheckedEntity extends ChainCodeEntity {
 
 
     public boolean addReference(Reference reference) {
-        boolean bool;
-        synchronized (references) {
-            bool = getReferences().add(reference);
-        }
-        return bool;
+        return getReferences().add(reference);
     }
 
     public boolean removeReference(@NotNull Reference reference) {
-        boolean bool;
-        synchronized (references) {
-            bool = getReferences().remove(reference);
-        }
-        return bool;
+        return getReferences().remove(reference);
     }
 
     public boolean removeReference(@NotNull Long referenceId, @NotNull String owner) {
