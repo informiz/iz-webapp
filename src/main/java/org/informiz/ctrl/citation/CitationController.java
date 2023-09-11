@@ -10,6 +10,7 @@ import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -53,18 +54,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("%s/add-citation.html", PREFIX);
     }
 
-    @PostMapping("/add")
-    @Secured("ROLE_MEMBER")
-    public String addCitation(@Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
-                              BindingResult result) {
-        if (result.hasErrors()) {
-            return String.format("%s/add-citation.html", PREFIX);
-        }
-        entityRepo.save(citation);
-
-        return String.format("redirect:%s/all", PREFIX);
-
-    }
 
     @GetMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
@@ -83,6 +72,19 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         return String.format("%s/all-citations.html", PREFIX);
     }
 
+    @PostMapping("/add")
+    @Secured("ROLE_MEMBER")
+    public String addCitation(@Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
+                              BindingResult result) {
+        if (result.hasErrors()) {
+            return String.format("%s/add-citation.html", PREFIX);
+        }
+        entityRepo.save(citation);
+
+        return String.format("redirect:%s/all", PREFIX);
+
+    }
+
     @PostMapping("/details/{citationId}")
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#citation.ownerId == authentication.principal.name")
@@ -93,7 +95,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
             return failedEdit(model, result, citation, citation);
         }
 
-        CitationBase current = entityRepo.findById(id)
+        CitationBase current = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         current.edit(citation);
         entityRepo.save(current);
@@ -104,7 +106,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @Secured("ROLE_MEMBER")
     @PreAuthorize("#ownerId == authentication.principal.name")
     public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
-        CitationBase citation = entityRepo.findById(Long.valueOf(id))
+        CitationBase citation = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         // TODO: set inactive
         entityRepo.delete(citation);
@@ -131,7 +133,8 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
 
-    @PostMapping("/{citationId}/review/del/")
+    //Todo need to restrict mediaTypes
+    @PostMapping(value = "/{citationId}/review/del/"/*, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE*/)
     @Secured("ROLE_CHECKER")
     @PreAuthorize("#review.ownerId == authentication.principal.name")
     public String deleteReview(@PathVariable("citationId") @Valid Long id,

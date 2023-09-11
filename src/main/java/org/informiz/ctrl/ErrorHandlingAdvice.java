@@ -22,7 +22,7 @@ public class ErrorHandlingAdvice {
     // TODO: implement handlers for custom exceptions
     @ExceptionHandler({ServletException.class, InternalServerErrorException.class})
     public ModelAndView handleInternalException(ServletException ex, HttpServletRequest request, HttpServletResponse response) {
-        logger.error(String.format("Handling error at $s:", request.getRequestURI()), ex);
+        logger.error(String.format("Handling error at %s:", request.getRequestURI()), ex);
         ModelAndView mv = new ModelAndView("error");
         mv.addObject("status", response.getStatus());
         mv.addObject("error",  ex.getClass().getSimpleName());
@@ -31,10 +31,21 @@ public class ErrorHandlingAdvice {
         return mv;
     }
 
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ModelAndView handleArgumentsException(Exception ex, HttpServletRequest request, HttpServletResponse response) {
+        logger.error(String.format("Handling error at %s:", request.getRequestURI()), ex);
+        ModelAndView mv = new ModelAndView("error");
+        mv.addObject("status", response.getStatus());
+        mv.addObject("error",  ex.getClass().getSimpleName());
+        mv.addObject("message", "Illegal argument, an error was logged and will be addressed by a developer");
+
+        return mv;
+    }
+
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ModelAndView handleValidationException(ConstraintViolationException ex, HttpServletRequest request, HttpServletResponse response) {
-        logger.debug(String.format("Validation error at $s:", request.getRequestURI()), ex);
+        logger.debug(String.format("Validation error at %s:", request.getRequestURI()), ex);
         ModelAndView mv = new ModelAndView("error");
         mv.addObject("status", response.getStatus());
         mv.addObject("error",  ex.getClass().getSimpleName());
