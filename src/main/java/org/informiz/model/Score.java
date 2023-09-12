@@ -3,6 +3,7 @@ package org.informiz.model;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+
 import java.io.Serializable;
 
 @Embeddable
@@ -48,7 +49,7 @@ public class Score implements Serializable {
         this.confidence = confidence;
     }
 
-    synchronized public void edit(Score other) {
+    public void edit(Score other) {
         this.reliability = other.getReliability();
         this.confidence = other.getConfidence();
     }
