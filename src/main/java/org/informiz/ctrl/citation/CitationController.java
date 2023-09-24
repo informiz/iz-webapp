@@ -10,8 +10,6 @@ import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -48,7 +46,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @GetMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addCitationForm(Model model) {
         model.addAttribute(CITATION_ATTR, new CitationBase());
         return String.format("%s/add-citation.html", PREFIX);
@@ -56,7 +54,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
 
     @GetMapping("/details/{citationId}")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String getCitation(@PathVariable("citationId") Long id, Model model) {
         CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
@@ -73,7 +71,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addCitation(@Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                               BindingResult result) {
         if (result.hasErrors()) {
@@ -86,8 +84,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/details/{citationId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#citation.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #citation.ownerId == authentication.principal.name")
     public String updateCitation(@PathVariable("citationId") @Valid Long id,
                                  @Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
                                  BindingResult result, Model model) {
@@ -103,8 +100,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/delete/{citationId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
         CitationBase citation = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
@@ -116,7 +112,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
 
     @PostMapping("/{citationId}/review/")
-    @Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReview(@PathVariable("citationId") @Valid Long id,
                                  @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Model model, Authentication authentication) {
@@ -124,8 +120,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @PostMapping("/{citationId}/review/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("citationId") @Valid Long id,
                              @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                              BindingResult result, Model model, Authentication authentication) {
@@ -135,8 +130,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     //Todo need to restrict mediaTypes
     @PostMapping(value = "/{citationId}/review/del/"/*, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE*/)
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name") //
     public String deleteReview(@PathVariable("citationId") @Valid Long id,
                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                BindingResult result, Model model, Authentication authentication) {
@@ -145,7 +139,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
 
     @PostMapping("/source-ref/{citationId}")
-    @Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("citationId") @Valid Long id,
                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
@@ -154,8 +148,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
 
     @PostMapping("/source-ref/{citationId}/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String editSourceRef(@PathVariable("citationId") @Valid Long id,
                              @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
@@ -164,8 +157,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
 
     @PostMapping("/source-ref/{citationId}/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("citationId") @Valid Long id,
                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                                BindingResult result, Model model, Authentication authentication) {
