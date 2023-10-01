@@ -63,13 +63,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
         model.addAttribute(SOURCE_ATTR, new SourceRef());
         return EDIT_PAGE_TEMPLATE;
     }
-
-    @GetMapping(path = {"/", "/all"})
-    public String getAllCitations(Model model) {
-        model.addAttribute(CITATIONS_ATTR, entityRepo.findAll());
-        return String.format("%s/all-citations.html", PREFIX);
-    }
-
+    
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addCitation(@Validated(CitationBase.CitationFromUI.class) @ModelAttribute(CITATION_ATTR) CitationBase citation,
