@@ -39,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public abstract class ControllerTest<T extends ChainCodeEntity> {
     public static final String TEST_ENTITY_ID = "test";
+
+
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
     @MockBean
@@ -74,6 +76,10 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
     protected String deleteEntityUrl() {
         return String.format("/%s/%s",prefix(), "delete/1");
+    }
+
+    protected String allEntitiesUrl() {
+        return String.format("/%s/%s",prefix(), "all");
     }
 
     protected  String entityReviewUrl() {
@@ -141,26 +147,13 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                         content().string(new StringContains(viewEntityTitle()))));
     }
 
-    //Todo: Validation group doesn't include Id and OwnerId
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenOwnerUpdateCitation_thenSucceeds() throws Exception {
-
-        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        //"id", new String[]{"1"},
-                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
-                Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
-    }
-
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenValidDeleteEntity_thenSucceeds() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "delete/1",  Map.of(
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
-                Arrays.asList(status().isFound(), redirectedUrl(deleteEntityUrl())));
+                Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
     @Test

@@ -56,9 +56,6 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
         return UPDATE_CITATION;
     }
     //@Override
-    protected String addEntityUrl() {
-        return "/citation/all";
-    }
     @Override
     protected String viewEntityTitle() {
         return DETAILS;
@@ -78,10 +75,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     protected String invalidCitationLinkMsg() {
         return INVALID_LINK;
     }
-    @Override
-    protected String deleteEntityUrl() {
-        return "/citation/all";
-    }
+
     //
     @Override
     protected String entityReviewUrl() {
@@ -106,7 +100,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
         verifyPostApiCall("add",  Map.of(
                         "link", new String[]{"http://server.com"},
                         "text", new String[]{RandomStringUtils.random(500)}),
-                Arrays.asList(status().isFound(), redirectedUrl(addEntityUrl())));
+                Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
     @Test
@@ -216,5 +210,18 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
             citation.addReview(getPopulatedReview(citation, reviewOwnerId));
         }
         return citation;
+    }
+
+    //Todo: Validation group doesn't include Id and OwnerId
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenOwnerUpdateCitation_thenSucceeds() throws Exception {
+
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
+                        //"id", new String[]{"1"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
     }
 }

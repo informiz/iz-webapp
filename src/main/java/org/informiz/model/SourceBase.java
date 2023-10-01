@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
 
@@ -70,6 +71,7 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     @NotNull(message = "Type is mandatory", groups = {SourceFromUI.class, Default.class})
     private SourceType srcType;
 
+    @Size(max = 500, message = "Description must be under 500 characters", groups = {SourceBase.SourceFromUI.class, Default.class})
     private String description;
 
     public String getName() {

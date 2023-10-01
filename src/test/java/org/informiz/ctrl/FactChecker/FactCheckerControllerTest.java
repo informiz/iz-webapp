@@ -1,4 +1,4 @@
-package org.informiz.ctrl;
+package org.informiz.ctrl.FactChecker;
 
 
 import org.informiz.WithCustomAuth;
