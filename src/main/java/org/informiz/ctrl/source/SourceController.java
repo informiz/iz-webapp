@@ -8,7 +8,6 @@ import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -39,14 +38,14 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @GetMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addSourceForm(Model model) {
         model.addAttribute(SOURCE_ATTR, new SourceBase());
         return String.format("%s/add-src.html", PREFIX);
     }
 
     @PostMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addSource(@Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                  BindingResult result) {
         if (result.hasErrors()) {
@@ -58,10 +57,9 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/delete/{sourceId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteSource(@PathVariable("sourceId") @Valid Long id, @RequestParam String ownerId) {
-        SourceBase source = entityRepo.findById(Long.valueOf(id))
+        SourceBase source = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
         // TODO: set inactive
         entityRepo.delete(source);
@@ -69,7 +67,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @GetMapping("/view/{sourceId}")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_VIEWER')")
     public String viewSource(@PathVariable("sourceId") @Valid Long id, Model model) {
         SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
@@ -78,7 +76,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @GetMapping("/details/{sourceId}")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String getSource(@PathVariable("sourceId") @Valid Long id, Model model) {
         SourceBase source = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid Source id"));
@@ -88,13 +86,12 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/details/{sourceId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#source.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #source.ownerId == authentication.principal.name")
     public String updateSource(@PathVariable("sourceId") @Valid Long id,
                                @Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                BindingResult result, Model model) {
         if (! result.hasErrors()) {
-            SourceBase current = entityRepo.findById(id)
+            SourceBase current = entityRepo.loadByLocalId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid source id"));
             current.edit(source);
             entityRepo.save(current);
@@ -105,7 +102,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/{sourceId}/review/")
-    @Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewSource(@PathVariable("sourceId") @Valid Long id,
                                @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                BindingResult result, Model model, Authentication authentication) {
@@ -113,8 +110,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/{sourceId}/review/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("sourceId") @Valid Long id,
                              @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                              BindingResult result, Model model, Authentication authentication) {
@@ -122,8 +118,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     }
 
     @PostMapping("/{sourceId}/review/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String deleteReview (@PathVariable("sourceId") @Valid Long id,
                                 @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                 BindingResult result, Model model, Authentication authentication) {

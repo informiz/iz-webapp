@@ -23,6 +23,7 @@ public class InformizGrantedAuthority implements GrantedAuthority {
 
     /**
      * TODO: make this available a Bean once Spring 6.1.x is GA
+     * Todo: ************************ DOES NOT WORK !!  ************************
      * @return Informiz' role-hierarchy
      */
     public static RoleHierarchyImpl roleHierarchy() {

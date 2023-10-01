@@ -14,7 +14,7 @@ import java.util.*;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomAuth> {
 
-    public static final String DEFAULT_TEST_CHECKER_ID = UUID.randomUUID().toString().substring(0, 30);
+    public static final String DEFAULT_TEST_CHECKER_ID = "Test_Checker_Id";//UUID.randomUUID().toString().substring(0, 30);
 
     @Override
     public SecurityContext createSecurityContext(WithCustomAuth withCustomAuth) {
@@ -22,12 +22,12 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Wi
 
         Map<String, Object> attributes = new HashMap<>();
 
-        attributes.put("eid", DEFAULT_TEST_CHECKER_ID);
-        attributes.put("name", DEFAULT_TEST_CHECKER_ID);
+        attributes.put("eid", withCustomAuth.checkerId());
+        attributes.put("name", withCustomAuth.checkerId());
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for (String role: withCustomAuth.role())
-            authorities.add(new InformizGrantedAuthority(role, DEFAULT_TEST_CHECKER_ID));
+            authorities.add(new InformizGrantedAuthority(role, withCustomAuth.checkerId()));
 
         OAuth2User user = new DefaultOAuth2User(authorities, attributes, "name");
         Authentication auth = new OAuth2AuthenticationToken(user, authorities, "mockClientId");

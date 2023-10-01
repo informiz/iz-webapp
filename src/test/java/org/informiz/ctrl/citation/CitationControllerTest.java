@@ -1,5 +1,6 @@
 package org.informiz.ctrl.citation;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
@@ -8,528 +9,220 @@ import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
-import org.informiz.model.Review;
 import org.informiz.repo.citation.CitationRepository;
-import org.informiz.repo.source.SourceRepository;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.Map;
 
 import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, CitationController.class, ErrorHandlingAdvice.class})
-@ActiveProfiles("test")
 @WebMvcTest(CitationController.class)
-class CitationControllerTest {
+@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, CitationController.class, ErrorHandlingAdvice.class})
+
+class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBase> {
+    public static final String ALL_CITATIONS_TITLE = "Quotes from e.g people, books or articles, ranked for reliability";
+    public static final String NEW_CITATION = "New Citation";
+    public static final String UPDATE_CITATION = "Update Citation";
+    public static final String DETAILS = "Details";
+    public static final String SIZE_MUST_BE_BETWEEN_0_AND_500 = "size must be between 0 and 500";
+    public static final String INVALID_LINK = "Please provide a link to the source of the citation";
+    public static final String COMMENT_SIZE = "Comment must be under 255 characters";
     @MockBean
-    private CitationRepository repo;
+    CitationRepository citationRepository;
 
-    @MockBean
-    private SourceRepository sourceRepo; // citation controller requires source repo
-
-    @MockBean
-    private SecurityConfig.ClientIdService googleOAuthService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    //Todo GETs: 1 - viewCitation
-    //Todo GETs: 2 - addCitation
-    //Todo GETs: 3 - getCitation
-    //Todo GETs: 4 - getAllCitation
-
-    //AddCitation (No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenMemberViewsAddCitation_thenAllowed() throws Exception {
-
-
-        mockMvc.perform(get("/citation/add")
-                        .secure(true))
-                .andExpect(status().isOk());
+    @Override
+    protected String prefix(){
+        return "citation";
     }
 
-    //AddCitation (Viewer Forbidden)
+    @Override
+    protected String allEntitiesTitle() {
+        return ALL_CITATIONS_TITLE;
+    }
+
+    @Override
+    protected String newEntityTitle() {
+        return NEW_CITATION;
+    }
+    @Override
+    protected String updateEntityTitle() {
+        return UPDATE_CITATION;
+    }
+    //@Override
+    @Override
+    protected String viewEntityTitle() {
+        return DETAILS;
+    }
+    @Override
+    protected String textExceedsMsg() {
+        return SIZE_MUST_BE_BETWEEN_0_AND_500;
+    }
+    protected String commentExceedsMsg() {
+        return COMMENT_SIZE;
+    }
+    protected String EntityIllegalArgumentTitle() {
+        return "Illegal argument, an error was logged and will be addressed by a developer";
+
+
+    }
+    //@Override
+    protected String invalidCitationLinkMsg() {
+        return INVALID_LINK;
+    }
+
+
+    @Override
+    protected String entityReviewUrl() {
+        return "/citation/details/1";
+    }
+
+    //Todo: disable log
+    //Todo: Fix Error Msg
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
-    void whenViewerViewsAddCitation_thenForbidden() throws Exception {
-
-
-        mockMvc.perform(get("/citation/add")
-                        .secure(true))
-                .andExpect(status().isForbidden());
+    void whenViewerViewsCitationInvalidId_thenErrorMsg() throws Exception {
+        verifyGetApiCall("view/1",
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(EntityIllegalArgumentTitle()))));
     }
 
-    //AddCitation (Checker Forbidden)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerViewsAddCitation_thenForbidden() throws Exception {
-
-
-        mockMvc.perform(get("/citation/add")
-                        .secure(true))
-                .andExpect(status().isForbidden());
-    }
-
-
-
-    //AddCitation
-    // Exceeds 500
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenAddCitationTextExceeds_thenErrorMsg() throws Exception {
+    void whenMemberAddCitation_thenSucceeds() throws Exception {
 
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/add")
-                        .secure(true).with(csrf())
-                        .param("link", "http://server.com")
-                        .param("text", RandomStringUtils.random(501))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("size must be between 0 and 500")));
+        verifyPostApiCall("add",  Map.of(
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
-    //Add Citation
-    // Invalid URL
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenCitationURLisInvalid_thenErrorMsg() throws Exception {
-
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/add")
-                        .secure(true).with(csrf())
-                        .param("link", "invalid")
-                        .param("text", RandomStringUtils.random(500))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Please provide a link to the source of the citation")));
-    }
-
-    //Update Citation (No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenValidUpdateCitation_thenSucceeds() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.findById(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/details/1")
-                        .secure(true).with(csrf())
-                        .param("ownerId", citation.get().getOwnerId())
-                        .param("link", "http://server.com")
-                        .param("text", RandomStringUtils.random(500))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isFound())
-                .andExpect(redirectedUrl("/citation/details/1"));
-    }
-
-    //Update Citation (Invalid OwnerID)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenInvalidCitationOwnerId_thenErrorMsg() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.findById(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/details/1")
-                        .secure(true).with(csrf())
-                        .param("ownerId", "120276")
-                        .param("link", "http://server.com")
-                        .param("text", RandomStringUtils.random(500))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
-    }
-
-    //Update Citation (Invalid Link)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenUpdateCitationInvalidLink_thenErrorMsg() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.findById(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/details/1")
-                        .secure(true).with(csrf())
-                        .param("id", citation.get().getLocalId().toString())//Todo Validation group doesn't enforce Id
-                        .param("ownerId", citation.get().getOwnerId())
-                        .param("link", "Invalid")
-                        .param("text", RandomStringUtils.random(500))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Please provide a link to the source of the citation")));
-    }
-
-    //Update Citation (Exceeds 500)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenUpdateCitationTextExceeds_thenErrorMsg() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.loadByLocalId(1l)).willReturn(citation);
-
-
-        mockMvc.perform(post("/citation/details/1")
-                        .secure(true).with(csrf())
-                        .param("ownerId", citation.get().getOwnerId())
-                        .param("id", "1")//Todo: Id not enforced by validation group
-                        .param("link", "http://server.com")
-                        .param("text", RandomStringUtils.random(501))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("size must be between 0 and 500")));
-    }
-
-    //Delete Citation(No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenValidDeleteCitation_thenSucceeds() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.findById(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/delete/1")
-                        .secure(true).with(csrf())
-                        .param("ownerId", citation.get().getOwnerId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isFound())
-                .andExpect(redirectedUrl("/citation/all"));
-    }
-
-    //Delete Citation(Not owner)
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenDeleteCitationNotOwner_thenForbidden() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        //citation.get().setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        given(repo.findById(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/delete/1")
-                        .secure(true).with(csrf())
-                        .param("ownerId", citation.get().getOwnerId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
-    }
-
-
-    //Add a valid Review (No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenAddValidReviewToCitation_thenSucceeds() throws Exception {
-
-        Optional<CitationBase> citation = Optional.of(getPopulatedCitation());
-        given(repo.loadByLocalId(1l)).willReturn(citation);
-
-        mockMvc.perform(post("/citation/1/review/")
-                        .secure(true).with(csrf())
-                        .param("rating", "0.82")
-                        .param("reviewedEntityId", citation.get().getEntityId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
-    }
-
-    //Add Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
-    void whenAddCitationReviewNoAuth_thenForbidden() throws Exception {
+    void whenViewerAddsCitation_thenForbidden() throws Exception {
 
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/1/review/")
-                        .secure(true).with(csrf())
-                        .param("rating", "0.82")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
-    }
-
-
-    //Add Review (OwnerId)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenNotOwnerAddReviewOfCitation_thenForbidden() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .param("reviewedEntityId", review.getReviewedEntityId())
-                        .param("rating", "0.82")
-                        .param("comment", "Changed Comment")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
-    }
-
-
-    //Add Review No Rating
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenAddReviewToCitationNoRating_thenErrorMsg() throws Exception {
-
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/1/review/")
-                        .secure(true).with(csrf())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Please submit rating between 0.0 and 1.0")));
-    }
-
-    //Add Review Comment Exceeds
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenReviewCommentExceeds_thenErrorMsg() throws Exception {
-
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/1/review/")
-                        .secure(true).with(csrf())
-                        .param("rating", "0.82")
-                        .param("comment", RandomStringUtils.random(256))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Comment must be under 255 characters")));
-    }
-
-    //Edit Review (No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenEditValidReviewToCitation_thenSucceeds() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("id", review.getId().toString())
-                        .param("ownerId", review.getOwnerId())
-                        .param("rating", "0.82")
-                        .param("reviewedEntityId", review.getReviewedEntityId())
-                        .param("comment", RandomStringUtils.random(255))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
-    }
-
-
-    //Edit Review (No Auth)
-    @Test
-    @WithCustomAuth(role = {ROLE_VIEWER})
-    void whenViewerEditsReviewOfCitation_thenForbidden() throws Exception {
-
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(getPopulatedCitation()));
-
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("rating", "0.82")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
+        verifyPostApiCall("add",  Map.of(
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isForbidden()));
     }
 
     //Edit Review (OwnerId)
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenNotOwnerIdToEditCitationReview_thenForbidden() throws Exception {
+    void whenCheckerAddCitation_thenForbidden() throws Exception {
 
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        //review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .param("rating", "0.82")
-                        .param("reviewedEntityId", review.getReviewedEntityId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isForbidden());
-    }
-
-    //Edit Review No Rating
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenEditReviewNoRating_thenErrorMsg() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Please submit rating between 0.0 and 1.0")));
+        verifyPostApiCall("add",  Map.of(
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isForbidden()));
     }
 
     //Edit Review Invalid ReviewedEntityId
     @Test
-    @Disabled("Currently no error message for reviewedEntityId")
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenEditReviewBlankReviewedEntityId_thenErrorMsg() throws Exception {
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenCitationURLisInvalid_thenErrorMsg() throws Exception {
 
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("id", review.getId().toString())
-                        .param("ownerId", review.getOwnerId())
-                        .param("rating", "0.82")
-                        .param("reviewedEntityId", "")
-                        .param("comment", RandomStringUtils.random(255))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("No Error MSG")));
+        verifyPostApiCall("add",  Map.of(
+                        "link", new String[]{"Invalid"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(invalidCitationLinkMsg()))));
     }
 
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenAddCitationTextExceeds_thenErrorMsg() throws Exception {
+
+        verifyPostApiCall("add",  Map.of(
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(501)}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(textExceedsMsg()))));
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER}, checkerId = "some member")
+    void whenNotOwnerUpdateCitation_thenForbidden() throws Exception {
+
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
+                        "link", new String[]{"http://server.com"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "text", new String[]{RandomStringUtils.random(500)}
+                ),
+                Arrays.asList(status().isForbidden()));
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenUpdateCitationInvalidLink_thenErrorMsg() throws Exception {
+
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
+                        "id", new String[]{"1"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "link", new String[]{"Invalid"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(invalidCitationLinkMsg()))));
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenUpdateCitationTextExceeds_thenErrorMsg() throws Exception {
+
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
+                        "id", new String[]{"1"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(501)}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(textExceedsMsg()))));
+    }
     //Todo Edit Review reviewedEntityId Exceeds?
 
-
-
-    //Edit Review Comment Exceeds 255
     @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenEditReviewCommentExceeds255_thenErrorMsg() throws Exception {
+    @WithCustomAuth(role = {ROLE_MEMBER}, checkerId = "some member")
+    void whenNotOwnerDeleteCitation_thenForbidden() throws Exception {
 
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        mockMvc.perform(post("/citation/1/review/edit/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .param("rating", "0.82")
-                        .param("comment", RandomStringUtils.random(256))
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Comment must be under 255 characters")));
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "delete/1",  Map.of(
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
+                Arrays.asList(status().isForbidden()));
     }
 
-    //Delete Review (No Errors)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenDeletesReviewOfCitation_succeedIfOwner() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        mockMvc.perform(post("/citation/1/review/del/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .param("reviewedEntityId", review.getReviewedEntityId())
-                        .param("id", review.getId().toString())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isFound()).andExpect(redirectedUrl("/citation/details/1"));
-    }
-
-    //Delete Review (No Auth)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerDeletesReviewOfCitation_thenForbidden() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/del/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .param("id", review.getId().toString())
-                        .param("reviewedEntityId", review.getReviewedEntityId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
-
-
-    //Delete Review (No Id)
-    @Test
-    @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenDeletesCitationReviewNoId_thenErrorMessage() throws Exception {
-
-        CitationBase citation = getPopulatedCitation();
-        Review review = getPopulatedReview(citation);
-        review.setOwnerId(DEFAULT_TEST_CHECKER_ID);
-        citation.addReview(review);
-        given(repo.loadByLocalId(1l)).willReturn(Optional.of(citation));
-
-        mockMvc.perform(post("/citation/1/review/del/")
-                        .secure(true).with(csrf())
-                        .param("ownerId", review.getOwnerId())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(new StringContains("Please provide an ID")));
-    }
-
-
-
-
-
+    @Override
     @NotNull
-    private static CitationBase getPopulatedCitation() {
+    protected CitationBase getPopulatedEntity(String ownerId, String reviewOwnerId) {
         CitationBase citation = new CitationBase();
         citation.setLocalId(1l);
-        citation.setEntityId("test");
+        citation.setEntityId(TEST_ENTITY_ID);
         citation.setCreatorId("test");
-        citation.setOwnerId("test");
+        citation.setOwnerId(ownerId);
         citation.setCreatedTs(12345l);
         citation.setUpdatedTs(12345l);
         citation.setLink("https://informiz.org");
         citation.setText("Test citation");
+
+        if(reviewOwnerId != null) {
+            citation.addReview(getPopulatedReview(citation, reviewOwnerId));
+        }
         return citation;
     }
 
-    @NotNull
-    private static Review getPopulatedReview(CitationBase citation) {
-        Review review = new Review(citation, 0.9f, "Test review");
-        review.setId(1l);
-        review.setReviewedEntityId("test");
-        review.setCreatorId("test");
-        review.setOwnerId("test");
-        review.setCreatedTs(12345l);
-        review.setUpdatedTs(12345l);
-        return review;
+    //Todo: Validation group doesn't include Id and OwnerId
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenOwnerUpdateCitation_thenSucceeds() throws Exception {
+
+        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
+                        //"id", new String[]{"1"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "link", new String[]{"http://server.com"},
+                        "text", new String[]{RandomStringUtils.random(500)}),
+                Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
     }
 }
