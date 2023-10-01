@@ -1,6 +1,7 @@
 package org.informiz.ctrl.citation;
 
 import jakarta.validation.constraints.NotNull;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
@@ -10,6 +11,7 @@ import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
 import org.informiz.repo.citation.CitationRepository;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CitationController.class)
@@ -76,7 +79,6 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
         return INVALID_LINK;
     }
 
-    //
     @Override
     protected String entityReviewUrl() {
         return "/citation/details/1";
@@ -113,6 +115,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
                 Arrays.asList(status().isForbidden()));
     }
 
+    //Edit Review (OwnerId)
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerAddCitation_thenForbidden() throws Exception {
@@ -123,6 +126,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
                 Arrays.asList(status().isForbidden()));
     }
 
+    //Edit Review Invalid ReviewedEntityId
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenCitationURLisInvalid_thenErrorMsg() throws Exception {

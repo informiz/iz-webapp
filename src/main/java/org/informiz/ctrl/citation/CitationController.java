@@ -83,6 +83,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     }
 
+
     @PostMapping("/details/{citationId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #citation.ownerId == authentication.principal.name")
     public String updateCitation(@PathVariable("citationId") @Valid Long id,
@@ -103,6 +104,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
         CitationBase citation = entityRepo.loadByLocalId(Long.valueOf(id))
+
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
         // TODO: set inactive
         entityRepo.delete(citation);
@@ -154,7 +156,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
                              BindingResult result, Model model, Authentication authentication) {
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
-
 
     @PostMapping("/source-ref/{citationId}/del/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
