@@ -1,7 +1,6 @@
 package org.informiz.ctrl.citation;
 
 import jakarta.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
@@ -11,7 +10,6 @@ import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
 import org.informiz.repo.citation.CitationRepository;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +20,6 @@ import java.util.Map;
 
 import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CitationController.class)
@@ -35,7 +32,6 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     public static final String DETAILS = "Details";
     public static final String SIZE_MUST_BE_BETWEEN_0_AND_500 = "size must be between 0 and 500";
     public static final String INVALID_LINK = "Please provide a link to the source of the citation";
-
     public static final String COMMENT_SIZE = "Comment must be under 255 characters";
     @MockBean
     CitationRepository citationRepository;
@@ -73,11 +69,13 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     protected String EntityIllegalArgumentTitle() {
         return "Illegal argument, an error was logged and will be addressed by a developer";
 
+
     }
     //@Override
     protected String invalidCitationLinkMsg() {
         return INVALID_LINK;
     }
+
 
     @Override
     protected String entityReviewUrl() {
@@ -89,7 +87,6 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerViewsCitationInvalidId_thenErrorMsg() throws Exception {
-
         verifyGetApiCall("view/1",
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(EntityIllegalArgumentTitle()))));
