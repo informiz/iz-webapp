@@ -114,11 +114,11 @@ public class SecurityConfig {
         @Autowired
         private HttpServletResponse response;
 
-        public boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
+        public boolean isOwner(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
             return principal.getName().equals(entity.getOwnerId());
         }
 
-        public String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
+        public String getDisabled(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
             return isOwner(principal, entity) ? "false" : "true";
         }
 

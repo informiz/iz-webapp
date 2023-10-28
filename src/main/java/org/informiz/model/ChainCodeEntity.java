@@ -20,7 +20,7 @@ import static org.informiz.model.Score.CONFIDENCE_BOOST;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @JsonView(Utils.Views.EntityDefaultView.class)
 //@MappedSuperclass
-public abstract class ChainCodeEntity extends InformizEntity {
+public abstract class ChainCodeEntity extends InformizEntity<InformizEntity> {
 
     static final long serialVersionUID = 3L ;
 
@@ -30,8 +30,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
-    @Positive(groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an ID", groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class})
+    @Positive(groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
     public Long id;
 
     public Long getLocalId() {
@@ -53,8 +53,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
     // Unique entity identifier
     @Column(name = "entity_id", unique = true)
     @Access(AccessType.PROPERTY)
-    @NotNull(message = "Please provide an entity-ID", groups = { DeleteEntity.class, Default.class })
-    @Size(message = "Entity-ID is expected to be 25-255 characters long", min = 25, max = 255, groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an entity-ID", groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
+    @Size(message = "Entity-ID is expected to be 25-255 characters long", min = 25, max = 255, groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
     protected String entityId;
 
     @NotNull(message = "Locale is mandatory")
@@ -72,8 +72,8 @@ public abstract class ChainCodeEntity extends InformizEntity {
     @Valid
     private Score score = new Score();
 
-    protected Consumer<InformizEntity> onCreateConsumer() {
-        Consumer<InformizEntity> consumer = super.onCreateConsumer();
+    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
+        Consumer<InformizEntity<InformizEntity>> consumer = super.onCreateConsumer();
         return entity -> {
             consumer.accept(entity);
             this.entityId = Utils.createEntityId(this);

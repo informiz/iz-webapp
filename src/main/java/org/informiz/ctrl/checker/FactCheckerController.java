@@ -4,7 +4,6 @@ import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,7 +35,7 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
     }
 
     @GetMapping("/add")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String addFactCheckerForm(Model model) {
         model.addAttribute(CHECKER_ATTR, new FactCheckerBase());
         return String.format("%s/add-fc.html", PREFIX);
@@ -55,7 +54,7 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
     }
 
     @GetMapping("/delete/{id}")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String deleteUser(@PathVariable("id") long id) {
         FactCheckerBase checker = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid fact-checker id"));
@@ -73,7 +72,7 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
     }
 
     @GetMapping("/details/{id}")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String getFactchecker(@PathVariable("id")  Long id, Model model) {
         FactCheckerBase checker = entityRepo.findById(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid fact-checker id"));
@@ -82,7 +81,7 @@ public class FactCheckerController  extends ChaincodeEntityController<FactChecke
     }
 
     @PostMapping("/details/{id}")
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String updateFactChecker(@PathVariable("id")  Long id,
                                     @Validated(FactCheckerBase.FactCheckerFromUI.class) @ModelAttribute(CHECKER_ATTR) FactCheckerBase checker,
                                     BindingResult result, Model model) {

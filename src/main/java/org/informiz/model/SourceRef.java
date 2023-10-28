@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Table(name="source_ref")
 @Entity
-public final class SourceRef extends InformizEntity implements Serializable {
+public final class SourceRef extends InformizEntity<InformizEntity> implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
@@ -25,8 +25,8 @@ public final class SourceRef extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull (message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
-    @Positive(groups = { DeleteEntity.class, Default.class })
+    @NotNull (message = "Please provide an ID", groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class})
+    @Positive(groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {

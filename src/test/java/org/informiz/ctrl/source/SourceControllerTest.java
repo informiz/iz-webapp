@@ -31,9 +31,7 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     public static final String DETAILS = "Details";
     public static final String SIZE_MUST_BE_BETWEEN_0_AND_500 = "size must be between 0 and 500";
     public static final String INVALID_LINK = "Please provide a link to the source of the source";
-
     public static final String COMMENT_SIZE = "Comment must be under 255 characters";
-
     public static final String TYPE_MSG = "Type is mandatory";
 
     @Override
@@ -69,11 +67,7 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     protected String nullTypeMsg() {
         return TYPE_MSG;
     }
-
-    protected String EntityIllegalArgumentTitle() {
-        return "Illegal argument, an error was logged and will be addressed by a developer";
-
-    }
+    protected String EntityIllegalArgumentTitle() {return "Illegal argument, an error was logged and will be addressed by a developer"; }
     protected String invalidSourceLinkMsg() {
         return  "Please provide a valid link";
     }
@@ -265,20 +259,4 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
         }
         return source;
     }
-
-    /*//Todo: Refractor down and copy to Sources
-    //Todo: Validation group doesn't include Id and OwnerId
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenOwnerUpdateSource_thenSucceeds() throws Exception {
-
-        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        "id", new String[]{"1"},
-                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "srcType", new String[]{null},
-                        "link", new String[]{"http://server.com"},
-                        "name", new String[]{TEST_ENTITY_ID},
-                        "description", new String[]{RandomStringUtils.random(500)}),
-                Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
-    }*/
 }

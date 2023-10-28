@@ -83,8 +83,8 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
         this.setName(other.getName());
     }
 
-    protected Consumer<InformizEntity> onCreateConsumer() {
-        Consumer<InformizEntity> consumer = super.onCreateConsumer();
+    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
+        Consumer<InformizEntity<InformizEntity>> consumer = super.onCreateConsumer();
         return entity -> {
             consumer.accept(entity);
             // TODO: use entity-id instead

@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public abstract class ControllerTest<T extends ChainCodeEntity> {
-    public static final String TEST_ENTITY_ID = "test";
+    public static final String TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
 
 
     @Autowired
@@ -63,12 +63,11 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     protected String EntityIllegalArgumentTitle() {
         return "Illegal argument, an error was logged and will be addressed by a developer";
     }
-
-    //protected abstract String redirUrl();
-
     protected abstract String textExceedsMsg();
 
-    protected abstract String commentExceedsMsg();
+    protected String commentExceedsMsg() {
+        return "";
+    }
 
     protected String updateEntityUrl() {
         return String.format("/%s/%s", prefix(), "details/1");
@@ -291,7 +290,6 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                         content().string(new StringContains("No Error MSG"))));
     }
 
-
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenDeletesReviewOfEntity_thenSucceed() throws Exception {
@@ -315,7 +313,6 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains("Please provide an ID"))));
     }
-    //Delete Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER}, checkerId = "some checker")
     void whenNotOwnerDeletesReview_thenForbidden() throws Exception {

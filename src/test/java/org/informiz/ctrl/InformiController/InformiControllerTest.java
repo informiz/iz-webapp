@@ -1,15 +1,20 @@
-package org.informiz.ctrl.citation;
+package org.informiz.ctrl.InformiController;
 
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
+import org.informiz.ctrl.informi.InformiController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ErrorHandlingAdvice;
+import org.informiz.ctrl.citation.CitationController;
 import org.informiz.model.CitationBase;
+import org.informiz.model.InformiBase;
 import org.informiz.repo.citation.CitationRepository;
+import org.informiz.repo.informi.InformiRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,36 +27,36 @@ import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(CitationController.class)
-@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, CitationController.class, ErrorHandlingAdvice.class})
+@WebMvcTest(InformiControllerTest.class)
+@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, InformiController.class, ErrorHandlingAdvice.class})
 
-class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBase> {
-    public static final String ALL_CITATIONS_TITLE = "Quotes from e.g people, books or articles, ranked for reliability";
-    public static final String NEW_CITATION = "New Citation";
-    public static final String UPDATE_CITATION = "Update Citation";
+class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase> {
+    public static final String ALL_INFORMI_TITLE = "Graphical snippets of information, ranked for reliability";
+    public static final String NEW_INFORMI = "New Informi";
+    public static final String UPDATE_INFORMI = "Update Informi";
     public static final String DETAILS = "Details";
-    public static final String SIZE_MUST_BE_BETWEEN_0_AND_500 = "size must be between 0 and 500";
-    public static final String INVALID_LINK = "Please provide a link to the source of the citation";
+    public static final String TEXT_EXCEEDS_MSG = "Description exceeds limit";
+    public static final String INVALID_LINK = "A valid link to a media file is mandatory";
     public static final String COMMENT_SIZE = "Comment must be under 255 characters";
     @MockBean
-    CitationRepository citationRepository;
+    InformiRepository informiRepository;
 
     @Override
     protected String prefix(){
-        return "citation";
+        return "informi";
     }
 
     @Override
     protected String allEntitiesTitle() {
-        return ALL_CITATIONS_TITLE;
+        return ALL_INFORMI_TITLE;
     }
     @Override
     protected String newEntityTitle() {
-        return NEW_CITATION;
+        return NEW_INFORMI;
     }
     @Override
     protected String updateEntityTitle() {
-        return UPDATE_CITATION;
+        return UPDATE_INFORMI;
     }
     @Override
     protected String viewEntityTitle() {
@@ -59,31 +64,28 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     }
     @Override
     protected String textExceedsMsg() {
-        return SIZE_MUST_BE_BETWEEN_0_AND_500;
+        return TEXT_EXCEEDS_MSG;
     }
     protected String commentExceedsMsg() {
         return COMMENT_SIZE;
     }
     protected String EntityIllegalArgumentTitle() {
-        return "Illegal argument, an error was logged and will be addressed by a developer";
-
-
-    }
-    protected String invalidCitationLinkMsg() {
+        return "Illegal argument, an error was logged and will be addressed by a developer"; }
+    protected String invalidInformiLinkMsg() {
         return INVALID_LINK;
     }
 
 
     @Override
     protected String entityReviewUrl() {
-        return "/citation/details/1";
+        return "/informi/details/1";
     }
 
     //Todo: disable log
     //Todo: Fix Error Msg
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
-    void whenViewerViewsCitationInvalidId_thenErrorMsg() throws Exception {
+    void whenViewerViewsInformiInvalidId_thenErrorMsg() throws Exception {
         verifyGetApiCall("view/1",
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(EntityIllegalArgumentTitle()))));
@@ -91,103 +93,103 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenMemberAddCitation_thenSucceeds() throws Exception {
+    void whenMemberAddInformi_thenSucceeds() throws Exception {
 
-        verifyPostApiCall("add",  Map.of(
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+        verifyPostApiCall("upload",  Map.of(
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
-    void whenViewerAddsCitation_thenForbidden() throws Exception {
+    void whenViewerAddsInformi_thenForbidden() throws Exception {
 
         verifyPostApiCall("add",  Map.of(
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isForbidden()));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenCheckerAddCitation_thenForbidden() throws Exception {
+    void whenCheckerAddInformi_thenForbidden() throws Exception {
 
         verifyPostApiCall("add",  Map.of(
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isForbidden()));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenCitationURLisInvalid_thenErrorMsg() throws Exception {
+    void whenInformiURLisInvalid_thenErrorMsg() throws Exception {
 
         verifyPostApiCall("add",  Map.of(
-                        "link", new String[]{"Invalid"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+                        "mediaPath", new String[]{"Invalid"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isOk(),
-                        content().string(new StringContains(invalidCitationLinkMsg()))));
+                        content().string(new StringContains(invalidInformiLinkMsg()))));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenAddCitationTextExceeds_thenErrorMsg() throws Exception {
+    void whenAddInformiTextExceeds_thenErrorMsg() throws Exception {
 
         verifyPostApiCall("add",  Map.of(
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(501)}),
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1501)}),
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(textExceedsMsg()))));
     }
 
+    //Todo: Validation group doesn't include Id and OwnerId
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenOwnerUpdateCitation_thenSucceeds() throws Exception {
+    void whenOwnerUpdateInformi_thenSucceeds() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        "id", new String[]{"1"},
-                        "entityId", new String[]{TEST_ENTITY_ID},
+                        //"id", new String[]{"1"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER}, checkerId = "some member")
-    void whenNotOwnerUpdateCitation_thenForbidden() throws Exception {
+    void whenNotOwnerUpdateInformi_thenForbidden() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        "link", new String[]{"http://server.com"},
+                        "mediaPath", new String[]{"http://server.com"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "text", new String[]{RandomStringUtils.random(500)}
-                ),
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isForbidden()));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenUpdateCitationInvalidLink_thenErrorMsg() throws Exception {
+    void whenUpdateInformiInvalidLink_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
                         "id", new String[]{"1"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "link", new String[]{"Invalid"},
-                        "text", new String[]{RandomStringUtils.random(500)}),
+                        "mediaPath", new String[]{"Invalid"},
+                        "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isOk(),
-                        content().string(new StringContains(invalidCitationLinkMsg()))));
+                        content().string(new StringContains(invalidInformiLinkMsg()))));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenUpdateCitationTextExceeds_thenErrorMsg() throws Exception {
+    void whenUpdateInformiTextExceeds_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
                         "id", new String[]{"1"},
+                        "name", new String[]{"informiTeatName"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
-                        "link", new String[]{"http://server.com"},
-                        "text", new String[]{RandomStringUtils.random(501)}),
+                        "mediaPath", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(1501)}),
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(textExceedsMsg()))));
     }
@@ -195,7 +197,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER}, checkerId = "some member")
-    void whenNotOwnerDeleteCitation_thenForbidden() throws Exception {
+    void whenNotOwnerDeleteInformi_thenForbidden() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "delete/1",  Map.of(
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
@@ -204,21 +206,23 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
 
     @Override
     @NotNull
-    protected CitationBase getPopulatedEntity(String ownerId, String reviewOwnerId) {
-        CitationBase citation = new CitationBase();
-        citation.setLocalId(1l);
-        citation.setEntityId(TEST_ENTITY_ID);
-        citation.setCreatorId("test");
-        citation.setOwnerId(ownerId);
-        citation.setCreatedTs(12345l);
-        citation.setUpdatedTs(12345l);
-        citation.setLink("https://informiz.org");
-        citation.setText("Test citation");
+    protected InformiBase getPopulatedEntity(String ownerId, String reviewOwnerId) {
+        InformiBase informi = new InformiBase();
+        informi.setLocalId(1l);
+        informi.setEntityId(TEST_ENTITY_ID);
+        informi.setCreatorId("test");
+        informi.setName("informiTeatName");
+        informi.setOwnerId(ownerId);
+        informi.setCreatedTs(12345l);
+        informi.setUpdatedTs(12345l);
+        informi.setMediaPath("https://informiz.org");
+        informi.setDescription("Test informi");
+
 
         if(reviewOwnerId != null) {
-            citation.addReview(getPopulatedReview(citation, reviewOwnerId));
+            informi.addReview(getPopulatedReview(informi, reviewOwnerId));
         }
-        return citation;
+        return informi;
     }
 
 
