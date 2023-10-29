@@ -169,7 +169,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     //@Secured("ROLE_CHECKER")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("hypothesisId") @Valid Long id,
-                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
 
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
@@ -179,7 +179,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     //@Secured("ROLE_CHECKER")
     @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String editSrcRef(@PathVariable("hypothesisId") @Valid Long id,
-                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
 
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);

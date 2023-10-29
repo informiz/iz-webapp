@@ -134,7 +134,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/source-ref/{citationId}")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("citationId") @Valid Long id,
-                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
@@ -142,7 +142,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/source-ref/{citationId}/edit/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String editSourceRef(@PathVariable("citationId") @Valid Long id,
-                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
