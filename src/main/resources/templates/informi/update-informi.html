@@ -5,7 +5,7 @@
     <div layout:fragment="content">
         <div class="my-5">
             <h1 class="mb-5">Update Informi</h1>
-            <form action="#" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
+            <form th:id="'update_informi_form_' + *{id}" th:action="@{/informi/details/{id}(id=${informi.id.toString()})}" th:object="${informi}" method="post">
 
                 <input type="number" class="d-none" name="id" th:value="${informi.id}" readonly/>
                 <input type="text" class="d-none" name="entityId" th:value="${informi.entityId}" readonly/>

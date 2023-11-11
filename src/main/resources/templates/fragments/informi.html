@@ -3,27 +3,37 @@
     <fieldset th:fragment="informi(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), informi)}">
         <div class="row">
             <div class="form-group col">
-                <label for="name" class="col-form-label">Title</label>
-                <input type="text" th:field="*{name}" class="form-control" id="name" placeholder="The meaning of life"/>
-                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+                <label th:for="'name_' + *{id}" class="col-form-label">Title</label>
+                <input th:id="'name_' + *{id}" name="name" type="text" th:value="*{name}" class="form-control" placeholder="The meaning of life"/>
+                <th:block th:if="${#model?.containsAttribute('name')}">
+                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+                </th:block>
+
+
             </div>
         </div>
         <div class="row">
             <div class="form-group col">
-                <label for="description" class="col-form-label">Description</label>
-                <textarea rows="5" th:field="*{description}" class="form-control" id="description"
-                       placeholder="The answer to the ultimate question of life, the universe, and everything"/>
-                <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+                <label th:for="'description_' + *{id}" class="col-form-label">Description</label>
+                <textarea th:id="'description_' + *{id}" name="description" rows="5" th:value="*{description}" class="form-control"
+                       placeholder="The answer to the ultimate question of life, the universe, and everything"></textarea>
+                <th:block th:if="${#model?.containsAttribute('description')}">
+                    <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+                </th:block>
+
+
             </div>
         </div>
         <div class="row">
             <div class="form-group col">
-                <label for="locale" class="col-form-label">Locale</label>
-                <select th:field="*{locale}" class="form-control custom-select" id="locale">
+                <label th:for="'locale_' + *{id}" class="col-form-label">Locale</label>
+                <select th:value="*{locale}" name="locale" class="form-control custom-select" th:id="'locale_' + *{id}">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
-                <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
+                <th:block th:if="${#model?.containsAttribute('locale')}">
+                    <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
+                </th:block>
             </div>
         </div>
         <div class="row">
@@ -32,8 +42,13 @@
                 <!-- TODO: verify input, allow other media types -->
                 <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath"
                        placeholder="No file uploaded" readonly/>
-                <img id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
-                <span id="mediaPathErr" th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
+                <img th:id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
+
+                <th:block th:if="${#model?.containsAttribute('mediaPath')}">
+                    <span th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
+                </th:block>
+
+
             </div>
         </div>
         <div th:replace="~{fragments/score :: score}"></div>

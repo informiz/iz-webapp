@@ -4,14 +4,37 @@
     <div layout:fragment="content">
         <div class="my-5">
             <h1 class="mb-5">New Informi</h1>
-            <form action="#" th:action="@{/informi/add}" th:object="${informi}" method="post">
-                <div th:replace="~{fragments/informi :: informi(true)}"></div>
+            <form id="addInformiForm" name="addInformiForm" enctype="multipart/form-data"
+                  th:action="@{/informi/add}" class="mb-5" method="post">
+                <div class="card">
+                    <div th:replace="~{fragments/informi :: informi(true)}"></div>
+                   
+                    <div class="form-group">
+                        <div class="card-header">
+                            Upload media file
+                        </div>
+                        <input type="file" class="form-control btn-sm float-left" id="file" name="file"
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')')}" />
+                        <div id="mediaUploadError" style="display:none" class="text-danger"></div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col mt-5">
                         <input type="submit" class="btn btn-primary" value="Add" />
                     </div>
+                    
                 </div>
             </form>
+            <script>
+            $(document).ready(function() {
+                $('#addInformiForm').onerror(function() {
+                    var fileUploadError = document.querySelector('#mediaUploadError');
+                    fileUploadError.innerHTML = "Upload failed";
+                    singleFileUploadError.style.display = "block";
+                });
+            });
+            </script>
+            
         </div>
     </div>
 </html>

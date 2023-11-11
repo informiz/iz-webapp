@@ -43,33 +43,6 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/all-informiz.html", PREFIX);
     }
 
-    @GetMapping("/upload")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String uploadInformiMedia() {
-        return String.format("%s/upload-media.html", PREFIX);
-    }
-
-    // TODO: improve user-experience (upload inside add-informi form)
-    @RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String uploadInformiMedia(@RequestParam("file") MultipartFile file, Model model) {
-        if (file != null && ! file.isEmpty()) {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            try (InputStream inStream = file.getInputStream()) {
-                // TODO: reprocess images, random filename
-                String path = AuthUtils.uploadMedia(inStream, fileName);
-                InformiBase informi = new InformiBase();
-                informi.setMediaPath(path);
-                model.addAttribute(INFORMI_ATTR, informi);
-                return String.format("%s/add-informi.html", PREFIX);
-            } catch (IOException e) {
-                // TODO: implement @ControllerAdvice
-                e.printStackTrace();
-            }
-        }
-        return String.format("%s/upload-media.html", PREFIX);
-    }
-
     @GetMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addInformiForm(Model model) {
@@ -79,14 +52,31 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String addInformi(@Validated(InformiBase.ExistingInformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
+    public String addInformi(@Valid @RequestParam("file") MultipartFile file,
+                             @Validated(InformiBase.NewInformiFromUI.class)
+                             @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                              BindingResult result, Model model) {
         if (result.hasErrors()) {
             return String.format("%s/add-informi.html", PREFIX);
         }
+
+        if (file != null && ! file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            try (InputStream inStream = file.getInputStream()) {
+                // TODO: reprocess images, random filename
+                String path = AuthUtils.uploadMedia(inStream, fileName);
+                informi.setMediaPath(path);
+                model.addAttribute(INFORMI_ATTR, informi);
+                return String.format("%s/add-informi.html", PREFIX);
+            } catch (IOException e) {
+                // TODO: implement @ControllerAdvice
+                e.printStackTrace();
+            }
+        }
         model.addAttribute(INFORMI_ATTR, entityRepo.save(informi));
         return String.format("redirect:%s/all", PREFIX);
     }
+
 
     @PostMapping("/delete/{informiId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")

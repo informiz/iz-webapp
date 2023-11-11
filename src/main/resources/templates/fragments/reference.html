@@ -18,7 +18,7 @@
     </div>
     <div class="form-row form-group">
         <div class="col">
-            <label th:for="'entailment' + ${ref.id}">Entailment</label>
+            <label th:for="'entailment_' + *{id}">Entailment</label>
             <select name="entailment" th:value="${ref.entailment}" class="form-control" th:id="'entailment' + ${ref.id}"
                     th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
                 <option value=""> -- </option>
@@ -33,7 +33,7 @@
     </div>
     <div class="form-group form-row">
         <div class="col">
-            <label th:for="'degree' + ${ref.id}">Degree</label>
+            <label th:for="'degree_' + *{id}">Degree</label>
             <input type="number" name="degree" th:value="${ref.degree}" th:id="'degree' + ${ref.id}"
                    min="0" max="1" step="0.01" class="form-control"
                    th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}">
@@ -44,7 +44,7 @@
     </div>
     <div class="form-group form-row">
         <div class="col">
-            <label th:for="'comment' + ${ref.id}" class="col-form-label">Comment</label>
+            <label th:for="'comment_' + *{id}" class="col-form-label">Comment</label>
             <textarea name="comment" class="form-control" cols="20" th:id="'comment' + ${ref.id}"
                       th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"
                       th:text="${ref.comment}"></textarea>

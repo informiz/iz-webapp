@@ -194,16 +194,16 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
     //SourcedId {!Blank}  (Default, NewUsrRef, ExistingUsrRef, DeleteNTT)
     @Test
-    public void whenSourcedIdIsBlank_thenDefaultValidatorSucceeds() {
+    public void whenSourcedIdIsBlank_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
         Set<ConstraintViolation<SourceRef>> violations;
 
         sourceRef.setSourcedId("");
         violations = validator.validate(sourceRef);
-        assertEquals(0, violations.size());
+        assertEquals(1, violations.size());
     }
     @Test
-    public void whenSourcedIdIsBlank_thenNewSourceReferenceValidatorSucceeds() {
+    public void whenSourcedIdIsBlank_thenNewSourceReferenceValidatorViolation() {
         SourceRef sourceRef = new SourceRef();
 
         sourceRef.setId(1l);
@@ -216,7 +216,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
         assertEquals(1, violations.size());
     }
     @Test
-    public void whenSourcedIdIsBlank_thenExistingSourceReferenceValidatorSucceeds() {
+    public void whenSourcedIdIsBlank_thenExistingSourceReferenceValidatorViolation() {
         SourceRef sourceRef = new SourceRef();
 
         sourceRef.setId(1l);
