@@ -60,7 +60,7 @@ public final class InformiBase extends FactCheckedEntity implements Serializable
     @Size(max = 1500, message = "Description exceeds limit", groups = {NewInformiFromUI.class, ExistingInformiFromUI.class, Default.class})
     private String description;
 
-    @URL(message = "A valid link to a media file is mandatory", groups = {NewInformiFromUI.class, ExistingInformiFromUI.class, Default.class})
+    @URL(message = "A valid link to a media file is mandatory", groups = {ExistingInformiFromUI.class, Default.class})
     private String mediaPath;
 
     public String getName() {

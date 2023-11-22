@@ -67,7 +67,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                 String path = AuthUtils.uploadMedia(inStream, fileName);
                 informi.setMediaPath(path);
                 model.addAttribute(INFORMI_ATTR, informi);
-                return String.format("%s/add-informi.html", PREFIX);
+                //model.addAttribute("file", file);
             } catch (IOException e) {
                 // TODO: implement @ControllerAdvice
                 e.printStackTrace();

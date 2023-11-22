@@ -1,40 +1,44 @@
-<html xmlns:layout="http://www.w3.org/1999/xhtml" layout:decorate="~{fragments/style-main-layout}"
+<html layout:decorate="~{fragments/style-main-layout}" xmlns:layout="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-
     <div layout:fragment="content">
         <div class="my-5">
             <h1 class="mb-5">New Informi</h1>
-            <form id="addInformiForm" name="addInformiForm" enctype="multipart/form-data"
-                  th:action="@{/informi/add}" class="mb-5" method="post">
+            <form class="mb-5" enctype="multipart/form-data" id="addInformiForm"
+                  method="post" name="addInformiForm" th:action="@{/informi/add}">
+                <div class="form-group">
+                    <div class="card-header">
+                        Upload media file
+                    </div>
+                    <input class="form-control btn-sm float-left" id="file" name="file" onchange="displaySelectedImage(event)"
+                           required th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')')}" type="file" />
+                    <img id="selectedImage" alt="Selected Image"/>
+                </div>
+                <script>
+    function displaySelectedImage(event) {
+        var input = event.target;
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var img = document.getElementById('selectedImage');
+                img.src = e.target.result;
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
                 <div class="card">
                     <div th:replace="~{fragments/informi :: informi(true)}"></div>
-                   
-                    <div class="form-group">
-                        <div class="card-header">
-                            Upload media file
-                        </div>
-                        <input type="file" class="form-control btn-sm float-left" id="file" name="file"
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')')}" />
-                        <div id="mediaUploadError" style="display:none" class="text-danger"></div>
-                    </div>
                 </div>
                 <div class="row">
                     <div class="col mt-5">
-                        <input type="submit" class="btn btn-primary" value="Add" />
+                        <input class="btn btn-primary" type="submit" value="Add" />
                     </div>
                     
                 </div>
             </form>
-            <script>
-            $(document).ready(function() {
-                $('#addInformiForm').onerror(function() {
-                    var fileUploadError = document.querySelector('#mediaUploadError');
-                    fileUploadError.innerHTML = "Upload failed";
-                    singleFileUploadError.style.display = "block";
-                });
-            });
-            </script>
-            
         </div>
     </div>
 </html>
