@@ -35,7 +35,7 @@
                                     <!-- IMPORTANT: iteration variables are not yet available at the time of
                                     th:replace. When passing iteration variables to fragments use th:insert -->
                                     <div th:id="'rev_' + ${cur_review.getId()}"
-                                        th:insert="~{fragments/review :: reviewForm(${entityId}, ${link} + 'edit/', ${cur_review})}">
+                                        th:insert="~{fragments/review :: editReviewForm(${entityId}, ${link} + 'edit/', ${cur_review})}">
                                     </div>
                                 </div>
                                 <div th:replace="~{fragments/modal :: customModal('Edit Review', 'rev_' + ${cur_review.getId()})}"></div>
@@ -67,7 +67,7 @@
             <!-- TODO: No add button if user already reviewed the entity -->
                 <div class="d-none">
                     <div th:id="rev_0">
-                        <div th:insert="~{fragments/review :: reviewForm(${entityId}, ${link}, ${review})}"></div>
+                        <div th:insert="~{fragments/review :: newReviewForm(${entityId}, ${link})}"></div>
                     </div>
                 </div>
                 <div
