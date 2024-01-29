@@ -63,6 +63,7 @@ public final class InformiBase extends FactCheckedEntity implements Serializable
     @URL(message = "A valid link to a media file is mandatory", groups = {ExistingInformiFromUI.class, Default.class})
     private String mediaPath;
 
+
     public String getName() {
         return name;
     }

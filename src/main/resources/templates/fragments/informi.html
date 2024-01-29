@@ -4,24 +4,20 @@
         <div class="row">
             <div class="form-group col">
                 <label th:for="'name_' + *{id}" class="col-form-label">Title</label>
-                <input th:id="'name_' + *{id}" name="name" type="text" th:value="*{name}" class="form-control" placeholder="The meaning of life"/>
+                <input th:id="'name_' + *{id}" name="name" type="text" th:value="*{name}" class="form-control" autocomplete="Title" placeholder="The meaning of life"/>
                 <th:block th:if="${#model?.containsAttribute('name')}">
                     <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
                 </th:block>
-
-
             </div>
         </div>
         <div class="row">
             <div class="form-group col">
                 <label th:for="'description_' + *{id}" class="col-form-label">Description</label>
-                <textarea th:id="'description_' + *{id}" name="description" rows="5" th:value="*{description}" class="form-control"
-                       placeholder="The answer to the ultimate question of life, the universe, and everything"></textarea>
+                <input th:id="'description_' + *{id}"  name="description" type="text"  th:value="*{description}" class="form-control"
+                          placeholder="The answer to the ultimate question of life, the universe, and everything">
                 <th:block th:if="${#model?.containsAttribute('description')}">
                     <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
                 </th:block>
-
-
             </div>
         </div>
         <div class="row">
@@ -29,6 +25,7 @@
                 <label th:for="'locale_' + *{id}" class="col-form-label">Locale</label>
                 <select th:value="*{locale}" name="locale" class="form-control custom-select" th:id="'locale_' + *{id}">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
+                    <option th:value="'nl_NL'" th:text="'Dutch (Netherlands)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
                 <th:block th:if="${#model?.containsAttribute('locale')}">
@@ -38,11 +35,12 @@
         </div>
         <div class="row">
             <div class="form-group col">
+                <div th:if="${not #strings.isEmpty(informi.mediaPath)}">
                 <span class="col-form-label text-muted">Media</span>
                 <!-- TODO: verify input, allow other media types -->
-                <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath"
-                       placeholder="No file uploaded" readonly/>
-                <img th:id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
+                    <input type="text" th:value="${informi.mediaPath}" class="form-control mt-2" name="mediaPath" placeholder="No file uploaded" readonly/>
+                    <img th:id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
+                </div>
 
                 <th:block th:if="${#model?.containsAttribute('mediaPath')}">
                     <span th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>

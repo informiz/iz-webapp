@@ -111,10 +111,11 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
                                     @Validated(InformiBase.ExistingInformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
-            InformiBase current = entityRepo.loadByLocalId(id)
+            InformiBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
+            return successfulEdit(model, id, current);
         }
         return failedEdit(model, result, informi, informi);
     }
@@ -122,7 +123,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @PostMapping("/{informiId}/review/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewInformi(@PathVariable("informiId") @Valid Long id,
-                                @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                 BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
@@ -146,7 +147,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     @PostMapping("/reference/{informiId}")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReference(@PathVariable("informiId") @Valid Long id,
-                               @Validated(Reference.ExistingUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               @Validated(Reference.NewUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Model model, Authentication authentication) {
         return referenceEntity(id, reference, result, model, authentication);
     }

@@ -15,6 +15,7 @@ public interface ChaincodeEntityRepo<E extends ChainCodeEntity> extends CrudRepo
 
     Optional<E> findById(Long localId);
 
+
     /**
      * A helper function for loading entities with lazy-fetch collections (e.g. reviews).
      * Override this method (or the findById method) in order to explicitly use an entity-graph for loading
@@ -24,5 +25,4 @@ public interface ChaincodeEntityRepo<E extends ChainCodeEntity> extends CrudRepo
     default Optional<E> loadByLocalId(Long localId) {
         return findById(localId);
     }
-
 }

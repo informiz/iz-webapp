@@ -16,6 +16,7 @@ public interface InformiRepository extends ChaincodeEntityRepo<InformiBase> {
     @EntityGraph(value = INFORMI_DATA)
     Optional<InformiBase> findById(Long id);
 
+
     @EntityGraph(value = INFORMI_DATA)
     InformiBase findByName(String name); // TODO: remove?
 
