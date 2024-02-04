@@ -10,7 +10,7 @@
     <div class="form-row">
         <div class="form-group col">
             <label th:for="'link_' + *{id}" class="col-form-label">Link</label>
-            <input type="text" th:value="${cur_src_ref.link}" name="link" class="form-control" th:id="'link' + ${cur_src_ref.id}"
+            <input type="text" th:value="${cur_src_ref.link}" name="link" class="form-control" th:id="'link_' + *{id}"
                    placeholder="https://www.nasa.com/some/article"
                    th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}" />
             <span th:if="${#fields.hasErrors('link') && @tlUtils.isSourceRefFormError(cur_src_ref, source)}" th:errors="*{link}" class="text-danger"></span>
@@ -19,7 +19,7 @@
     <div class="form-row">
         <div class="form-group col">
             <label th:for="'description_' + *{id}" class="col-form-label">Description</label>
-            <textarea th:text="${cur_src_ref.description}" name="description" class="form-control" th:id="'description' + ${cur_src_ref.id}"
+            <textarea th:text="${cur_src_ref.description}" name="description" class="form-control" th:id="'description_' + *{id}"
                       cols="30" placeholder="Describe the source..."
                       th:disabled="${!#authorization.expression('hasRole(''ROLE_CHECKER'')') or mode == 'read'}"></textarea>
             <span th:if="${#fields.hasErrors('description') && @tlUtils.isSourceRefFormError(cur_src_ref, source)}" th:errors="*{description}" class="text-danger"></span>
