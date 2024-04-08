@@ -65,7 +65,6 @@ class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
     protected String textExceedsMsg() {
         return CLAIM_SIZE;
     }
-    //protected String commentExceedsMsg() {        return CLAIM_SIZE;    }
     protected String EntityIllegalArgumentTitle() {
         return "Illegal argument, an error was logged and will be addressed by a developer";
     }
@@ -131,6 +130,7 @@ class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
                         "id", new String[]{"1"},
+                        "entityId", new String[]{TEST_ENTITY_ID},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
                         "claim", new String[]{RandomStringUtils.random(500)}),
                 Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
@@ -152,7 +152,8 @@ class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
     void whenUpdateHypothesisClaimExceeds_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        "id", new String[]{"1"},
+                        "id", new String[]{"1251"},
+                        "entityId", new String[]{TEST_ENTITY_ID},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
                         "claim", new String[]{RandomStringUtils.random(501)}),
                 Arrays.asList(status().isOk(),

@@ -96,7 +96,8 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     void whenMemberAddSource_thenSucceeds() throws Exception {
 
         verifyPostApiCall("/add",  Map.of(
-                        "srcType", new String[]{TEST_TYPE},
+
+                "srcType", new String[]{TEST_TYPE},
                         "name", new String[]{TEST_ENTITY_ID},
                         "link", new String[]{"http://server.com"},
                         "description", new String[]{RandomStringUtils.random(500)},
@@ -136,13 +137,17 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenOwnerUpdateSource_thenSucceeds() throws Exception {
 
-        verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        //"id", new String[]{"1"},
-                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+        SourceBase populatedEntity = getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null);
+        populatedEntity.setDescription(RandomStringUtils.random(500));
+        verifyPostApiCall(populatedEntity, "details/1",  Map.of(
+                        "id", new String[]{"1"},
+                        "entityId", new String[]{TEST_ENTITY_ID},
                         "srcType", new String[]{TEST_TYPE},
-                        "link", new String[]{"http://server.com"},
                         "name", new String[]{TEST_ENTITY_ID},
-                        "description", new String[]{RandomStringUtils.random(500)}),
+                        "link", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(500)},
+                        "reliability", new String[]{"0.9"},
+                        "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
                 Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
     }
 

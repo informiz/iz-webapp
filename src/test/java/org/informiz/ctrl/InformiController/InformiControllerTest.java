@@ -95,9 +95,10 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenMemberAddInformi_thenSucceeds() throws Exception {
 
-        verifyPostApiCall("upload",  Map.of(
+        verifyPostApiCall("add",  Map.of(
+                        "name", new String[]{RandomStringUtils.random(50)},
                         "mediaPath", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(1500)}),
+                        "description", new String[]{RandomStringUtils.random(1400)}),
                 Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
@@ -149,8 +150,10 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
     void whenOwnerUpdateInformi_thenSucceeds() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
-                        //"id", new String[]{"1"},
+                        "id", new String[]{"1"},
+                        "name", new String[]{"informiTeatName"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "entityId", new String[]{TEST_ENTITY_ID},
                         "mediaPath", new String[]{"http://server.com"},
                         "description", new String[]{RandomStringUtils.random(1500)}),
                 Arrays.asList(status().isFound(), redirectedUrl(updateEntityUrl())));
@@ -187,6 +190,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
                         "id", new String[]{"1"},
                         "name", new String[]{"informiTeatName"},
+                        "entityId", new String[]{TEST_ENTITY_ID},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
                         "mediaPath", new String[]{"http://server.com"},
                         "description", new String[]{RandomStringUtils.random(1501)}),

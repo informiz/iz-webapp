@@ -3,33 +3,36 @@
     <fieldset th:fragment="informi(is_new)" th:disabled="${ (! is_new) and @sUtils.getDisabled(#authentication.getPrincipal(), informi)}">
         <div class="row">
             <div class="form-group col">
-                <label th:for="'name_' + *{id}" class="col-form-label">Title</label>
-                <input th:id="'name_' + *{id}" name="name" type="text" th:value="*{name}" class="form-control" autocomplete="Title" placeholder="The meaning of life"/>
-                <th:block th:if="${#model?.containsAttribute('name')}">
+                <label for="name" class="col-form-label">Title</label>
+                <input type="text"  th:field="*{name}" class="form-control" id="name" autocomplete="Title" placeholder="The meaning of life" name="name"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+
                     <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
-                </th:block>
+
             </div>
         </div>
         <div class="row">
             <div class="form-group col">
-                <label th:for="'description_' + *{id}" class="col-form-label">Description</label>
-                <input th:id="'description_' + *{id}"  name="description" type="text"  th:value="*{description}" class="form-control"
-                          placeholder="The answer to the ultimate question of life, the universe, and everything">
-                <th:block th:if="${#model?.containsAttribute('description')}">
+                <label for="description" class="col-form-label">Description</label>
+                <input type="text" id="description" th:field="*{description}" class="form-control" placeholder="The answer to the ultimate question of life, the universe, and everything"
+                       name="description"  th:value="*{description}"
+                       th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
+
                     <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
-                </th:block>
+
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-4">
-                <label for="locale" class="col-form-label">Locale</label>
-                <select th:field="*{locale}" class="form-control custom-select" id="locale"
-                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
+            <div class="form-group col">
+                <label th:for="'locale_' + *{id}" class="col-form-label">Locale</label>
+                <select th:value="*{locale}" name="locale" class="form-control custom-select" th:id="'locale_' + *{id}">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
                     <option th:value="'nl_NL'" th:text="'Dutch (Netherlands)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
-                <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
+
+                    <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
+
             </div>
         </div>
         <div class="row">
@@ -41,9 +44,7 @@
                     <img th:id="media" class="img-fluid" th:src="${informi.getMediaPath()}"/>
                 </div>
 
-                <th:block th:if="${#model?.containsAttribute('mediaPath')}">
                     <span th:if="${#fields.hasErrors('mediaPath')}" th:errors="*{mediaPath}" class="text-danger"></span>
-                </th:block>
 
 
             </div>

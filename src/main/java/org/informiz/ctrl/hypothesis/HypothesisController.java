@@ -47,7 +47,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String addHypothesis(@Validated(HypothesisBase.ExistingHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+    public String addHypothesis(@Validated(HypothesisBase.NewHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return "hypothesis/add-hypothesis.html";
@@ -56,7 +56,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         entityRepo.save(hypothesis);
         return String.format("redirect:%s/all", PREFIX);
     }
-
+//Group validation missing?
     @PostMapping("/delete/{hypothesisId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteHypothesis(@PathVariable("hypothesisId") @Valid Long id, @RequestParam String ownerId) {
@@ -108,7 +108,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     //@Secured("ROLE_CHECKER")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewHypothesis(@PathVariable("hypothesisId") @Valid Long id,
-                                   @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                   @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
@@ -137,7 +137,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     //@Secured("ROLE_CHECKER")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReference(@PathVariable("hypothesisId") @Valid Long id,
-                               @Validated(Reference.ExistingUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               @Validated(Reference.NewUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result,Authentication authentication, Model model) {
 
         return referenceEntity(id, reference, result, model, authentication);
@@ -169,7 +169,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     //@Secured("ROLE_CHECKER")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("hypothesisId") @Valid Long id,
-                            @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            @Validated(SourceRef.NewUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
 
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);

@@ -45,7 +45,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String addSource(@Validated(SourceBase.ExistingSourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
+    public String addSource(@Validated(SourceBase.NewSourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-src.html", PREFIX);
@@ -103,7 +103,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/{sourceId}/review/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewSource(@PathVariable("sourceId") @Valid Long id,
-                               @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                               @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }

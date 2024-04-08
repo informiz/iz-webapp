@@ -38,7 +38,7 @@ public abstract class InformizEntity<T extends InformizEntity> implements Serial
 
     @Column(name = "owner_entity_id", nullable = false)
     @NotBlank(message = "Owner ID is required", groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
-    @Size(max = 255, groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
+    @Size(max = 255, groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class  })
     protected String ownerId;//todo required also in user-input validation groups
 
     // Creation time, as UTC timestamp in milliseconds

@@ -16,6 +16,7 @@
                         <th data-field="score" data-sortable="true" data-searchable="false">Score</th>
                         <th data-field="comment" data-sortable="true" data-searchable="true">Comment</th>
                         <th:block sec:authorize="hasRole('ROLE_CHECKER')" th:if="not ${#strings.isEmpty(link)}">
+
                             <th data-sortable="false" data-searchable="false">Edit</th>
                             <th data-sortable="false" data-searchable="false">Delete</th>
                         </th:block>

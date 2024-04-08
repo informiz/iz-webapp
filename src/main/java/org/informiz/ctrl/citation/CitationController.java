@@ -109,7 +109,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/{citationId}/review/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReview(@PathVariable("citationId") @Valid Long id,
-                                 @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                 @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                  BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
@@ -134,7 +134,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     @PostMapping("/source-ref/{citationId}")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("citationId") @Valid Long id,
-                            @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            @Validated(SourceRef.NewUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }

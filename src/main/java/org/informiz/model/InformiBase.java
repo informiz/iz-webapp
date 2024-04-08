@@ -39,7 +39,7 @@ import java.io.Serializable;
         )
 
 })
-public final class InformiBase extends FactCheckedEntity implements Serializable {
+public final class        InformiBase extends FactCheckedEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 

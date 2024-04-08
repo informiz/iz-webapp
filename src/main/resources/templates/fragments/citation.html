@@ -4,7 +4,7 @@
         <div class="row">
             <div class="form-group col">
                 <label for="text" class="col-form-label">Text</label>
-                <input type="text" th:field="*{text}" class="form-control" id="text" placeholder="Whales are big"
+                <input type="text" id="text" th:field="*{text}" class="form-control" placeholder="Whales are big"
                        th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}"/>
                 <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="text-danger"></span>
             </div>
@@ -23,6 +23,7 @@
                 <select th:field="*{locale}" class="form-control custom-select" id="locale"
                         th:disabled="${!#authorization.expression('hasRole(''ROLE_MEMBER'')') or mode == 'read'}">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
+                    <option th:value="'nl_NL'" th:text="'Dutch (Netherlands)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
                 <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>
