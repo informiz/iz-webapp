@@ -221,5 +221,4 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
         return citation;
     }
 
-
 }

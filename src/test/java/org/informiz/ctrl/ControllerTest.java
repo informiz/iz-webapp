@@ -40,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class ControllerTest<T extends ChainCodeEntity> {
     public static final String TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
 
-
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
     @MockBean
@@ -168,6 +167,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerAddReview_thenForbidden() throws Exception {
+
         verifyPostApiCall(getPopulatedEntity("some owner", null), "1/review/",  Map.of(
                         "rating", new String[]{("0.82")},
                         "reviewedEntityId", new String[]{TEST_ENTITY_ID},

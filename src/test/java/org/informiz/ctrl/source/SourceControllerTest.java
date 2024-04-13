@@ -67,7 +67,8 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     protected String nullTypeMsg() {
         return TYPE_MSG;
     }
-    protected String EntityIllegalArgumentTitle() {return "Illegal argument, an error was logged and will be addressed by a developer"; }
+    protected String EntityIllegalArgumentTitle() {
+        return "Illegal argument, an error was logged and will be addressed by a developer"; }
     protected String invalidSourceLinkMsg() {
         return  "Please provide a valid link";
     }
@@ -97,7 +98,7 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
 
         verifyPostApiCall("/add",  Map.of(
 
-                "srcType", new String[]{TEST_TYPE},
+                        "srcType", new String[]{TEST_TYPE},
                         "name", new String[]{TEST_ENTITY_ID},
                         "link", new String[]{"http://server.com"},
                         "description", new String[]{RandomStringUtils.random(500)},

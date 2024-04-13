@@ -97,7 +97,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
 
     @PostMapping("/delete/{citationId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
-    //Todo: Use validationGroup
     public String deleteCitation(@PathVariable("citationId") @Valid Long id ,@RequestParam String ownerId) {
         CitationBase citation = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
