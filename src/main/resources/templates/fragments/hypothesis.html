@@ -13,6 +13,7 @@
                 <label for="locale" class="col-form-label">Locale</label>
                 <select th:field="*{locale}" class="form-control custom-select" id="locale">
                     <option th:value="'en_GH'" th:text="'English (Ghana)'"></option>
+                    <option th:value="'nl_NL'" th:text="'Dutch (Netherlands)'"></option>
                     <option th:value="'en_US'" th:text="'English (US)'"></option>
                 </select>
                 <span th:if="${#fields.hasErrors('locale')}" th:errors="*{locale}" class="text-danger"></span>

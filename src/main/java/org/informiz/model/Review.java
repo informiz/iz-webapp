@@ -8,19 +8,21 @@ import java.io.Serializable;
 
 @Table(name="review")
 @Entity
-public final class Review extends InformizEntity implements Serializable {
+public final class Review extends InformizEntity<InformizEntity> implements Serializable {
 
     static final long serialVersionUID = 3L ;
+
 
     /**
      * Validation group for incoming review from UI (most fields will not be initialized)
      */
-    public interface UserReview {}
+    public interface ExistingUserReview extends ExistingEntityFromUI {}
+    public interface NewUserReview {}
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class })
-    @Positive(groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an ID", groups = { Default.class, ExistingEntityFromUI.class, DeleteEntity.class })
+    @Positive(groups = { Default.class, ExistingEntityFromUI.class, DeleteEntity.class })
     protected Long id;
 
     public Long getId() {
@@ -32,21 +34,21 @@ public final class Review extends InformizEntity implements Serializable {
         return this;
     }
 
-    @DecimalMin(value = "0.0", groups = { UserReview.class, Default.class })
-    @DecimalMax(value = "1.0", groups = { UserReview.class, Default.class })
-    @NotNull(groups = { UserReview.class, Default.class }, message = "Please submit rating between 0.0 and 1.0")
+    @DecimalMin(value = "0.0", groups = { Default.class, NewUserReview.class, ExistingUserReview.class })
+    @DecimalMax(value = "1.0", groups = { Default.class, NewUserReview.class, ExistingUserReview.class })
+    @NotNull(groups = { Default.class, NewUserReview.class, ExistingUserReview.class }, message = "Please submit rating between 0.0 and 1.0")
     @Column(name = "rating", nullable = false)
     private Float rating;
 
 
     // TODO: Allow null in db - Hibernate sets to null on remove from parent's reviews, then deletes the review
     @Column(name = "reviewed_entity_id")
-    @NotBlank(groups = { UserReview.class, DeleteEntity.class })
-    @Size(max = 255, groups = { UserReview.class, DeleteEntity.class, Default.class })
+    @NotBlank(groups = { Default.class, NewUserReview.class, ExistingUserReview.class, DeleteEntity.class })
+    @Size(max = 255, groups = { Default.class, NewUserReview.class, ExistingUserReview.class, DeleteEntity.class })
     private String reviewedEntityId;
 
     @Column(name = "comment")
-    @Size(max = 255, groups = { UserReview.class, Default.class }, message = "Comment must be under 255 characters")
+    @Size(max = 255, groups = { Default.class, NewUserReview.class, ExistingUserReview.class }, message = "Comment must be under 255 characters")
     private String comment;
 
     public static Review create() { return new Review(); }

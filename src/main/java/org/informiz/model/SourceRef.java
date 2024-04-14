@@ -14,19 +14,20 @@ import java.util.Objects;
 
 @Table(name="source_ref")
 @Entity
-public final class SourceRef extends InformizEntity implements Serializable {
+public final class SourceRef extends InformizEntity<InformizEntity> implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
     /**
      * Validation group for incoming source-reference from UI (most fields will not be initialized)
      */
-    public interface UserSourceReference {}
+    public interface ExistingUserSourceReference extends ExistingEntityFromUI {}
+    public interface NewUserSourceReference{}
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull (message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
-    @Positive(groups = { DeleteEntity.class, Default.class })
+    @NotNull (message = "Please provide an ID", groups = { Default.class, ExistingEntityFromUI.class, DeleteEntity.class })
+    @Positive(groups = { Default.class, ExistingEntityFromUI.class, DeleteEntity.class })
     protected Long id;
 
     public Long getId() {
@@ -39,21 +40,21 @@ public final class SourceRef extends InformizEntity implements Serializable {
     }
 
     @Column(name = "src_entity_id")
-    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class, DeleteEntity.class })
     private String srcEntityId;
 
     // TODO: ------------------------- need to change in DB from id to entity-id -------------------------
     // TODO: Allow null in db - Hibernate sets to null on remove from parent's sources, then deletes the source-ref
     @Column(name = "sourced_entity_id")
-    @NotBlank(groups = { DeleteEntity.class, UserSourceReference.class })
-    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
+    @NotBlank(groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class, DeleteEntity.class })
+    @Size(max = 255, groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class, DeleteEntity.class })
     private String sourcedId;
 
-    @URL(groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
-    @Size(max = 255, groups = { DeleteEntity.class, UserSourceReference.class, Default.class })
+    @URL(groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class, DeleteEntity.class })
+    @Size(max = 255, groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class, DeleteEntity.class })
     private String link;
 
-    @Size(max = 255, groups = { UserSourceReference.class, Default.class })
+    @Size(max = 255, groups = { Default.class, NewUserSourceReference.class, ExistingUserSourceReference.class  })
     private String description;
 
 

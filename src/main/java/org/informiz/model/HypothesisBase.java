@@ -3,12 +3,10 @@ package org.informiz.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Table(name="hypothesis")
 @Entity
@@ -41,9 +39,13 @@ public final class HypothesisBase extends FactCheckedEntity implements Serializa
     /**
      * Validation group for add/edit hypothesis through the UI (most fields will not be initialized)
      */
-    public interface HypothesisFromUI {}
+    public interface ExistingHypothesisFromUI extends ExistingEntityFromUI {}
+    public interface NewHypothesisFromUI{}
 
-    @NotBlank(message = "Claim is mandatory", groups = {HypothesisFromUI.class, Default.class})
+
+    @NotBlank(message = "Claim is mandatory", groups = {NewHypothesisFromUI.class, ExistingHypothesisFromUI.class, Default.class})
+    @Size(max = 500, message = "Claim must be under 500 characters", groups = {NewHypothesisFromUI.class, ExistingHypothesisFromUI.class, Default.class})
+    @Column(length = 500)
     private String claim;
 
     public String getClaim() {

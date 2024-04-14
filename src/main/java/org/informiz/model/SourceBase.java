@@ -29,7 +29,8 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
     /**
      * Validation group for add/edit source through the UI (most fields will not be initialized)
      */
-    public interface SourceFromUI {}
+    public interface ExistingSourceFromUI extends ExistingEntityFromUI {}
+    public interface NewSourceFromUI {}
 
     // TODO: additional details per source-type?
     public enum SourceType {
@@ -60,18 +61,19 @@ public final class SourceBase extends ChainCodeEntity implements Serializable {
 
     }
 
-    @NotBlank(message = "Name is mandatory", groups = {SourceFromUI.class, Default.class})
+    @NotBlank(message = "Name is mandatory", groups = {NewSourceFromUI.class, ExistingSourceFromUI.class, Default.class})
     private String name;
 
-    @URL(message = "Please provide a valid link", groups = {SourceFromUI.class, Default.class})
-    @NotBlank(message = "Link is mandatory", groups = {SourceFromUI.class, Default.class})
+    @URL(message = "Please provide a valid link", groups = {NewSourceFromUI.class, ExistingSourceFromUI.class, Default.class})
+    @NotBlank(message = "Link is mandatory", groups = {NewSourceFromUI.class, ExistingSourceFromUI.class, Default.class})
     private String link;
 
     @Enumerated(EnumType.ORDINAL)
-    @NotNull(message = "Type is mandatory", groups = {SourceFromUI.class, Default.class})
+    @NotNull(message = "Type is mandatory", groups = {NewSourceFromUI.class, ExistingSourceFromUI.class, Default.class})
     private SourceType srcType;
 
-    @Size(max = 500, message = "Description must be under 500 characters", groups = {SourceBase.SourceFromUI.class, Default.class})
+    //Todo: mach size restriction
+    @Size(max = 500, message = "Description must be under 500 characters", groups = {NewSourceFromUI.class, ExistingSourceFromUI.class, Default.class})
     private String description;
 
     public String getName() {

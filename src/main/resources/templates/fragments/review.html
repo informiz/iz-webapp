@@ -1,58 +1,81 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- TODO: can define thymeleaf "macro" to check if errors come from this form?? -->
-    <div th:fragment="reviewForm(entityId, action_path, cur_review)">
-        <form th:id="'rev_form_' + ${cur_review.getId()}" th:action="${action_path}" th:object="${review}" method="post">
-            <div class="form-row">
-                <div class="col">
-                    <input type="text" class="d-none" name="reviewedEntityId" th:value="${entityId}" readonly/>
-                    <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
-                    <input type="text" class="d-none" name="id" th:value="${cur_review.getId()}" readonly>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-4">
-                    <label th:for="'rating' + ${cur_review.getId()}" class="col-form-label">Reliability</label>
-                    <input type="number" name="rating" th:value="${cur_review.rating}" min="0" max="1" step="0.01"
-                           class="form-control" th:id="'rating' + ${cur_review.getId()}" placeholder="0.9"/>
-                    <span th:if="${#fields.hasErrors('rating') && @tlUtils.isReviewFormError(cur_review, review)}"
-                          th:errors="*{rating}" class="text-danger"></span>
-                </div>
-                <div class="col-8">
-                    <label th:for="'comment' + ${cur_review.getId()}" class="col-form-label">Comment</label>
-                    <textarea name="comment" th:text="${cur_review.comment}" class="form-control" th:id="'comment' + ${cur_review.getId()}" cols="30"
-                              placeholder="Explain your review..."></textarea>
-                    <span th:if="${#fields.hasErrors('comment') && @tlUtils.isReviewFormError(cur_review, review)}"
-                          th:errors="*{comment}" class="text-danger"></span>
-                </div>
-            </div>
-            <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
-                <div class="col-4">
-                    <input type="submit" th:id="'rev_form_submit_' + ${cur_review.getId()}" class="btn btn-primary"
-                           value="Submit">
-                    </a>
-                </div>
-            </div>
-            <th:block th:if="${#fields.hasAnyErrors() && @tlUtils.isReviewFormError(cur_review, review)}">
-                <!-- Display form if submission failed with errors -->
-                <th:block th:if="${@tlUtils.isAddReviewError(cur_review, review)}">
-                    <script>
+<div th:fragment="newReviewForm(entityId, action_path)">
+    <form th:id="'rev_form_0'" th:action="${action_path}" th:object="${review}" method="post">
+        <div th:replace="~{fragments/review :: reviewForm(${entityId}, ${action_path}, ${review})}"></div>
+    </form>
+
+    <span th:if="${#fields.hasErrors('review.comment') || #fields.hasErrors('review.rating')}" th:errors="*{review.comment}" class="text-danger"></span>
+    <th:block th:if="${#fields.hasErrors('review.comment') || #fields.hasErrors('review.rating')}">
+
+               <th:block th:if="${review.getId() == 0}">
+                   <span th:if="${#fields.hasErrors('review.comment') || #fields.hasErrors('review.rating')}" th:errors="*{review.comment}" class="text-danger"></span>
+
+            <script>
                         loadCompleteCallbacks.push(function() {
                             // trigger containing modal to display form
                             $("#modal_rev_0").modal('show');
                         });
                     </script>
-                </th:block>
-                <th:block th:unless="${@tlUtils.isAddReviewError(cur_review, review)}">
-                    <script>
+    </th:block>
+</div>
+
+<div th:fragment="editReviewForm(entityId, action_path, cur_review)">
+    <form th:id="'rev_form_' + ${cur_review.getId()}" th:action="${action_path}" th:object="${review}" method="post">
+        <div th:replace="~{fragments/review :: reviewForm(${entityId}, ${action_path}, ${cur_review})}"></div>
+    </form>
+
+    <span th:if="${#fields.hasErrors('review.comment') || #fields.hasErrors('review.rating')}" th:errors="*{review.comment}" class="text-danger"></span>
+
+   <th:block th:if="${#fields.hasErrors('review.comment') || #fields.hasErrors('review.rating')}">
+        -        <th:block th:if="${review.getId() == 0}">
+
+
+            <script>
                         loadCompleteCallbacks.push(function() {
-                            const modal_selector = "#modal_rev_" + "[[${cur_review.getId()}]]";
+                            const modal_selector = "#modal_rev_" + "[[${review_cur.getId()}]]";
                             // trigger containing modal to display form
                             $(modal_selector).modal('show');
                         });
                     </script>
-                </th:block>
-            </th:block>
-        </form>
+    </th:block>
+</div>
+
+<!-- TODO: can define thymeleaf "macro" to check if errors come from this form?? -->
+    <div th:fragment="reviewForm(entityId, action_path, cur_review)">
+        <div class="form-row">
+            <div class="col">
+                <input type="text" class="d-none" name="reviewedEntityId" th:value="${entityId}" readonly/>
+                <span th:if="${#fields.hasErrors('reviewedEntityId')}" th:errors="*{reviewedEntityId}" class="text-danger"></span>
+                <input type="text" class="d-none" name="ownerId" th:value="${cur_review.ownerId} ? ${cur_review.ownerId} : ${#authentication.principal.name}" readonly/>
+                <input type="text" class="d-none" name="id" th:value="${cur_review.id}" readonly>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-4">
+                <label th:for="'rating_' + ${cur_review.id}" class="col-form-label">Reliability</label>
+                <input type="number" name="rating" th:value="${cur_review.rating}" min="0" max="1" step="0.01"
+                       class="form-control" th:id="'rating_' + ${cur_review.id}" placeholder="0.9"/>
+                <span th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}" class="text-danger"></span>
+
+            </div>
+            <div class="col-8">
+                <label th:for="'comment_' + *{id}" class="col-form-label">Comment</label>
+                <textarea name="comment" th:text="${cur_review.comment}" class="form-control" th:id="'comment_' + ${cur_review.id}" cols="30"
+                          placeholder="Explain your review..."></textarea>
+                <span th:if="${#fields.hasErrors('comment')}"
+                      th:errors="*{comment}" class="text-danger"></span>
+
+
+            </div>
+        </div>
+        <div th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}" class="form-row mt-2">
+            <div class="col-4">
+                <input type="submit" th:id="'rev_form_submit_' + ${cur_review.id}" class="btn btn-primary"
+                       value="Submit">
+                </a>
+            </div>
+        </div>
+
     </div>
 </html>

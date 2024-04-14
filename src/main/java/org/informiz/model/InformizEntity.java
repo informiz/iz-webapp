@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 @MappedSuperclass
 @JsonView(Utils.Views.EntityDefaultView.class)
-public abstract class InformizEntity implements Serializable {
+public abstract class InformizEntity<T extends InformizEntity> implements Serializable {
 
     static final long serialVersionUID = 3L;
 
@@ -29,7 +29,7 @@ public abstract class InformizEntity implements Serializable {
     /**
      * Validation group for Post-Inset Entities in the DB
      */
-    public interface PostInsertDefault extends Default {}
+    public interface ExistingEntityFromUI {}
 
     @Column(name = "creator_entity_id", nullable = false, updatable = false)
     @NotBlank
@@ -37,8 +37,8 @@ public abstract class InformizEntity implements Serializable {
     protected String creatorId;
 
     @Column(name = "owner_entity_id", nullable = false)
-    @NotBlank(message = "Owner ID is required", groups = { DeleteEntity.class, Default.class })
-    @Size(max = 255, groups = { DeleteEntity.class, Default.class })
+    @NotBlank(message = "Owner ID is required", groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
+    @Size(max = 255, groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class  })
     protected String ownerId;//todo required also in user-input validation groups
 
     // Creation time, as UTC timestamp in milliseconds
@@ -56,7 +56,7 @@ public abstract class InformizEntity implements Serializable {
     @Column(name = "removed")
     protected Long removedTs;
 
-    protected Consumer<InformizEntity> onCreateConsumer() {
+    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
             return entity -> {
                 entity.createdTs = entity.updatedTs = new Date().getTime();
                 try {
@@ -74,7 +74,7 @@ public abstract class InformizEntity implements Serializable {
 
     @PrePersist
     protected void onCreate() {
-        onCreateConsumer().accept(this);
+        onCreateConsumer().accept((InformizEntity<InformizEntity>) this);
     }
 
     @PreUpdate
@@ -133,7 +133,7 @@ public abstract class InformizEntity implements Serializable {
 
     public abstract Long getId();
 
-    @Positive(groups = {DeleteEntity.class, Default.class})
-    public abstract InformizEntity setId(Long id);
+    @Positive(groups = {ExistingEntityFromUI.class, DeleteEntity.class, Default.class})
+    public abstract InformizEntity<InformizEntity> setId(Long id);
 
 }

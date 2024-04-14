@@ -10,7 +10,6 @@ import org.informiz.model.Review;
 import org.informiz.repo.informi.InformiRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -44,55 +43,43 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/all-informiz.html", PREFIX);
     }
 
-    @GetMapping("/upload")
-    @Secured("ROLE_MEMBER")
-    public String uploadInformiMedia() {
-        return String.format("%s/upload-media.html", PREFIX);
-    }
-
-    // TODO: improve user-experience (upload inside add-informi form)
-    //@PostMapping("/upload")
-    @RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
-    @Secured("ROLE_MEMBER")
-    public String uploadInformiMedia(@RequestParam("file") MultipartFile file, Model model) {
-        if (file != null && ! file.isEmpty()) {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            try (InputStream inStream = file.getInputStream()) {
-                // TODO: reprocess images, random filename
-                String path = AuthUtils.uploadMedia(inStream, fileName);
-                InformiBase informi = new InformiBase();
-                informi.setMediaPath(path);
-                model.addAttribute(INFORMI_ATTR, informi);
-                return String.format("%s/add-informi.html", PREFIX);
-            } catch (IOException e) {
-                // TODO: implement @ControllerAdvice
-                e.printStackTrace();
-            }
-        }
-        return String.format("%s/upload-media.html", PREFIX);
-    }
-
     @GetMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addInformiForm(Model model) {
         model.addAttribute(INFORMI_ATTR, new InformiBase());
         return String.format("%s/add-informi.html", PREFIX);
     }
 
     @PostMapping("/add")
-    @Secured("ROLE_MEMBER")
-    public String addInformi(@Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    public String addInformi(@Valid @RequestParam("file") MultipartFile file,
+                             @Validated(InformiBase.NewInformiFromUI.class)
+                             @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                              BindingResult result, Model model) {
         if (result.hasErrors()) {
             return String.format("%s/add-informi.html", PREFIX);
+        }
+
+        if (file != null && ! file.isEmpty()) {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            try (InputStream inStream = file.getInputStream()) {
+                // TODO: reprocess images, random filename
+                String path = AuthUtils.uploadMedia(inStream, fileName);
+                informi.setMediaPath(path);
+                model.addAttribute(INFORMI_ATTR, informi);
+                //model.addAttribute("file", file);
+            } catch (IOException e) {
+                // TODO: implement @ControllerAdvice
+                e.printStackTrace();
+            }
         }
         model.addAttribute(INFORMI_ATTR, entityRepo.save(informi));
         return String.format("redirect:%s/all", PREFIX);
     }
 
+
     @PostMapping("/delete/{informiId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteInformi(@PathVariable("informiId") @Valid Long id, @RequestParam String ownerId) {
         InformiBase informi = entityRepo.loadByLocalId(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
@@ -110,7 +97,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/details/{informiId}")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String getInformi(@PathVariable("informiId") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
@@ -119,40 +106,38 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/details/{informiId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#informi.getOwnerId() == principal.getAttributes().get('eid')")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #informi.getOwnerId() == principal.getAttributes().get('eid')")
     public String updateInformi(@PathVariable("informiId") @Valid Long id,
-                                    @Validated(InformiBase.InformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
+                                    @Validated(InformiBase.ExistingInformiFromUI.class) @ModelAttribute(INFORMI_ATTR) InformiBase informi,
                                     BindingResult result, Model model) {
         if (! result.hasErrors()) {
-            InformiBase current = entityRepo.loadByLocalId(id)
+            InformiBase current = entityRepo.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid informi id"));
             current.edit(informi);
             entityRepo.save(current);
+            return successfulEdit(model, id, current);
         }
         return failedEdit(model, result, informi, informi);
     }
 
     @PostMapping("/{informiId}/review/")
-    @Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewInformi(@PathVariable("informiId") @Valid Long id,
-                                @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                 BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
 
     @PostMapping("/{informiId}/review/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("informiId") @Valid Long id,
-                                    @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                    @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                     BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
 
     @PostMapping("/{informiId}/review/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String deleteReview (@PathVariable("informiId") @Valid Long id,
                                 @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                 BindingResult result, Model model, Authentication authentication) {
@@ -160,25 +145,23 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @PostMapping("/reference/{informiId}")
-    @Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReference(@PathVariable("informiId") @Valid Long id,
-                               @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               @Validated(Reference.NewUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Model model, Authentication authentication) {
         return referenceEntity(id, reference, result, model, authentication);
     }
 
     @PostMapping("/reference/{informiId}/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #reference.ownerId == authentication.principal.name")
     public String editReference(@PathVariable("informiId") @Valid Long id,
-                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                @Validated(Reference.ExistingUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result, Model model, Authentication authentication) {
         return referenceEntity(id, reference, result, model, authentication);
     }
 
     @PostMapping("/reference/{informiId}/ref/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #reference.ownerId == authentication.principal.name")
     public String deleteReference(@PathVariable("informiId") @Valid Long id,
                                   @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                   BindingResult result, Model model, Authentication authentication) {

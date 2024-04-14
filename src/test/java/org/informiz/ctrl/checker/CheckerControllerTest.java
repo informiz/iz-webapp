@@ -1,11 +1,10 @@
-package org.informiz.ctrl.FactChecker;
+package org.informiz.ctrl.checker;
 
 import org.informiz.WithCustomAuth;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
-import org.informiz.ctrl.checker.FactCheckerController;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, FactCheckerController.class})
 @ActiveProfiles("test")
 @WebMvcTest(FactCheckerController.class)
-public class FactCheckerControllerTest {
+public class CheckerControllerTest {
 
     @MockBean
     private FactCheckerRepository repo;

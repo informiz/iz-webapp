@@ -7,7 +7,6 @@ import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.informiz.repo.source.SourceRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -40,15 +39,15 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @GetMapping("/add")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addHypothesisForm(Model model) {
         model.addAttribute(HYPOTHESIS_ATTR, new HypothesisBase());
         return String.format("%s/add-hypothesis.html", PREFIX);
     }
 
     @PostMapping("/add")
-    @Secured("ROLE_MEMBER")
-    public String addHypothesis(@Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    public String addHypothesis(@Validated(HypothesisBase.NewHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return "hypothesis/add-hypothesis.html";
@@ -57,10 +56,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         entityRepo.save(hypothesis);
         return String.format("redirect:%s/all", PREFIX);
     }
-
+//Group validation missing?
     @PostMapping("/delete/{hypothesisId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
     public String deleteHypothesis(@PathVariable("hypothesisId") @Valid Long id, @RequestParam String ownerId) {
         HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
@@ -80,7 +78,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     // TODO: Remove references to deleted hypothesis
     @GetMapping("/details/{hypothesisId}")
-    @Secured("ROLE_MEMBER")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String getHypothesis(@PathVariable("hypothesisId") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
                 .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));
@@ -91,10 +89,9 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/details/{hypothesisId}")
-    @Secured("ROLE_MEMBER")
-    @PreAuthorize("#hypothesis.ownerId == authentication.principal.name")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #hypothesis.ownerId == authentication.principal.name")
     public String updateHypothesis(@PathVariable("hypothesisId") @Valid Long id,
-                                    @Validated(HypothesisBase.HypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+                                    @Validated(HypothesisBase.ExistingHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
                                     BindingResult result, Model model) {
         if (result.hasErrors()) {
             return failedEdit(model, result, hypothesis, hypothesis);
@@ -108,26 +105,27 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
     }
 
     @PostMapping("/{hypothesisId}/review/")
-    @Secured("ROLE_CHECKER")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewHypothesis(@PathVariable("hypothesisId") @Valid Long id,
-                                   @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                                   @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                    BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
 
     @PostMapping("/{hypothesisId}/review/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("hypothesisId") @Valid Long id,
-                             @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                             @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                              BindingResult result, Model model, Authentication authentication) {
 
         return reviewEntity(id, review, result, model, authentication);
     }
 
     @PostMapping("/{hypothesisId}/review/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#review.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String deleteReview (@PathVariable("hypothesisId") @Valid Long id,
                                 @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                 BindingResult result, Model model, Authentication authentication) {
@@ -136,9 +134,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
 
     @PostMapping("/reference/{hypothesisId}")
-    @Secured("ROLE_CHECKER")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addReference(@PathVariable("hypothesisId") @Valid Long id,
-                               @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                               @Validated(Reference.NewUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                BindingResult result,Authentication authentication, Model model) {
 
         return referenceEntity(id, reference, result, model, authentication);
@@ -146,10 +145,10 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
 
     @PostMapping("/reference/{hypothesisId}/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #reference.ownerId == authentication.principal.name")
     public String editReference(@PathVariable("hypothesisId") @Valid Long id,
-                                @Validated(Reference.UserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
+                                @Validated(Reference.ExistingUserReference.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                 BindingResult result, Authentication authentication, Model model) {
 
         return referenceEntity(id, reference, result, model, authentication);
@@ -157,8 +156,8 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
 // TODO: remove /ref/ from url
     @PostMapping("/reference/{hypothesisId}/ref/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#reference.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #reference.ownerId == authentication.principal.name")
     public String deleteReference(@PathVariable("hypothesisId") @Valid Long id,
                                   @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(REFERENCE_ATTR) Reference reference,
                                   BindingResult result, Model model, Authentication authentication) {
@@ -167,27 +166,28 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
 
     @PostMapping("/source-ref/{hypothesisId}")
-    @Secured("ROLE_CHECKER")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String addSource(@PathVariable("hypothesisId") @Valid Long id,
-                            @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                            @Validated(SourceRef.NewUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                             BindingResult result, Model model, Authentication authentication) {
 
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
     @PostMapping("/source-ref/{hypothesisId}/edit/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String editSrcRef(@PathVariable("hypothesisId") @Valid Long id,
-                             @Validated(SourceRef.UserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
+                             @Validated(SourceRef.ExistingUserSourceReference.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                              BindingResult result, Model model, Authentication authentication) {
 
         return sourceForEntity(id, srcRef, sourceRepo.findByEntityId(srcRef.getSrcEntityId()), result, model, authentication);
     }
 
     @PostMapping("/source-ref/{hypothesisId}/del/")
-    @Secured("ROLE_CHECKER")
-    @PreAuthorize("#srcRef.ownerId == authentication.principal.name")
+    //@Secured("ROLE_CHECKER")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER') and #srcRef.ownerId == authentication.principal.name")
     public String deleteSrcRef(@PathVariable("hypothesisId") @Valid Long id,
                                @Validated(InformizEntity.DeleteEntity.class) @ModelAttribute(SOURCE_ATTR) SourceRef srcRef,
                                BindingResult result, Model model, Authentication authentication) {

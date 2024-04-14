@@ -15,14 +15,15 @@ import java.io.Serializable;
  */
 @Table(name="reference")
 @Entity
-public final class Reference extends InformizEntity implements Serializable {
+public final class Reference extends InformizEntity<InformizEntity> implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
     /**
      * Validation group for incoming reference from UI (most fields will not be initialized)
      */
-    public interface UserReference {}
+    public interface ExistingUserReference extends ExistingEntityFromUI {}
+    public interface NewUserReference {}
 
     public enum Entailment {
         SUPPORTS("Supports"), // Positive textual-entailment
@@ -42,8 +43,8 @@ public final class Reference extends InformizEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "hibernate_sequence")
-    @NotNull(message = "Please provide an ID", groups = { DeleteEntity.class, PostInsertDefault.class})
-    @Positive(groups = { DeleteEntity.class, Default.class })
+    @NotNull(message = "Please provide an ID", groups = { Default.class, ExistingEntityFromUI.class, DeleteEntity.class })
+    @Positive(groups = { ExistingEntityFromUI.class, DeleteEntity.class, Default.class })
     protected Long id;
 
     public Long getId() {
@@ -58,28 +59,28 @@ public final class Reference extends InformizEntity implements Serializable {
 
     // TODO: Allow null in db - Hibernate sets to null on remove from parent's references, then deletes the reference
     @Column(name = "fact_checked_entity_id")
-    @NotBlank(groups = { DeleteEntity.class, UserReference.class })
-    @Size(max = 255, groups = { DeleteEntity.class, UserReference.class, Default.class })
+    @NotBlank(groups = { Default.class, NewUserReference.class, ExistingUserReference.class, DeleteEntity.class })
+    @Size(max = 255, groups = { Default.class, NewUserReference.class, ExistingUserReference.class, DeleteEntity.class  })
     private String factCheckedEntityId;
 
     // The entity-id of the claim/citation on the ledger. TODO: validation??
     @Column(name = "ref_entity_id")
-    @NotBlank(groups = { DeleteEntity.class, UserReference.class, Default.class })
-    @Size(max = 255, groups = { DeleteEntity.class, UserReference.class, Default.class })
+    @NotBlank(groups = { Default.class, NewUserReference.class, ExistingUserReference.class, DeleteEntity.class })
+    @Size(max = 255, groups = { Default.class, NewUserReference.class, ExistingUserReference.class, DeleteEntity.class })
     private String refEntityId; // either hypothesis or citation
 
     @Enumerated(EnumType.ORDINAL)
-    @NotNull(groups = { UserReference.class, Default.class })
+    @NotNull(groups = { Default.class, NewUserReference.class, ExistingUserReference.class })
     private Entailment entailment;
 
-    @DecimalMin(value = "0.0", groups = { UserReference.class, Default.class })
-    @DecimalMax(value = "1.0", groups = { UserReference.class, Default.class })
-    @NotNull(groups = { UserReference.class, Default.class })
+    @DecimalMin(value = "0.0", groups = { Default.class, NewUserReference.class, ExistingUserReference.class })
+    @DecimalMax(value = "1.0", groups = { Default.class, NewUserReference.class, ExistingUserReference.class })
+    @NotNull(groups = { Default.class, NewUserReference.class, ExistingUserReference.class })
     // The degree to which the reference entails the entity
     private Float degree = 0.9f;
 
     @Column
-    @Size(max = 255, groups = { UserReference.class, Default.class })
+    @Size(max = 255, groups = { Default.class, NewUserReference.class, ExistingUserReference.class })
     private String comment;
 
     public static Reference create() { return new Reference(); }

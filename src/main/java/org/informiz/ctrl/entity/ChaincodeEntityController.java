@@ -35,12 +35,12 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         if (! model.containsAttribute(REVIEW_ATTR)) model.addAttribute(REVIEW_ATTR, new Review());
     };
 
-    protected String successfulEdit(Model model, Long localId, @Nullable InformizEntity userInput) {
+    protected String successfulEdit(Model model, Long localId, @Nullable InformizEntity<InformizEntity> userInput) {
         // Assuming redirect back to edit-page
         return getRedirectToEditPage(localId);
     }
 
-    protected String failedEdit(Model model, BindingResult result, T current, InformizEntity userInput) {
+    protected String failedEdit(Model model, BindingResult result, T current, InformizEntity<InformizEntity> userInput) {
         modelForError(model, current);
         // Assuming reloaded page presents errors in UI
         return getEditPageTemplate();

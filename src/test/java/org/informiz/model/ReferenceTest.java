@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ReferenceTest extends IzEntityTestBase<Reference> {
 
-    //Default
+    //  Valid (Default, NewUserReference, ExistingUserReference)
     @Test
     public void whenValidReference_thenDefaultValidatorSucceeds() {
         Reference reference = getValidEntity();
@@ -20,9 +20,508 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
         Set<ConstraintViolation<Reference>> violations = validator.validate(reference);
         assertEquals(0, violations.size());
     }
+    @Test
+    public void whenValidReference_thenNewUserReferenceValidatorSucceeds() {
+        Reference reference = new Reference();
 
-    // ID    >>    !Null, Pos{DeleteEntity}
-    //!Null
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(0, violations.size());
+    }
+    @Test
+    public void whenValidReference_thenExistingUserReferenceValidatorSucceeds() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(0, violations.size());
+    }
+    @Test
+    public void whenValidReference_thenDeleteEntityValidatorSucceeds() {
+        Reference reference = new Reference();
+
+        reference.setId(1l);
+        reference.setOwnerId("1l");
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        assertEquals(0, violations.size());
+    }
+
+    //FactCheckedEntityId   {!Blank} (Default, NewUserRef, ExistingUserRef, DeleteNTT)
+    @Test
+    public void whenFactCheckedEntityIdIsBlank_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setFactCheckedEntityId("");
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityIsBlank_thenNewUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setFactCheckedEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityIdIsBlank_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setFactCheckedEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityIdIsBlank_thenDeleteEntityValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setRefEntityId("12345l");
+        //reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setFactCheckedEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
+
+    //  FactCheckedEntityId     {<255>} (Default, NewUserRef, ExistingUserRef, DeleteNTT)
+    @Test
+    public void whenFactCheckedEntityIdExceeds_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityExceeds_thenNewUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityExceeds_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenFactCheckedEntityIdExceeds_thenDeleteEntityValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setRefEntityId("12345l");
+
+        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size());
+    }
+
+    // RefEntityId {!Blank} (Default, NewUserRef, ExistingUserRef, DeleteNTT)
+    @Test
+    public void whenRefEntityIdIsBlank_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setRefEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+        violations = validator.validate(reference);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+
+    }
+
+    @Test
+    public void whenRefEntityIdIsBlank_thenNewUserReferenceValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setRefEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+    @Test
+    public void whenRefEntityIdIsBlank_thenExistingUserReferenceValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setRefEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+    @Test
+    public void whenRefEntityIdIsBlank_thenDeleteEntityValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+
+        reference.setRefEntityId("");
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+
+    // RefEntityId {<255>} (Default, NewUserRef, ExistingUserRef, DeleteNTT)
+    @Test
+    public void whenRefEntityIdExceeds_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setRefEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+
+    }
+    @Test
+    public void whenRefEntityIdExceeds_thenNewUserReferenceValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setRefEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+    @Test
+    public void whenRefEntityIdExceeds_thenExistingUserReferenceValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setRefEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+    @Test
+    public void whenRefEntityIdExceeds_thenDeleteEntityValidatorViolation() {
+        Reference reference =new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+
+        reference.setRefEntityId(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
+        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
+    }
+
+
+    //Entailment   {!Null} (Default, NewUserRef, ExistingUserRef)
+
+    @Test
+    public void whenEntailmentIsNull_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setEntailment(null);
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenEntailmentIsNull_thenNewUserReferenceValidatorSucceeds() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+
+        reference.setEntailment(null);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenEntailmentIsNull_thenExistingUserReferenceValidatorSucceeds() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+
+        reference.setEntailment(null);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size());
+    }
+
+    //Degree {!Null} (Default, NewUserRef, ExistingUserRef)
+    @Test
+    public void whenDegreeIsNull_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+        Set<ConstraintViolation<Reference>> violations;
+
+        reference.setDegree(null);
+
+        violations = validator.validate(reference);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+    @Test
+    public void whenDegreeIsNull_thenNewUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(null);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    @Test
+    public void whenDegreeIsNull_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(null);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    //Degree {Less_Than_Min} (Default, NewUserRef, ExistingUserRef)
+    @Test
+    public void whenDegreeIsLessThanMinimum_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+        Set<ConstraintViolation<Reference>> violations;
+
+        reference.setDegree(-0.69f);
+
+        violations = validator.validate(reference);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+    @Test
+    public void whenDegreeIsLessThanMinimum_thenNewUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(-0.69f);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    @Test
+    public void whenDegreeIsLessThanMinimum_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(-0.69f);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    //Degree {More_Than_Max} (Default, NewUserRef, ExistingUserRef)
+    @Test
+    public void whenDegreeIsMoreThanMaximum_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+        Set<ConstraintViolation<Reference>> violations;
+
+        reference.setDegree(1.69f);
+
+        violations = validator.validate(reference);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+    @Test
+    public void whenDegreeIsMoreThanMaximum_thenNewUserRefere2nceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(1.69f);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    @Test
+    public void whenDegreeIsMoreThanMaximum_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setDegree(1.69f);
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+
+
+    //Comment  {<255}  (Default, NewUserRef, ExistingUserRef)
+    @Test
+    public void whenCommentExceeds_thenDefaultValidatorViolation() {
+        Reference reference = getValidEntity();
+
+        reference.setComment(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>>
+                violations = validator.validate(reference);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenCommentExceeds_thenNewUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setComment(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.NewUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+    @Test
+    public void whenCommentExceeds_thenExistingUserReferenceValidatorViolation() {
+        Reference reference = new Reference();
+
+        reference.setId(1L);
+        reference.setOwnerId("TestOwnerId");
+
+        reference.setFactCheckedEntityId("12345l");
+        reference.setRefEntityId("12345l");
+        reference.setEntailment(Reference.Entailment.SUPPORTS);
+
+        reference.setComment(RandomStringUtils.random(256));
+
+        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.ExistingUserReference.class);
+        assertEquals(1, violations.size(), "Expected Null Degree Violation");
+    }
+
+    //********************
+    /*// ID    >>    !Null, Pos{DeleteEntity}
     @Test
     public void whenIDisNull_thenDeleteEntityValidatorViolation() {
         Reference reference = getValidEntity();
@@ -45,277 +544,14 @@ class ReferenceTest extends IzEntityTestBase<Reference> {
     }
 
     @Test
-    public void whenPreInsertIDisNegative_thenDefaultValidatorViolation() {
+    public void whenIdIsNegative_thenDefaultValidatorViolation() {
         Reference reference = getValidEntity();
 
         reference.setId(-1L);
         Set<ConstraintViolation<Reference>>
                 violations = validator.validate(reference);
         assertEquals(1, violations.size());
-    }
-
-    //FactCheckedEntityId  >>  Blank, =<255
-    //Blank
-    @Test
-    public void whenFactCheckedEntityIdIsBlank_thenDefaultValidatorSucceeds() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId("");
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference);
-        assertEquals(0, violations.size());
-    }
-
-    //=<255
-    @Test
-    public void whenFactCheckedEntityIdExceeds_thenDefaultValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference);
-        assertEquals(1, violations.size());
-    }
-
-    //FactCheckedEntityId {DeleteEntity}
-    //!Blank
-    @Test
-    public void whenFactCheckedEntityIdNotBlank_thenDeleteEntityValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId("");
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
-        assertEquals(1, violations.size());
-    }
-
-    //=<255
-    @Test
-    public void whenFactCheckedEntityIdExceeds_thenDeleteEntityValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
-        assertEquals(1, violations.size());
-    }
-
-    //FactCheckedEntityId {UserReference}
-    //!Blank
-    @Test
-    public void whenFactCheckedEntityIdNotBlank_thenUserReferenceValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId("");
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size());
-    }
-
-    //=<255
-    @Test
-    public void whenFactCheckedEntityIdExceeds_thenUserReferenceValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setFactCheckedEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size());
-    }
-
-    //UserReference Valid
-    @Test
-    public void whenValidReference_thenUserReferenceValidatorSucceeds() {
-        Reference reference = getValidEntity();
-
-        Set<ConstraintViolation<Reference>> violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(0, violations.size());
-    }
-
-
-    // RefEntityId {Default}>> =<255,!null, !Blank
-    @Test
-    public void whenInvalidRefEntityId_thenDefaultValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        //Exceeds 255
-        reference.setRefEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected TooLong RefID Violation");
-
-        //null
-        reference.setRefEntityId(null);
-        violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected Null RefID Violation");
-
-        //!Blank
-        reference.setRefEntityId("");
-        violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
-
-    }
-
-    // RefEntityId {DeleteEntity}>> =<255,!null, !Blank
-    @Test
-    public void whenInvalidRefEntityId_thenDeleteEntityValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        //Exceeds 255
-        reference.setRefEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
-        assertEquals(1, violations.size(), "Expected TooLong RefID Violation");
-
-        //null
-        reference.setRefEntityId(null);
-        violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
-        assertEquals(1, violations.size(), "Expected Null RefID Violation");
-
-        //!Blank
-        reference.setRefEntityId("");
-        violations = validator.validate(reference, InformizEntity.DeleteEntity.class);
-        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
-
-    }
-
-
-
-
-
-    // RefEntityId {UserReference}>> =<255,!null, !Blank
-    @Test
-    public void whenInvalidRefEntityId_thenUserReferenceValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        //Exceeds 255
-        reference.setRefEntityId(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected TooLong RefID Violation");
-
-        //null
-        reference.setRefEntityId(null);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected Null RefID Violation");
-
-        //!Blank
-        reference.setRefEntityId("");
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected Blank RefID Violation");
-
-    }
-
-
-
-    //Entailment   >>  !Null {UserReference}
-
-    @Test
-    public void whenEntailmentIsNull_thenUserReferenceValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setEntailment(null);
-        //reference.setId(null);
-
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size());
-    }
-
-    //UserReference Degree test
-    @Test
-    public void whenInvalidDegree_thenUserReferenceValidatorViolation() {
-
-        Reference reference = getValidEntity();
-//        Review review = new Review();
-//        review.setReviewedEntityId("test");
-        Set<ConstraintViolation<Reference>> violations;
-
-        // null degree
-//        review.setRating(null);
-        reference.setDegree(null);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected Null Degree Violation");
-
-        // negative value
-        reference.setDegree(-0.1f);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected Negative Degree Violation");
-
-
-        // value > 1.0
-        reference.setDegree(1.01f);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size(), "Expected Invalid Degree Violation");
-
-        // value > 0.0
-        reference.setDegree(0.00f);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(0, violations.size(), "Expected Zero Degree Violation");
-
-
-        // valid, no more errors
-        reference.setDegree(1.0f);
-        violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(0, violations.size(), "Expected No Violation");
-    }
-
-    //Reference comments  >>  =<255
-    @Test
-    public void whenLongComment_thenUserReferenceValidatorViolation() {
-        Reference reference = getValidEntity();
-
-        reference.setComment(RandomStringUtils.random(256));
-        Set<ConstraintViolation<Reference>>
-                violations = validator.validate(reference, Reference.UserReference.class);
-        assertEquals(1, violations.size());
-    }
-
-    //DefaultAssault   {Default}
-    @Test
-    public void whenDefaultIsFaulty_thenDefaultValidatorFails() {
-        Reference reference = getValidEntity();
-
-        //Entailment_Null
-        reference.setEntailment(null);
-        Set<ConstraintViolation<Reference>> violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected Null Entailment Violation");
-
-        reference.setEntailment(Reference.Entailment.SUPPORTS);
-        String validStr = reference.getRefEntityId();
-
-        //RefEntity_Null
-        reference.setRefEntityId(null);
-        violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected Null RefEntity Violation");
-
-        reference.setRefEntityId(validStr);
-
-
-        //Degree>1
-        reference.setDegree(1.4f);
-        violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected RefDegree Violation");
-
-        reference.setDegree(0.9f);
-
-        //Comment>255
-        reference.setComment(RandomStringUtils.random(256));
-        violations = validator.validate(reference);
-        assertEquals(1, violations.size(), "Expected Too Long Comment Violation");
-
-        reference.setComment(RandomStringUtils.random(250));
-
-        reference.setEntailment(null);
-        reference.setRefEntityId(RandomStringUtils.random(257));
-        reference.setDegree(-1.4f);
-        reference.setComment(RandomStringUtils.random(3256));
-
-        violations = validator.validate(reference);
-        assertEquals(4, violations.size());
-
-
-    }
+    }*/
 
     //*******************
     @NotNull

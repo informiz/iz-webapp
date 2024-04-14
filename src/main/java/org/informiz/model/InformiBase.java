@@ -39,7 +39,7 @@ import java.io.Serializable;
         )
 
 })
-public final class InformiBase extends FactCheckedEntity implements Serializable {
+public final class        InformiBase extends FactCheckedEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
@@ -49,18 +49,20 @@ public final class InformiBase extends FactCheckedEntity implements Serializable
     /**
      * Validation group for add/edit informi through the UI (most fields will not be initialized)
      */
-    public interface InformiFromUI {}
+    public interface ExistingInformiFromUI extends ExistingEntityFromUI {}
+    public interface NewInformiFromUI {}
 
-    @NotBlank(message = "Name is mandatory", groups = {InformiFromUI.class, Default.class})
+    @NotBlank(message = "Name is mandatory", groups = {NewInformiFromUI.class, ExistingInformiFromUI.class, Default.class})
     private String name;
 
-    @NotBlank(message = "Description is mandatory", groups = {InformiFromUI.class, Default.class})
+    @NotBlank(message = "Description is mandatory", groups = {NewInformiFromUI.class, ExistingInformiFromUI.class, Default.class})
     @Column(length = 1500)
-    @Size(max = 1500)
+    @Size(max = 1500, message = "Description exceeds limit", groups = {NewInformiFromUI.class, ExistingInformiFromUI.class, Default.class})
     private String description;
 
-    @URL(message = "A valid link to a media file is mandatory", groups = {InformiFromUI.class, Default.class})
+    @URL(message = "A valid link to a media file is mandatory", groups = {ExistingInformiFromUI.class, Default.class})
     private String mediaPath;
+
 
     public String getName() {
         return name;

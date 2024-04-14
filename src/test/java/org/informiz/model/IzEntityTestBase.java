@@ -7,23 +7,31 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Set;
 
 import static org.informiz.model.InformizEntity.DeleteEntity;
-import static org.informiz.model.InformizEntity.PostInsertDefault;
+import static org.informiz.model.InformizEntity.ExistingEntityFromUI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringJUnitConfig(IzEntityTestBase.Config.class)
-public abstract class IzEntityTestBase<T extends InformizEntity> {
+public abstract class IzEntityTestBase<T extends InformizEntity<InformizEntity>> {
     protected Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     static class Config {}
 
+    //Valid
+    @Test
+    public void whenValidEntity_thenDefaultValidatorSucceeds() {
+        T entity = getValidEntity();
+        Set<ConstraintViolation<T>>
 
-    //************* ID (POST Insert) Test  >>  !Null, Positive
+        violations = validator.validate(entity);
+        assertEquals(0, violations.size());
+    }
+
+    //************* ID >>  !Null, Positive
     //!Null
     @Test
     public void whenIDIsNull_thenPostInsertDefaultValidatorViolation() {
@@ -31,11 +39,10 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
 
         entity.setId(null);
 
-        Set<ConstraintViolation<T>> violations = validator.validate(entity, PostInsertDefault.class);
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, ExistingEntityFromUI.class);
         assertEquals(1, violations.size());
     }
 
-    //!Null
     @Test
     public void whenIDIsNull_thenDeleteEntityValidatorViolation() {
         T entity = getValidEntity();
@@ -48,10 +55,10 @@ public abstract class IzEntityTestBase<T extends InformizEntity> {
 
     //************* creatorId test
     @Test
-    public void whenCreatorIDisNull_thenDefaultValidatorViolation() {
+    public void whenCreatorIDisBlank_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
-        entity.setCreatorId(null);
+        entity.setCreatorId("");
 
         Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());

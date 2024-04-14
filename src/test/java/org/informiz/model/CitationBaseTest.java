@@ -12,42 +12,128 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CitationBaseTest extends IzEntityTestBase<CitationBase> {
 
-    //Default
+    //Valid   (Default, NewCitation, ExistingCitation)
     @Test
-    public void whenValidSourceReference_thenDefaultValidatorSucceeds() {
+    public void whenValidCitation_thenDefaultValidatorSucceeds() {
         CitationBase citationBase = getValidEntity();
+        Set<ConstraintViolation<CitationBase>>
 
-        Set<ConstraintViolation<CitationBase>> violations = validator.validate(citationBase);
+                violations = validator.validate(citationBase);
+                assertEquals(0, violations.size());
+    }
+    @Test
+    public void whenValidCitation_thenNewCitationFromUIValidatorSucceeds() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setText("TestCitationIdLongerThanTwentyFive");
+        citation.setLink("http://www.server.com");
+
+
+        violations = validator.validate(citation, CitationBase.NewCitationFromUI.class);
         assertEquals(0, violations.size());
     }
 
-    //Text  >> !Blank, =<500
-    //!Blank
     @Test
-    public void whenTextIsNull_thenDefaultValidatorViolation() {
+    public void whenValidCitation_thenExistingCitationFromUIValidatorSucceeds() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setId(1l);
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setOwnerId("1l");
+
+        citation.setText("TestCitationIdLongerThanTwentyFive");
+        citation.setLink("http://www.server.com");
+
+        violations = validator.validate(citation, CitationBase.ExistingCitationFromUI.class);
+        assertEquals(0, violations.size());
+    }
+
+    //Text  {!Blank}  (Default, NewCitation, ExistingCitation)
+    @Test
+    public void whenTextIsBlank_thenDefaultValidatorViolation() {
         CitationBase citationBase = getValidEntity();
         Set<ConstraintViolation<CitationBase>> violations;
 
         citationBase.setText("");
+
         violations = validator.validate(citationBase);
         assertEquals(1, violations.size());
     }
 
-    // =<500
+    @Test
+    public void whenTextIsBlank_thenNewCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setLink("http://www.server.com");
+
+        citation.setText("");
+
+        violations = validator.validate(citation, CitationBase.NewCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    public void whenTextIsBlank_thenExistingCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setId(1l);
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setOwnerId("1l");
+
+        citation.setLink("http://www.server.com");
+
+        citation.setText("");
+        violations = validator.validate(citation, CitationBase.ExistingCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+
+    //Text  {>500}  (Default, NewCitation, ExistingCitation)
     @Test
     public void whenTextExceeds_thenDefaultValidatorViolation() {
         CitationBase citationBase = getValidEntity();
         Set<ConstraintViolation<CitationBase>> violations;
 
         citationBase.setText(RandomStringUtils.random(501));
+
         violations = validator.validate(citationBase);
         assertEquals(1, violations.size());
     }
 
-    //Link  >>  !Blank, !Valid
-    //!Blank
     @Test
-    public void whenLinkNull_thenDefaultValidatorViolation() {
+    public void whenTextExceeds_thenNewCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setLink("http://www.server.com");
+
+        citation.setText(RandomStringUtils.random(501));
+
+        violations = validator.validate(citation, CitationBase.NewCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenTextExceeds_thenExistingCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setId(1l);
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setOwnerId("1l");
+        citation.setLink("http://www.server.com");
+
+        citation.setText(RandomStringUtils.random(501));
+
+        violations = validator.validate(citation, CitationBase.ExistingCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+
+    //Link  {!Blank}  (Default, NewCitation, ExistingCitation)
+    @Test
+    public void whenLinkIsBlank_thenDefaultValidatorViolation() {
         CitationBase citationBase = getValidEntity();
         Set<ConstraintViolation<CitationBase>> violations;
 
@@ -55,15 +141,70 @@ class CitationBaseTest extends IzEntityTestBase<CitationBase> {
         violations = validator.validate(citationBase);
         assertEquals(1, violations.size());
     }
+    @Test
+    public void whenLinkIsBlank_thenNewCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
 
-    //!Valid
+        citation.setText("Citation validation groups Text testing");
+
+        citation.setLink("");
+
+        violations = validator.validate(citation, CitationBase.NewCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenLinkIsBlank_thenExistingCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setId(1l);
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setOwnerId("1l");
+        citation.setText("TestCitationIdLongerThanTwentyFive");
+
+        citation.setLink("");
+
+        violations = validator.validate(citation, CitationBase.ExistingCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+
+    //Link  {!Valid}  (Default, NewCitation, ExistingCitation)
     @Test
     public void whenLinkIsNotValid_thenDefaultValidatorViolation() {
         CitationBase citationBase = getValidEntity();
         Set<ConstraintViolation<CitationBase>> violations;
 
-        citationBase.setLink("This Is Not Valid");
+        citationBase.setLink("This Is Not A Valid Link");
+
         violations = validator.validate(citationBase);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenLinkIsNotValid_thenNewCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setText("Citation validation groups Text testing");
+
+        citation.setLink("This Is Not A Valid Link");
+
+        violations = validator.validate(citation, CitationBase.NewCitationFromUI.class);
+        assertEquals(1, violations.size());
+    }
+    @Test
+    public void whenLinkIsNotValid_thenExistingCitationFromUIValidatorViolation() {
+        CitationBase citation = new CitationBase();
+        Set<ConstraintViolation<CitationBase>> violations;
+
+        citation.setId(1l);
+        citation.setEntityId("TestCitationIdLongerThanTwentyFive");
+        citation.setOwnerId("1l");
+        citation.setText("TestCitationIdLongerThanTwentyFive");
+
+        citation.setLink("This Is Not A Valid Link");
+
+        violations = validator.validate(citation, CitationBase.ExistingCitationFromUI.class);
         assertEquals(1, violations.size());
     }
 

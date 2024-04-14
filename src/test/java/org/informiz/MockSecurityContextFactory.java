@@ -14,7 +14,7 @@ import java.util.*;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomAuth> {
 
-    public static final String DEFAULT_TEST_CHECKER_ID = "Test_Checker_Id";//UUID.randomUUID().toString().substring(0, 30);
+    public static final String DEFAULT_TEST_CHECKER_ID = "Test_Checker_Id";
 
     @Override
     public SecurityContext createSecurityContext(WithCustomAuth withCustomAuth) {

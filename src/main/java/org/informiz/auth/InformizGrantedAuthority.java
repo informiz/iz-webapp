@@ -21,11 +21,6 @@ public class InformizGrantedAuthority implements GrantedAuthority {
         this.entityId = entityId;
     }
 
-    /**
-     * TODO: make this available a Bean once Spring 6.1.x is GA
-     * Todo: ************************ DOES NOT WORK !!  ************************
-     * @return Informiz' role-hierarchy
-     */
     public static RoleHierarchyImpl roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
         roleHierarchy.setHierarchy(String.format("%s > %s > %s > %s",

@@ -3,14 +3,21 @@
     <div th:fragment="score">
         <div class="row">
             <div class="form-group col-4">
-                <label th:for="reliability" class="col-form-label">Reliability</label>
-                <input type="number" min="0" max="1" step="0.01" placeholder="0.9" th:field="*{score.reliability}"
+                <!-- Todo: Unique Ids for inputs -->
+                <label th:for="'reliability_' + *{id}" class="col-form-label">Reliability</label>
+                <input th:id="'reliability_' + *{id}" name="reliability" type="number" min="0" max="1" step="0.01" placeholder="0.9" th:value="*{score?.reliability}"
                        class="form-control" readonly/>
-                <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
-                <label th:for="confidence" class="col-form-label">Confidence</label>
-                <input type="number" min="0" max="2" step="0.01" placeholder="0.5" th:field="*{score.confidence}" class="form-control"
+                <th:block th:if="${#model?.containsAttribute('score.reliability')}">
+                    <span th:if="${#fields.hasErrors('score.reliability')}" th:errors="*{score.reliability}" class="text-danger"></span>
+                </th:block>
+
+                <label th:for="'confidence_' + *{id}" class="col-form-label">Confidence</label>
+                <input th:id="'confidence_' + *{id}" name="confidence" type="number" min="0" max="2" step="0.01" placeholder="0.5" th:value="*{score?.confidence}" class="form-control"
                        readonly="readonly" />
-                <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
+                <th:block th:if="${#model?.containsAttribute('score.confidence')}">
+                    <span th:if="${#fields.hasErrors('score.confidence')}" th:errors="*{score.confidence}" class="text-danger"></span>
+                </th:block>
+
             </div>
         </div>
     </div>

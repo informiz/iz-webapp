@@ -8,9 +8,6 @@ import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Table(name = "citation")
 @Entity
@@ -41,15 +38,15 @@ public final class CitationBase extends ChainCodeEntity implements Serializable 
     /**
      * Validation group for add/edit citation through the UI (most fields will not be initialized)
      */
-    public interface CitationFromUI {}
-
-    @NotBlank(message = "Text is mandatory", groups = {CitationFromUI.class, Default.class})
+    public interface ExistingCitationFromUI extends ExistingEntityFromUI {}
+    public interface NewCitationFromUI {}
+    @NotBlank(message = "Text is mandatory", groups = {NewCitationFromUI.class, ExistingCitationFromUI.class, Default.class})
     @Column(length = 500)
-    @Size(max = 500, groups = {CitationFromUI.class, Default.class})
+    @Size(max = 500, groups = {NewCitationFromUI.class, ExistingCitationFromUI.class, Default.class})
     private String text;
 
-    @NotBlank(message = "Citations must be sourced", groups = {CitationFromUI.class, Default.class})
-    @URL(message = "Please provide a link to the source of the citation", groups = {CitationFromUI.class, Default.class})
+    @NotBlank(message = "Citations must be sourced", groups = {NewCitationFromUI.class, ExistingCitationFromUI.class, Default.class})
+    @URL(message = "Please provide a link to the source of the citation", groups = {NewCitationFromUI.class, ExistingCitationFromUI.class, Default.class})
     private String link;
 
     public String getText() {

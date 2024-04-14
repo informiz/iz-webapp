@@ -38,8 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public abstract class ControllerTest<T extends ChainCodeEntity> {
-    public static final String TEST_ENTITY_ID = "test";
-
+    public static final String TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
 
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
@@ -63,12 +62,11 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     protected String EntityIllegalArgumentTitle() {
         return "Illegal argument, an error was logged and will be addressed by a developer";
     }
-
-    //protected abstract String redirUrl();
-
     protected abstract String textExceedsMsg();
 
-    protected abstract String commentExceedsMsg();
+    protected String commentExceedsMsg() {
+        return "";
+    }
 
     protected String updateEntityUrl() {
         return String.format("/%s/%s", prefix(), "details/1");
@@ -159,7 +157,6 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenValidAddReview_thenSucceeds() throws Exception {
-
         verifyPostApiCall(getPopulatedEntity("some owner", null), "1/review/",  Map.of(
                         "rating", new String[]{("0.82")},
                         "reviewedEntityId", new String[]{DEFAULT_TEST_CHECKER_ID},
@@ -185,8 +182,8 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
         verifyPostApiCall(getPopulatedEntity("some owner", null), "1/review/",  Map.of(
                         // "rating", new String[]{"0.82"}
-                        "reviewedEntityId", new String[]{TEST_ENTITY_ID},
-                        "comment", new String[]{RandomStringUtils.random(255)}
+                        "reviewedEntityId", new String[]{TEST_ENTITY_ID}
+                       // "comment", new String[]{RandomStringUtils.random(255)}
                 ),
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains("Please submit rating between 0.0 and 1.0"))));
@@ -282,15 +279,15 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     void whenEditReviewBlankReviewedEntityId_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity("some owner", DEFAULT_TEST_CHECKER_ID), "1/review/edit/",  Map.of(
-                        "id", new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "id", new String[]{"1"},
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID},
                         "rating", new String[]{("0.82")},
+                        "comment", new String[]{RandomStringUtils.random(255)},
                         "reviewedEntityId", new String[]{("")}
                 ),
                 Arrays.asList(status().isOk(),
-                        content().string(new StringContains("No Error MSG"))));
+                        content().string(new StringContains("must not be blank"))));
     }
-
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
@@ -315,7 +312,6 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains("Please provide an ID"))));
     }
-    //Delete Review (No Auth)
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER}, checkerId = "some checker")
     void whenNotOwnerDeletesReview_thenForbidden() throws Exception {
@@ -349,6 +345,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     protected void verifyPostApiCall(T entity, String path, Map<String, String[]> params, List<ResultMatcher> matchers) throws Exception {
         if (entity != null) {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
+            given(repo.findById(1l)).willReturn(Optional.of(entity));
         }
         performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers);
     }

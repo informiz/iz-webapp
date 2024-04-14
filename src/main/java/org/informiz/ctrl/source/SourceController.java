@@ -16,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
 @Controller
 @RequestMapping(path = SourceController.PREFIX)
 @Validated
@@ -46,7 +45,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
 
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String addSource(@Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
+    public String addSource(@Validated(SourceBase.NewSourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                  BindingResult result) {
         if (result.hasErrors()) {
             return String.format("%s/add-src.html", PREFIX);
@@ -88,7 +87,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/details/{sourceId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #source.ownerId == authentication.principal.name")
     public String updateSource(@PathVariable("sourceId") @Valid Long id,
-                               @Validated(SourceBase.SourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
+                               @Validated(SourceBase.ExistingSourceFromUI.class) @ModelAttribute(SOURCE_ATTR) SourceBase source,
                                BindingResult result, Model model) {
         if (! result.hasErrors()) {
             SourceBase current = entityRepo.loadByLocalId(id)
@@ -104,7 +103,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/{sourceId}/review/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String reviewSource(@PathVariable("sourceId") @Valid Long id,
-                               @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                               @Validated(Review.NewUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                                BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
@@ -112,7 +111,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
     @PostMapping("/{sourceId}/review/edit/")
     @PreAuthorize("hasAuthority('ROLE_CHECKER') and #review.ownerId == authentication.principal.name")
     public String editReview(@PathVariable("sourceId") @Valid Long id,
-                             @Validated(Review.UserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
+                             @Validated(Review.ExistingUserReview.class) @ModelAttribute(REVIEW_ATTR) Review review,
                              BindingResult result, Model model, Authentication authentication) {
         return reviewEntity(id, review, result, model, authentication);
     }
