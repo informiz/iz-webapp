@@ -50,7 +50,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
         return String.format("%s/add-informi.html", PREFIX);
     }
 
-    @PostMapping("/add")
+    @PostMapping(value="/add", consumes="multipart/form-data")
     @PreAuthorize("hasAuthority('ROLE_MEMBER')")
     public String addInformi(@Valid @RequestParam("file") MultipartFile file,
                              @Validated(InformiBase.NewInformiFromUI.class)

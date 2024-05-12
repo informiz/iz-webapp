@@ -326,7 +326,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
     protected void verifyGetApiCall(String path, List<ResultMatcher> matchers) throws Exception {
         performRequest(get(String.format("/%s/%s", prefix(), path)), Map.of(),
-                matchers);
+                matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
     protected void verifyGetApiCall(T entity, String path, List<ResultMatcher> matchers) throws Exception {
@@ -334,12 +334,12 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
         }
         performRequest(get(String.format("/%s/%s", prefix(), path)), Map.of(),
-                matchers);
+                matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
     protected void verifyPostApiCall(String path, Map<String, String[]> params, List<ResultMatcher> matchers) throws Exception {
         performRequest(post(String.format("/%s/%s", prefix(), path)), params,
-                matchers);
+                matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
     protected void verifyPostApiCall(T entity, String path, Map<String, String[]> params, List<ResultMatcher> matchers) throws Exception {
@@ -347,16 +347,23 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
             given(repo.findById(1l)).willReturn(Optional.of(entity));
         }
-        performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers);
+        performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers, MediaType.APPLICATION_FORM_URLENCODED);
+    }
+    protected void verifyPostApiCall(T entity, String path, Map<String, String[]> params, List<ResultMatcher> matchers, MediaType contentType) throws Exception {
+        if (entity != null) {
+            given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
+            given(repo.findById(1l)).willReturn(Optional.of(entity));
+        }
+        performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers, contentType);
     }
 
-    protected void performRequest(@NotNull MockHttpServletRequestBuilder request, Map<String, String[]> params, List<ResultMatcher> matchers) throws Exception {
+    protected void performRequest(@NotNull MockHttpServletRequestBuilder request, Map<String, String[]> params, List<ResultMatcher> matchers, MediaType contentType) throws Exception {
         if (params != null && !params.isEmpty())
             params.entrySet().forEach(entry -> request.param(entry.getKey(), entry.getValue()));
 
         ResultActions resultActions = mockMvc.perform(request
                 .secure(true).with(csrf())
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED));
+                .contentType(contentType));
 
         if (matchers != null && !matchers.isEmpty())
             resultActions.andExpectAll(matchers.toArray(new ResultMatcher[matchers.size()]));

@@ -6,6 +6,8 @@ import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
 import org.informiz.ctrl.informi.InformiController;
 import org.junit.jupiter.api.Disabled;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
@@ -20,12 +22,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
 import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(InformiControllerTest.class)
@@ -93,61 +103,108 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
     }
 
     @Test
-    @Disabled("multipart form submission with multi-stage photo upload error handling")
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenMemberAddInformi_thenSucceeds() throws Exception {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
+        File file = new File(url.getPath());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "JGimage001.jpeg",
+                "image/jpeg",
+                 new FileInputStream(file).readAllBytes());
 
-        verifyPostApiCall("add",  Map.of(
-                        "name", new String[]{RandomStringUtils.random(50)},
-                        "mediaPath", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(1400)}),
-                Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+                        .file(mockFile)
+                        .param("name", new String[]{RandomStringUtils.random(50)})
+                        .param("description", new String[]{RandomStringUtils.random(1400)})
+                        .secure(true).with(csrf())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isFound()) // Expecting HTTP status OK (200)
+                .andExpect(redirectedUrl(allEntitiesUrl()));
     }
 
     @Test
-    @Disabled("multipart form submission with multi-stage photo upload error handling")
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerAddsInformi_thenForbidden() throws Exception {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
+        File file = new File(url.getPath());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "JGimage001.jpeg",
+                "image/jpeg",
+                new FileInputStream(file).readAllBytes());
 
-        verifyPostApiCall("add",  Map.of(
-                        "mediaPath", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(1500)}),
-                Arrays.asList(status().isForbidden()));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+                        .file(mockFile)
+                        .param("name", new String[]{RandomStringUtils.random(50)})
+                        .param("description", new String[]{RandomStringUtils.random(1400)})
+                        .secure(true).with(csrf())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    @Disabled("multipart form submission with multi-stage photo upload error handling")
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerAddInformi_thenForbidden() throws Exception {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
+        File file = new File(url.getPath());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "JGimage001.jpeg",
+                "image/jpeg",
+                new FileInputStream(file).readAllBytes());
 
-        verifyPostApiCall("add",  Map.of(
-                        "mediaPath", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(1500)}),
-                Arrays.asList(status().isForbidden()));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+                        .file(mockFile)
+                        .param("name", new String[]{RandomStringUtils.random(50)})
+                        .param("description", new String[]{RandomStringUtils.random(1400)})
+                        .secure(true).with(csrf())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    @Disabled("multipart form submission with multi-stage photo upload error handling")
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenInformiURLisInvalid_thenErrorMsg() throws Exception {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
+        File file = new File(url.getPath());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "JGimage001.jpeg",
+                "image/jpeg",
+                new FileInputStream(file).readAllBytes());
 
-        verifyPostApiCall("add",  Map.of(
-                        "mediaPath", new String[]{"Invalid"},
-                        "description", new String[]{RandomStringUtils.random(1500)}),
-                Arrays.asList(status().isOk(),
-                        content().string(new StringContains(invalidInformiLinkMsg()))));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+                        .file(mockFile)
+                        .param("name", new String[]{RandomStringUtils.random(50)})
+                        .param("mediaPath", new String[]{"Invalid"})
+                        .param("description", new String[]{RandomStringUtils.random(1400)})
+                        .secure(true).with(csrf())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk()) // Expecting HTTP status OK (200)
+                .andExpect(content().string(new StringContains(invalidInformiLinkMsg())));
     }
 
     @Test
-    @Disabled("multipart form submission with multi-stage photo upload error handling")
     @WithCustomAuth(role = {ROLE_MEMBER})
     void whenAddInformiTextExceeds_thenErrorMsg() throws Exception {
 
-        verifyPostApiCall("add",  Map.of(
-                        "mediaPath", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(1501)}),
-                Arrays.asList(status().isOk(),
-                        content().string(new StringContains(textExceedsMsg()))));
+        URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
+        File file = new File(url.getPath());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "JGimage001.jpeg",
+                "image/jpeg",
+                new FileInputStream(file).readAllBytes());
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+                        .file(mockFile)
+                        .param("name", new String[]{RandomStringUtils.random(50)})
+                        .param("description", new String[]{RandomStringUtils.random(1501)})
+                        .secure(true).with(csrf())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk()) // Expecting HTTP status OK (200)
+                .andExpect(content().string(new StringContains(textExceedsMsg())));
     }
 
     //Todo: Validation group doesn't include Id and OwnerId
