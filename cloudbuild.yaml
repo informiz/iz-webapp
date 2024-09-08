@@ -1,17 +1,12 @@
 steps:
 
 # TODO: separate build and deploy scripts
-#  - name: maven:3-jdk-8
-#    entrypoint: mvn
-#    args: ["test"]
   - name: maven:3.8-openjdk-17
     entrypoint: mvn
     args: ["clean", "package", "-P", "prod", "spring-boot:repackage"]
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/iz-webapp:$TAG_NAME', '.' ]
-#  - name: "gcr.io/cloud-builders/docker"
-#    args: ["push", "gcr.io/$PROJECT_ID/iz-webapp:$TAG_NAME"]
+    args: [ 'build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/iz-webapp/iz-webapp:$TAG_NAME', '.' ]
 
 images:
-- 'gcr.io/$PROJECT_ID/iz-webapp:$TAG_NAME'
+- 'europe-docker.pkg.dev/$PROJECT_ID/iz-webapp/iz-webapp:$TAG_NAME'
