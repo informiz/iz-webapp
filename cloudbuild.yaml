@@ -5,6 +5,8 @@ steps:
     entrypoint: mvn
     args: ["clean", "package", "-P", "prod", "spring-boot:repackage"]
 
+  - name: 'gcr.io/cloud-builders/git'
+    args: [ 'checkout', '${BRANCH_NAME}' ]
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/iz-webapp/iz-webapp:$TAG_NAME', '.' ]
 
