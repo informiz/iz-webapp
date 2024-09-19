@@ -6,7 +6,7 @@ steps:
     args: ["clean", "package", "-P", "prod", "spring-boot:repackage"]
 
   - name: 'gcr.io/cloud-builders/git'
-    args: [ 'clone', 'https://github.com/iz-webapp.git' ]
+    args: [ 'clone', 'https://github.com/informiz/iz-webapp.git' ]
   - name: 'gcr.io/cloud-builders/git'
     args: [ 'checkout', '${BRANCH_NAME}' ]
   - name: 'gcr.io/cloud-builders/docker'
