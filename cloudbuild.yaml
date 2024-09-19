@@ -8,7 +8,7 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args: [ 'clone', 'https://github.com/informiz/iz-webapp.git' ]
   - name: 'gcr.io/cloud-builders/git'
-    args: [ 'checkout', '${BRANCH_NAME}' ]
+    args: [ '-C', 'iz-webapp', 'checkout', '${BRANCH_NAME}' ]
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/iz-webapp/iz-webapp:$TAG_NAME', '.' ]
 
