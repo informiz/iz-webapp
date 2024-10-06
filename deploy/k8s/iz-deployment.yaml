@@ -17,7 +17,7 @@ spec:
       serviceAccountName: <CHANNEL_NAME>-ksa
       containers:
       - name: iz-webapp
-        image: gcr.io/key-master-283113/iz-webapp:0.0.1-SNAPSHOT
+        image:  europe-docker.pkg.dev/key-master-283113/iz-webapp/iz-webapp:v0.2.1-TEST
         readinessProbe:
           httpGet:
             scheme: HTTPS
@@ -87,11 +87,10 @@ spec:
       - name: cloud-sql-proxy
         # It is recommended to use the latest version of the Cloud SQL proxy
         # Make sure to update on a regular schedule!
-        image: gcr.io/cloudsql-docker/gce-proxy:1.33.9
+        image: eu.gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.13.0
         command:
-          - "/cloud_sql_proxy"
-          - "-log_debug_stdout"
-          - "-instances=key-master-283113:europe-west1:informiz-beta=tcp:3306"
+          - "/cloud-sql-proxy"
+          - "key-master-283113:europe-west1:informiz-beta"
         securityContext:
           runAsNonRoot: true
           capabilities:
