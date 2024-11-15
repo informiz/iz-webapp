@@ -8,6 +8,7 @@
 		<version>3.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>org.informiz</groupId>
 	<artifactId>iz-webapp</artifactId>
 	<version>0.0.1-ALPHA</version>
@@ -270,6 +271,19 @@
 			<scope>test</scope>
 			<version>${junit.version}</version>
 		</dependency>
+<!--		Add the Pub/Sub dependency-->
+
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-pubsub</artifactId>
+			<version>1.113.7</version>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-scheduling</artifactId>-->
+<!--		</dependency>-->
+
 	</dependencies>
 
 	<build>

@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: demo-chan-cert
+spec:
+  domains:
+    - demo-channel.informiz.org
+    - www.demo-channel.informiz.org
