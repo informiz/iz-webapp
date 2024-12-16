@@ -27,12 +27,11 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.web.util.WebUtils;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.informiz.auth.CookieUtils.*;
+import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 
@@ -46,14 +45,18 @@ public class SecurityConfig {
 
     private final TokenSecurityContextRepository securityContextRepo;
 
-    public SecurityConfig(TokenSecurityContextRepository securityContextRepo) {
+    private final CookieUtils cookieUtils;
+
+    @Autowired
+    public SecurityConfig(TokenSecurityContextRepository securityContextRepo, CookieUtils cookieUtils) {
         this.securityContextRepo = securityContextRepo;
+        this.cookieUtils = cookieUtils;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         RequestCache nullRequestCache = new NullRequestCache();
-        CookieCsrfTokenRepository repo = csrfTokenRepo();
+        CookieCsrfTokenRepository repo = cookieUtils.csrfTokenRepo();
         List<GrantedAuthority> minAuth = AuthUtils.anonymousAuthorities();
 
         http
@@ -84,16 +87,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private static CookieCsrfTokenRepository csrfTokenRepo() {
-        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
-        // repo.setCookieDomain(cookieDomain); // TODO: add spring property
-        repo.setCookieName(CSRF_COOKIE_NAME);
-        repo.setParameterName(CSRF_COOKIE_NAME);
-        repo.setSecure(true);
-        repo.setCookieHttpOnly(true);
-        return repo;
-    }
-
     @Bean(name = "googleOAuthService")
     ClientIdService googleOAuthService() {
         return () -> googleAuthClientId;
@@ -114,6 +107,9 @@ public class SecurityConfig {
         @Autowired
         private HttpServletResponse response;
 
+        @Autowired
+        private CookieUtils cookieUtils;
+
         public boolean isOwner(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
             return principal.getName().equals(entity.getOwnerId());
         }
@@ -123,9 +119,9 @@ public class SecurityConfig {
         }
 
         public String getNonce() {
-            Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
+            Cookie cookie =  cookieUtils.getCookie(request, cookieUtils.nonceCookieName());
             if (cookie == null) {
-                cookie = CookieUtils.setCookie(response, NONCE_COOKIE_NAME, TOKEN_MAX_AGE,
+                cookie = cookieUtils.setNonceCookie(response, TOKEN_MAX_AGE,
                         UUID.randomUUID().toString().substring(0, 16));
             }
 

@@ -95,11 +95,11 @@ public class AuthUtils {
         authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId));
 
         // TODO: get current channel name
-        if (isChannelMember(email, userWallet, CHANNEL_ID)) {
+        if (isChannelMember(email, userWallet, CHANNEL_FOLDER)) {
             authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId));
         }
 
-        if (isChannelAdmin(email, userWallet, CHANNEL_ID)) {
+        if (isChannelAdmin(email, userWallet, CHANNEL_FOLDER)) {
             authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId));
         }
 
@@ -143,12 +143,12 @@ public class AuthUtils {
     private static final String idsFolder = "identities";
 
     // Used for checking identities for memberships in channel
-    private static String CHANNEL_ID;
+    private static String CHANNEL_FOLDER;
 
-    @Value("${iz.channel.id}")
+    @Value("${iz.channel.folder}")
     public void setChannelName(String cid){
         // workaround for assigning property-value to static field
-        AuthUtils.CHANNEL_ID = cid;
+        AuthUtils.CHANNEL_FOLDER = cid;
     }
 
     // Used for uploading media to channels
@@ -208,7 +208,7 @@ public class AuthUtils {
             byte[] bytes = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
 
             BlobId certBlobId = BlobId.of(izBucket,
-                    String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, CHANNEL_ID, filename));
+                    String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, CHANNEL_FOLDER, filename));
             BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
             storage.create(blobInfo, bytes);
         } catch (IOException e) {
@@ -224,11 +224,11 @@ public class AuthUtils {
 
         // TODO: check for admin identity
         blobs = storage.list(izBucket,
-                Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, CHANNEL_ID)),
+                Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, CHANNEL_FOLDER)),
                 Storage.BlobListOption.pageSize(1));
 
         if (blobs.getValues().iterator().hasNext()) {
-            return getWalletForIdentity(userEntityId, "member", CHANNEL_ID);
+            return getWalletForIdentity(userEntityId, "member", CHANNEL_FOLDER);
         } else {
             // All fact-checkers should have crypto-material for checker identity
             return getWalletForIdentity(userEntityId, "member", checkersChannelId);

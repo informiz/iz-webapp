@@ -32,7 +32,8 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
-import static org.informiz.auth.CookieUtils.*;
+import static org.informiz.auth.CookieUtils.GOOGLE_CSRF_COOKIE_NAME;
+import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 
 @RestController
 @RequestMapping(path = AccessRestController.PREFIX)
@@ -53,13 +54,17 @@ public class AccessRestController {
 
     private final SecurityContextRepository securityContextRepo;
 
+    private final CookieUtils cookieUtils;
+
     private static final Logger logger = LoggerFactory.getLogger(AccessRestController.class);
 
     @Autowired
-    public AccessRestController(FactCheckerRepository factCheckerRepo, TokenProvider tokenProvider, SecurityContextRepository securityContextRepo) {
+    public AccessRestController(FactCheckerRepository factCheckerRepo, TokenProvider tokenProvider,
+                                SecurityContextRepository securityContextRepo, CookieUtils cookieUtils) {
         this.factCheckerRepo = factCheckerRepo;
         this.tokenProvider = tokenProvider;
         this.securityContextRepo = securityContextRepo;
+        this.cookieUtils = cookieUtils;
     }
 
 
@@ -68,23 +73,22 @@ public class AccessRestController {
      * This authorization process is protected by CSRF and nonce tokens.
      *
      * @param referer      the page that invoked login
-     * @param nonce        the expected nonce value
      * @param gCsrf        the expected Google CSRF token value
      * @param response     current HTTP response
      * @param request      current HTTP request
      * @param credential   Google ID-token
-     * @param g_csrf_token Google CSRF token
+     * @param g_csrf_token Google CSRF token TODO: verify that the correct one is sent to each subdomain
      * @throws IOException in case of unexpected error while redirecting
      */
     @PostMapping(path = LOGIN_PATH, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public void login(@RequestHeader("referer") Optional<String> referer,
-                      @CookieValue(name = NONCE_COOKIE_NAME) String nonce,
                       @CookieValue(name = GOOGLE_CSRF_COOKIE_NAME) String gCsrf,
                       HttpServletResponse response,
                       HttpServletRequest request,
                       String credential,
                       String g_csrf_token) throws IOException {
 
+        String nonce =  cookieUtils.getNonce(request); // TODO: verify that the correct one is sent to each subdomain
         Assert.isTrue(Objects.equals(g_csrf_token, gCsrf), "Wrong CSRF value");
         try {
             GoogleIdToken.Payload idToken = getIdToken(credential, nonce);
@@ -104,7 +108,7 @@ public class AccessRestController {
 
             OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities, attributes, "name"),
                     authorities, clientId);
-            CookieUtils.setCookie(response, JWT_COOKIE_NAME, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
+            cookieUtils.setSessionCookie(response, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(auth);
@@ -114,7 +118,7 @@ public class AccessRestController {
         } catch (Exception e) {
             logger.error("Unexpected error during auth", e);
             // TODO: revoke other cookies? reset g_state cookie?
-            CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
+            cookieUtils.setSessionCookie(response, 0, "");
         }
         String path = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
         response.sendRedirect(path);
@@ -134,12 +138,12 @@ public class AccessRestController {
 
     @PostMapping(path = LOGOUT_PATH)
     public void logout(HttpServletResponse response, @RequestHeader("referer") Optional<String> referer) throws IOException {
-        CookieUtils.setCookie(response, JWT_COOKIE_NAME, 0, "");
-        CookieUtils.setCookie(response, GOOGLE_STATE_COOKIE_NAME, 0, "");
+        cookieUtils.setSessionCookie(response, 0, "");
+        // TODO: need to remove this cookie?
+        // cookieUtils.setCookie(response, GOOGLE_STATE_COOKIE_NAME, 0, "");
 
         // TODO: stay on same page if it doesn't require auth?
         // String path  = referer.isPresent() ? new URL(referer.get()).getPath() : "/";
         response.sendRedirect("/");
     }
-
 }
