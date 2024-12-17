@@ -271,7 +271,7 @@
 			<scope>test</scope>
 			<version>${junit.version}</version>
 		</dependency>
-<!--		Add the Pub/Sub dependency-->
+<!--	Pub/Sub dependency-->
 
 		<dependency>
 			<groupId>com.google.cloud</groupId>

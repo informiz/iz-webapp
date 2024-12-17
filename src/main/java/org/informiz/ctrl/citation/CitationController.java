@@ -1,7 +1,6 @@
 package org.informiz.ctrl.citation;
 
 import jakarta.validation.Valid;
-import org.informiz.conf.PubSubPublisher;
 import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.CitationBase;
 import org.informiz.model.InformizEntity;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = CitationController.PREFIX)
 @Validated
 public class CitationController extends ChaincodeEntityController<CitationBase> {
-    PubSubPublisher publisher = new PubSubPublisher();
 
     public static final String PREFIX = "/citation";
     public static final String EDIT_PAGE_TEMPLATE = String.format("%s/update-citation.html", PREFIX);
@@ -73,9 +71,6 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
             return String.format("%s/add-citation.html", PREFIX);
         }
         entityRepo.save(citation);
-
-// Send a message to 'hello-pubsub' topic
-        publisher.publishMessage("hello-pubsub", "Hello, Pub/Sub!");
 
         return String.format("redirect:%s/all", PREFIX);
     }
