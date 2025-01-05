@@ -1,73 +1,51 @@
 package org.informiz.auth;
 
-import com.google.api.gax.paging.Page;
 import com.google.cloud.WriteChannel;
-import com.google.cloud.kms.v1.CryptoKeyName;
-import com.google.cloud.kms.v1.DecryptResponse;
-import com.google.cloud.kms.v1.EncryptResponse;
-import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.*;
-import com.google.protobuf.ByteString;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import org.apache.commons.io.FileUtils;
-import org.hyperledger.fabric.gateway.Identity;
-import org.hyperledger.fabric.gateway.Wallet;
-import org.informiz.repo.CryptoUtils;
+import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import static org.informiz.auth.InformizGrantedAuthority.*;
+import static org.informiz.ctrl.checker.CheckerRestController.CHECKER_API_PREFIX;
+import static org.informiz.model.Utils.channelFromEntityId;
 
 @Service
 public class AuthUtils {
-
     static RoleHierarchy roleHierarchy = InformizGrantedAuthority.roleHierarchy();
 
-    public static void generateCryptoMaterial(String userEntityId) {
-        // TODO: generate using organization's CA
-/*
-        try {
-            saveCertificates(userEntityId);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to generate and upload crypto material", e);
-        }
-*/
+    @Value("${iz.channel.id}")
+    private String channelId;
+
+    private final FactCheckerRepository factCheckerRepo;
+
+    private final RestClient.Builder restClientBuilder = RestClient.builder();
+
+    public AuthUtils(FactCheckerRepository factCheckerRepo) {
+        this.factCheckerRepo = factCheckerRepo;
     }
 
-    public static boolean isChannelMember(@NotBlank String userEntityId, @NotNull Wallet userWallet, @NotBlank String channelId) {
-        Identity identity = null;
+    public boolean verifyMemberInChannel(String channel, String entityId)  {
         try {
-            identity = userWallet.get(String.format("%s:%s:%s", userEntityId, "member", channelId));
-        } catch (IOException e) {
-            throw new IllegalStateException("Unexpected error while retrieving identity", e);
-        }
-        return identity != null;
-    }
+            RestClient restClient = restClientBuilder.baseUrl(String.format("https://%s", channel)).build();
 
-    public static boolean isChannelAdmin(@NotBlank String userEntityId, @NotNull Wallet userWallet, @NotBlank String channelId) {
-        Identity identity = null;
-        try {
-            identity = userWallet.get(String.format("%s:%s:%s", userEntityId, "admin", channelId));
-        } catch (IOException e) {
-            throw new IllegalStateException("Unexpected error while retrieving identity", e);
+            return restClient.get().uri("/{prefix}/{eid}", CHECKER_API_PREFIX, entityId)
+                    .retrieve().body(Boolean.class);
+        } catch (RuntimeException e) {
+            // TODO: log reason for failing
+            return false;
         }
-        return identity != null;
     }
 
     public static List<GrantedAuthority> anonymousAuthorities() {
@@ -75,32 +53,30 @@ public class AuthUtils {
                 new InformizGrantedAuthority(ROLE_VIEWER, "anonymous"));
     }
 
-    public static Collection<? extends GrantedAuthority> getUserAuthorities(String email, String entityId) {
-        // TODO: get wallet from secret-manager based on user entity-id
-        Wallet userWallet;
-        try {
-            userWallet = getUserWallet(email);
-        } catch (Exception e) {
-            throw new IllegalStateException("Unexpected error while loading user wallet", e);
-        }
+    /**
+     * If local user - get member/admin creds
+     * If checker - verify channel membership and give Checker access
+     * Otherwise - anonymous user
+     * @param email
+     * @return granted authorities
+     */
+    public Collection<? extends GrantedAuthority> getUserAuthorities(String email) {
+        String entityId = factCheckerRepo.getCheckerEntityId(email);
+        // Not a member in any channel - anonymous user
+        if (entityId == null) return anonymousAuthorities();
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
+        String userChannel = channelFromEntityId(entityId);
 
-        if (userWallet == null) {
-            authorities.add(new InformizGrantedAuthority(ROLE_VIEWER, entityId));
-            return authorities; // No additional authorities
-        }
-
-        // All users have fact-checker permissions
-        authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId));
-
-        // TODO: get current channel name
-        if (isChannelMember(email, userWallet, CHANNEL_FOLDER)) {
+        if (channelId.equals(userChannel)) {
             authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId));
+            // TODO: check if also admin
         }
-
-        if (isChannelAdmin(email, userWallet, CHANNEL_FOLDER)) {
-            authorities.add(new InformizGrantedAuthority(ROLE_ADMIN, entityId));
+        else if(verifyMemberInChannel(userChannel, entityId)) {
+            authorities.add(new InformizGrantedAuthority(ROLE_CHECKER, entityId));
+        } else {
+            // Not local member, could not verify membership in other channel
+            return anonymousAuthorities();
         }
 
         // TODO: AuthorityAuthorizationManager not using defined role hierarchy, fixed in Spring 6.1.x
@@ -121,37 +97,9 @@ public class AuthUtils {
         return entityId;
     }
 
-
-/*
-    public static void getChannelProxy(String email, String channelId) {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        HttpSession userSession =  attr.getRequest().getSession(true);
-
-        if (userSession.getAttribute(CryptoUtils.ChaincodeProxy.PROXY_ATTR) == null) {
-            //CryptoUtils.ChaincodeProxy proxy = CryptoUtils.createChaincodeProxy(channelId, "informiz");
-        }
-        // TODO: update granted authorities if channel changes (trigger re-authentication?)
-    }
-*/
-
-    // TODO: use config
+    // TODO: uploading media to channels - move to informi-controller, use config
     private static final String projectId = "key-master-283113";
-    private static final String locationId = "global";
-    private static final String keyRingId = "informiz";
-    private static final String keyId = "beta-channel";
-    private static final String izBucket = "informiz";
-    private static final String idsFolder = "identities";
 
-    // Used for checking identities for memberships in channel
-    private static String CHANNEL_FOLDER;
-
-    @Value("${iz.channel.folder}")
-    public void setChannelName(String cid){
-        // workaround for assigning property-value to static field
-        AuthUtils.CHANNEL_FOLDER = cid;
-    }
-
-    // Used for uploading media to channels
     private static String CHANNEL_MEDIA_FOLDER;
 
     @Value("${iz.channel.media.folder}")
@@ -159,11 +107,6 @@ public class AuthUtils {
         // workaround for assigning property-value to static field
         AuthUtils.CHANNEL_MEDIA_FOLDER = folder;
     }
-
-    private static final String checkersChannelId = "checkers.informiz.org";
-
-    private static final String certFilename = "cert.pem";
-    private static final String keyFilename = "key.pk";
 
     private static final String mediaBucket = "iz-public";
     private static final String mediaFolder = "media";
@@ -188,111 +131,4 @@ public class AuthUtils {
         }
         return String.format("%s%s", mediaPrefix, blobInfo.getName());
     }
-
-    public static void saveCertificates(String userEntityId) throws IOException {
-
-        // TODO: get real credentials
-        String userCertContent = FileUtils.readFileToString(
-                new File(AuthUtils.class.getClassLoader().getResource("test-crypto/test-cert.pem").getPath()),
-                StandardCharsets.UTF_8.toString());
-        String privateKeyContent = FileUtils.readFileToString(
-                new File(AuthUtils.class.getClassLoader().getResource("test-crypto/test_pk").getPath()),
-                StandardCharsets.UTF_8.toString());
-
-        uploadIdentityContent(storage, userEntityId, userCertContent, certFilename);
-        uploadIdentityContent(storage, userEntityId, privateKeyContent, keyFilename);
-    }
-
-    private static void uploadIdentityContent(Storage storage, String userEntityId, String content, String filename) {
-        try {
-            byte[] bytes = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
-
-            BlobId certBlobId = BlobId.of(izBucket,
-                    String.format("%s/%s/member:%s/%s", idsFolder, userEntityId, CHANNEL_FOLDER, filename));
-            BlobInfo blobInfo = BlobInfo.newBuilder(certBlobId).build();
-            storage.create(blobInfo, bytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload crypto material", e);
-        }
-    }
-
-    public static  Wallet getUserWallet(String userEntityId) throws IOException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        Page<Blob> blobs = storage.list(izBucket,
-                Storage.BlobListOption.prefix(String.format("%s/%s/", idsFolder, userEntityId)),
-                Storage.BlobListOption.pageSize(1));
-        if ( ! blobs.getValues().iterator().hasNext()) return null;
-
-        // TODO: check for admin identity
-        blobs = storage.list(izBucket,
-                Storage.BlobListOption.prefix(String.format("%s/%s/member:%s/", idsFolder, userEntityId, CHANNEL_FOLDER)),
-                Storage.BlobListOption.pageSize(1));
-
-        if (blobs.getValues().iterator().hasNext()) {
-            return getWalletForIdentity(userEntityId, "member", CHANNEL_FOLDER);
-        } else {
-            // All fact-checkers should have crypto-material for checker identity
-            return getWalletForIdentity(userEntityId, "member", checkersChannelId);
-        }
-
-    }
-
-    private static Wallet getWalletForIdentity(String userEntityId, String role, String channel) throws IOException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        Blob certBlob = storage.get(BlobId.of(izBucket, String.format("%s/%s/%s:%s/%s",
-                idsFolder, userEntityId, role, channel, certFilename)));
-        Blob keyBlob = storage.get(BlobId.of(izBucket, String.format("%s/%s/%s:%s/%s",
-                idsFolder, userEntityId, role, channel, keyFilename)));
-
-        byte[] certBytes = decrypt(ByteString.copyFrom(certBlob.getContent()), keyRingId, keyId).toByteArray();
-        X509Certificate cert = CryptoUtils.getCertificate(new ByteArrayInputStream(certBytes));
-
-        ByteString keyContent = decrypt(ByteString.copyFrom(keyBlob.getContent()), keyRingId, keyId);
-        PrivateKey key = CryptoUtils.getPKCS8Key(keyContent.toString(StandardCharsets.UTF_8), CryptoUtils.ALGORITHM);
-
-        // TODO: same MSP for all organizations?
-        return CryptoUtils.setUpWallet(String.format("%s:%s:%s", userEntityId, role, channel),
-                CryptoUtils.ORG_1_MSP, cert, key);
-    }
-
-
-    // TODO: use local encryption key to improve performance..?
-    public static String encrypt(String content, String keyRingId, String keyId) throws IOException {
-        byte[] encrypted = encrypt(ByteString.copyFromUtf8(content), keyRingId, keyId).toByteArray();
-        return Base64.getEncoder().encodeToString(encrypted);
-    }
-
-    public static ByteString encrypt(ByteString content, String keyRingId, String keyId) throws IOException {
-        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
-
-            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
-            EncryptResponse response = client.encrypt(keyVersionName, content);
-            return response.getCiphertext();
-        }
-    }
-
-    public static String decrypt(String content, String keyRingId, String keyId) throws IOException {
-        byte[] restored = Base64.getDecoder().decode(content);
-        return decrypt(ByteString.copyFrom(restored), keyRingId, keyId).toStringUtf8();
-    }
-
-    public static ByteString decrypt(ByteString content, String keyRingId, String keyId) throws IOException {
-        try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
-
-            CryptoKeyName keyVersionName = CryptoKeyName.of(projectId, locationId, keyRingId, keyId);
-            DecryptResponse response = client.decrypt(keyVersionName, content);
-            return response.getPlaintext();
-        }
-    }
-
-    // TODO: REMOVE THIS
-/*
-    public static void main(String[] args) {
-        try {
-            //saveCertificates("email@domain.com");
-            //Wallet wallet = getUserWallet("email@domain.com");
-            //System.out.println("Got it");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-*/
 }

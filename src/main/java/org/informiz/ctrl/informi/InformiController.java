@@ -8,7 +8,6 @@ import org.informiz.model.InformizEntity;
 import org.informiz.model.Reference;
 import org.informiz.model.Review;
 import org.informiz.repo.informi.InformiRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -175,7 +174,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @Override
-    protected void modelForError(@NotNull Model model, InformiBase current) {
+    protected void modelForError(Model model, InformiBase current) {
         super.modelForError(model, current);
         model.addAttribute(INFORMI_ATTR, current);
         if (! model.containsAttribute(REFERENCE_ATTR)) model.addAttribute(REFERENCE_ATTR, new Reference());

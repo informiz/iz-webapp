@@ -1,4 +1,4 @@
-package org.informiz;
+package hlf;
 
 import org.hyperledger.fabric.gateway.*;
 
@@ -20,6 +20,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Hyperledger-Fabric integration PoC
+ * TODO: is this necessary? Alternatives for audit capabilities?
+ */
 public class ToRemove {
 
     /**

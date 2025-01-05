@@ -10,7 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
+
 
 // TODO: refactor entity-class hierarchy
 public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
@@ -32,15 +33,16 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
     protected String getEditPageTemplate() { return null; }
 
     protected void modelForError(Model model, T current) {
+        Objects.requireNonNull(model);
         if (! model.containsAttribute(REVIEW_ATTR)) model.addAttribute(REVIEW_ATTR, new Review());
-    };
+    }
 
-    protected String successfulEdit(Model model, Long localId, @Nullable InformizEntity<InformizEntity> userInput) {
+    protected <E extends InformizEntity> String successfulEdit(Model model, Long localId, E userInput) {
         // Assuming redirect back to edit-page
         return getRedirectToEditPage(localId);
     }
 
-    protected String failedEdit(Model model, BindingResult result, T current, InformizEntity<InformizEntity> userInput) {
+    protected <E extends InformizEntity> String failedEdit(Model model, BindingResult result, T current, E userInput) {
         modelForError(model, current);
         // Assuming reloaded page presents errors in UI
         return getEditPageTemplate();

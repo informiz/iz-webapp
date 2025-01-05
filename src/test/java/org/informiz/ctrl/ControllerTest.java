@@ -7,13 +7,14 @@ import org.informiz.WithCustomAuth;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.Review;
+import org.informiz.repo.checker.FactCheckerRepository;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.informiz.repo.source.SourceRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -42,9 +43,11 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
-    @MockBean
+    @MockitoBean
     protected SourceRepository sourceRepo;
-    @MockBean
+    @MockitoBean
+    private FactCheckerRepository checkerRepo;
+    @MockitoBean
     protected SecurityConfig.ClientIdService googleOAuthService;
     @Autowired
     protected MockMvc mockMvc;

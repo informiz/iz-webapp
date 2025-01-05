@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.2</version>
+		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.informiz</groupId>
@@ -19,14 +19,13 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>17</java.version>
-        <spring.security.version>6.0.2</spring.security.version>
-        <jackson.version>2.14.2</jackson.version> <!-- jackson version compatible with spring -->
-		<junit.version>5.9.2</junit.version>
+        <spring.security.version>6.4.2</spring.security.version>
+        <jackson.version>2.18.2</jackson.version> <!-- jackson version compatible with spring -->
 		<jmockit.version>1.49</jmockit.version>
         <h2.version>2.2.220</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible. -->
-		<thymeleaf.version>3.1.1.RELEASE</thymeleaf.version>
-		<thymeleaf.sec.version>3.1.1.RELEASE</thymeleaf.sec.version>
+		<thymeleaf.version>3.1.3.RELEASE</thymeleaf.version>
+		<thymeleaf.sec.version>3.1.3.RELEASE</thymeleaf.sec.version>
 	</properties>
 
 	<profiles>
@@ -125,13 +124,17 @@
             <version>${jackson.version}</version>
         </dependency>
 
-<!--
-		TODO: is there in fact a mysql:mysql-connector-java available at runtime? Need to add dependency for that?
 		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
--->
+		<!--
+                TODO: is there in fact a mysql:mysql-connector-java available at runtime? Need to add dependency for that?
+                <dependency>
+                    <groupId>com.google.cloud</groupId>
+                    <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
+                </dependency>
+        -->
         <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -185,18 +188,6 @@
             <version>${spring.security.version}</version>
         </dependency>
 
-        <dependency>
-			<groupId>org.hyperledger.fabric</groupId>
-			<artifactId>fabric-gateway-java</artifactId>
-			<version>2.2.8</version>
-			<exclusions>
-				<exclusion><!-- TODO: remove exclusion when vulnerabilities in version 1.33 are fixed -->
-					<groupId>org.yaml</groupId>
-					<artifactId>snakeyaml</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
@@ -244,12 +235,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-			</exclusions>
 		</dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -268,8 +253,22 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
-			<version>${junit.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.hyperledger.fabric</groupId>
+			<artifactId>fabric-gateway-java</artifactId>
+			<scope>test</scope>
+			<version>2.2.9</version>
+			<exclusions>
+				<exclusion><!-- TODO: remove exclusion when vulnerabilities in version 1.33 are fixed -->
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

@@ -1,12 +1,12 @@
-package org.informiz.ctrl.checker;
+package hlf;
 
 import jakarta.servlet.http.HttpSession;
 import org.informiz.model.ChainCodeEntity;
 import org.informiz.model.FactCheckerBase;
-import org.informiz.repo.CryptoUtils.ChaincodeProxy;
+import hlf.CryptoUtils.ChaincodeProxy;
 
 
-import static org.informiz.repo.CryptoUtils.ChaincodeProxy.PROXY_ATTR;
+import static hlf.CryptoUtils.ChaincodeProxy.PROXY_ATTR;
 
 public class CheckerCCDao {
 
@@ -19,7 +19,7 @@ public class CheckerCCDao {
 
     public static ChaincodeProxy getCCProxy(HttpSession session) {
         // TODO: re-create from encrypted blob?
-        return (ChaincodeProxy) session.getAttribute(PROXY_ATTR);
+        return (ChaincodeProxy) session.getAttribute(ChaincodeProxy.PROXY_ATTR);
     }
 
 

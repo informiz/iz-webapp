@@ -4,11 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.regex.PatternSyntaxException;
 
 
 @Service
 public class Utils {
 
+    public static final String ID_PATTERN = "%s_%s_%s";
     private static String CHANNEL_NAME;
 
     @Value("${iz.channel.name}")
@@ -52,8 +54,17 @@ public class Utils {
         }
 
         // TODO: check uniqueness
-        return String.format("%s_%s_%s",
+        return String.format(ID_PATTERN,
                 entityType, CHANNEL_NAME, UUID.randomUUID().toString().substring(0, 16));
+    }
+
+    public static String channelFromEntityId(String entityId) {
+        try {
+            String[] parts = entityId.split("_");
+            return parts.length == 3 ? parts[1] : null;
+        } catch (NullPointerException | PatternSyntaxException e) {
+            return null;
+        }
     }
 
     public static class Views {

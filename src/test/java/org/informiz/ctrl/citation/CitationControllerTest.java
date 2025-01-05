@@ -12,7 +12,7 @@ import org.informiz.model.CitationBase;
 import org.informiz.repo.citation.CitationRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
@@ -33,7 +33,7 @@ class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBa
     public static final String SIZE_MUST_BE_BETWEEN_0_AND_500 = "size must be between 0 and 500";
     public static final String INVALID_LINK = "Please provide a link to the source of the citation";
     public static final String COMMENT_SIZE = "Comment must be under 255 characters";
-    @MockBean
+    @MockitoBean
     CitationRepository citationRepository;
 
     @Override

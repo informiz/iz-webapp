@@ -18,7 +18,7 @@ import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
     public static final String UPDATE_HYPOTHESIS = "Update Claim";
     public static final String DETAILS = "Details";
     public static final String CLAIM_SIZE = "Claim must be under 500 characters";
-    @MockBean
+    @MockitoBean
     HypothesisRepository hypothesisRepository;
 
     @Override

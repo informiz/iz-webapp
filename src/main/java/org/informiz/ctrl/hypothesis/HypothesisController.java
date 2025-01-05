@@ -5,7 +5,6 @@ import org.informiz.ctrl.entity.ChaincodeEntityController;
 import org.informiz.model.*;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.informiz.repo.source.SourceRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -202,7 +201,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         model.addAttribute(SOURCE_ATTR, new SourceRef());
     }
 
-    protected void modelForError(@NotNull Model model, HypothesisBase current) {
+    protected void modelForError(Model model, HypothesisBase current) {
         super.modelForError(model, current);
         model.addAttribute(HYPOTHESIS_ATTR, current);
         if (! model.containsAttribute(REFERENCE_ATTR)) model.addAttribute(REFERENCE_ATTR, new Reference());

@@ -20,7 +20,7 @@ import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.informi.InformiRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -49,7 +49,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
     public static final String TEXT_EXCEEDS_MSG = "Description exceeds limit";
     public static final String INVALID_LINK = "A valid link to a media file is mandatory";
     public static final String COMMENT_SIZE = "Comment must be under 255 characters";
-    @MockBean
+    @MockitoBean
     InformiRepository informiRepository;
 
     @Override

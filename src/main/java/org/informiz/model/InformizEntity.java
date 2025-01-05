@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 @MappedSuperclass
 @JsonView(Utils.Views.EntityDefaultView.class)
-public abstract class InformizEntity<T extends InformizEntity> implements Serializable {
+public abstract class InformizEntity<T extends InformizEntity> implements Serializable { // TODO: what was I thinking..?
 
     static final long serialVersionUID = 3L;
 

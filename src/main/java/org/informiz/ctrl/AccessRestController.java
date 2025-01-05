@@ -11,8 +11,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
 import org.informiz.auth.TokenProvider;
-import org.informiz.model.FactCheckerBase;
-import org.informiz.repo.checker.FactCheckerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,24 +45,23 @@ public class AccessRestController {
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
-    // TODO: user may not be a member, get entity-id from ES
-    private final FactCheckerRepository factCheckerRepo;
-
     private final TokenProvider tokenProvider;
 
     private final SecurityContextRepository securityContextRepo;
 
     private final CookieUtils cookieUtils;
 
+    private final AuthUtils authUtils;
+
     private static final Logger logger = LoggerFactory.getLogger(AccessRestController.class);
 
     @Autowired
-    public AccessRestController(FactCheckerRepository factCheckerRepo, TokenProvider tokenProvider,
-                                SecurityContextRepository securityContextRepo, CookieUtils cookieUtils) {
-        this.factCheckerRepo = factCheckerRepo;
+    public AccessRestController(TokenProvider tokenProvider, SecurityContextRepository securityContextRepo,
+                                CookieUtils cookieUtils, AuthUtils authUtils) {
         this.tokenProvider = tokenProvider;
         this.securityContextRepo = securityContextRepo;
         this.cookieUtils = cookieUtils;
+        this.authUtils = authUtils;
     }
 
 
@@ -92,21 +89,20 @@ public class AccessRestController {
         Assert.isTrue(Objects.equals(g_csrf_token, gCsrf), "Wrong CSRF value");
         try {
             GoogleIdToken.Payload idToken = getIdToken(credential, nonce);
-
+            // TODO: looks like we can rely on Subject field as well? Does Google ensure it never changes for users?
             String email = idToken.getEmail();
-            String subscriber = idToken.getSubject();
+            String gUserId = idToken.getSubject();
 
-            // TODO: user may not be a member, get entity-id from ES
-            FactCheckerBase checker = factCheckerRepo.findByEmail(email);
-            String entityId = checker == null ? "" : checker.getEntityId();
-            Collection<? extends GrantedAuthority> authorities = AuthUtils.getUserAuthorities(email, entityId);
+            Collection<? extends GrantedAuthority> authorities = authUtils.getUserAuthorities(email);
+            String entityId = authUtils.getUserEntityId(authorities);
 
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("eid", entityId);
-            attributes.put("gid", subscriber);
+            attributes.put("gid", gUserId);
             attributes.put("name", entityId);
 
-            OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities, attributes, "name"),
+            OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(new DefaultOAuth2User(authorities,
+                    attributes, "name"),
                     authorities, clientId);
             cookieUtils.setSessionCookie(response, TOKEN_MAX_AGE, tokenProvider.createToken(auth));
 
