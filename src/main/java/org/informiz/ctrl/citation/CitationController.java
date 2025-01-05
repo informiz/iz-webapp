@@ -52,7 +52,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @GetMapping("/details/{citationId}")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String getCitation(@PathVariable("citationId") Long id, Model model) {
         CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));

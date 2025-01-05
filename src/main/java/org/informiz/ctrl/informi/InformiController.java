@@ -96,7 +96,7 @@ public class InformiController extends ChaincodeEntityController<InformiBase> {
     }
 
     @GetMapping("/details/{informiId}")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String getInformi(@PathVariable("informiId") @Valid Long id, Model model) {
         InformiBase informi = entityRepo.loadByLocalId(id)
                 .orElseThrow(() ->new IllegalArgumentException("Invalid informi id"));
