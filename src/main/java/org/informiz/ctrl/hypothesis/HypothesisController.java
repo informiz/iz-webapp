@@ -78,7 +78,7 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
 
     // TODO: Remove references to deleted hypothesis
     @GetMapping("/details/{hypothesisId}")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String getHypothesis(@PathVariable("hypothesisId") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
                 .orElse(null); //Throw(() ->new IllegalArgumentException("Invalid Hypothesis id"));

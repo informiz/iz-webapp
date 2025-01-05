@@ -13,6 +13,7 @@ import org.informiz.ctrl.citation.CitationController;
 import org.informiz.ctrl.hypothesis.HypothesisController;
 import org.informiz.model.CitationBase;
 import org.informiz.model.HypothesisBase;
+import org.informiz.model.Reference;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.hypothesis.HypothesisRepository;
 import org.junit.jupiter.api.Disabled;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(HypothesisController.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, HypothesisController.class, ErrorHandlingAdvice.class})
-@Disabled("Validation doesn't work - FIX this")
+//@Disabled("Validation doesn't work - FIX this")
 class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
     public static final String ALL_HYPOTHESIS_TITLE = "Factual claims, ranked for reliability";
     public static final String NEW_HYPOTHESIS = "New Claim";
@@ -169,6 +170,21 @@ class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
                 Arrays.asList(status().isForbidden()));
     }
+
+
+/*  This method would test addReference
+    @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenValidAddReference_thenSucceeds() throws Exception {
+        verifyPostApiCall(getPopulatedEntity("some owner", null), "1/reference/",  Map.of(
+                        "factCheckedEntityId",  new String[]{DEFAULT_TEST_CHECKER_ID},
+                        "refEntityId", new String[]{("1")},
+                        "entailment", new String[]{Reference.Entailment.SUPPORTS.name()},
+                        "degree", new String[]{("0.94")},
+                        "comment", new String[]{RandomStringUtils.random(255)}),
+                Arrays.asList(status().isFound(), redirectedUrl(updateEntityTitle())));
+    }
+*/
 
     @Override
     @NotNull

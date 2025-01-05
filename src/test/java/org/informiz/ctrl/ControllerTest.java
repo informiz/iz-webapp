@@ -120,8 +120,8 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     }
 
     @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenMemberViewsUpdateEntity_thenSucceeds() throws Exception {
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerViewsUpdateEntity_thenSucceeds() throws Exception {
 
         verifyGetApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",
                 Arrays.asList(status().isOk(),
@@ -216,6 +216,9 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                 ),
                 Arrays.asList(status().isFound()));
     }
+
+
+
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER}, checkerId="Some_Checker")
     void whenNotOwnerEditReview_thenForbidden() throws Exception {

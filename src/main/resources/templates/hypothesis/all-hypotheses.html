@@ -22,8 +22,11 @@
                             <th data-field="date"  data-sortable="true" data-searchable="false" data-formatter="tsToString">Last Updated</th>
                             <th:block sec:authorize="hasRole('ROLE_CHECKER')">
                                 <th data-sortable="false" data-searchable="false">Edit</th>
-                                <th data-sortable="false" data-searchable="false">Delete</th>
+<!--                                <th data-sortable="false" data-searchable="false">Delete</th>-->
                             </th:block>
+                            <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
+                                data-sortable="false" data-searchable="false">Delete
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
