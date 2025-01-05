@@ -3,8 +3,11 @@ package org.informiz.model;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
 import java.util.UUID;
-import java.util.regex.PatternSyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -35,7 +38,14 @@ public class Utils {
         public String getDisplayValue() {
             return displayValue;
         }
+
+        public static String entityTypeOptionsPattern() {
+            return EnumSet.allOf(EntityType.class).stream().map(Enum::toString).collect(Collectors.joining("|"));
+        }
     }
+
+    public static Pattern EID_PREFIX_PATTERN = Pattern.compile(String.format("^(%s)_([^_]+)_(.*)",
+            EntityType.entityTypeOptionsPattern()));
     public static String createEntityId(ChainCodeEntity entity) {
         EntityType entityType;
 
@@ -60,9 +70,11 @@ public class Utils {
 
     public static String channelFromEntityId(String entityId) {
         try {
-            String[] parts = entityId.split("_");
-            return parts.length == 3 ? parts[1] : null;
-        } catch (NullPointerException | PatternSyntaxException e) {
+            Matcher m = EID_PREFIX_PATTERN.matcher(entityId);
+            if (m.find())
+                return m.group(2);
+            return null;
+        } catch (RuntimeException e) {
             return null;
         }
     }
