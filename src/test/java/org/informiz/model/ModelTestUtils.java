@@ -104,7 +104,7 @@ public class ModelTestUtils {
         return sourceBase;
     }
 
-    private static void setMetaData(Long id, InformizEntity<InformizEntity> izEntity) {
+    private static void setMetaData(Long id, InformizEntity izEntity) {
         izEntity.setId(id);
         izEntity.setCreatorId("test");
         izEntity.setOwnerId("test");

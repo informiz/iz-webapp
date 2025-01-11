@@ -2,9 +2,9 @@ package org.informiz.auth;
 
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
+import org.informiz.model.ChainCodeEntity;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,10 +22,8 @@ import static org.informiz.model.Utils.channelFromEntityId;
 
 @Service
 public class AuthUtils {
-    static RoleHierarchy roleHierarchy = InformizGrantedAuthority.roleHierarchy();
-
-    @Value("${iz.channel.id}")
-    private String channelId;
+    @Value("${iz.channel.name}")
+    private String channelName;
 
     private final FactCheckerRepository factCheckerRepo;
 
@@ -38,9 +35,9 @@ public class AuthUtils {
 
     public boolean verifyMemberInChannel(String channel, String entityId)  {
         try {
-            RestClient restClient = restClientBuilder.baseUrl(String.format("https://%s", channel)).build();
+            RestClient restClient = restClientBuilder.baseUrl(String.format("https://%s.informiz.org", channel)).build();
 
-            return restClient.get().uri("/{prefix}/{eid}", CHECKER_API_PREFIX, entityId)
+            return restClient.get().uri("{prefix}/{eid}", CHECKER_API_PREFIX.substring(1), entityId)
                     .retrieve().body(Boolean.class);
         } catch (RuntimeException e) {
             // TODO: log reason for failing
@@ -49,7 +46,7 @@ public class AuthUtils {
     }
 
     public static List<GrantedAuthority> anonymousAuthorities() {
-        return Arrays.asList(
+        return List.of(
                 new InformizGrantedAuthority(ROLE_VIEWER, "anonymous"));
     }
 
@@ -57,18 +54,20 @@ public class AuthUtils {
      * If local user - get member/admin creds
      * If checker - verify channel membership and give Checker access
      * Otherwise - anonymous user
-     * @param email
+     * @param email email address used for log-in
      * @return granted authorities
      */
     public Collection<? extends GrantedAuthority> getUserAuthorities(String email) {
-        String entityId = factCheckerRepo.getCheckerEntityId(email);
+        // TODO: if not found locally - get entity-id(s) from PubSub topic. Return all ids if multiple channels?
+        // TODO: create dummy PubSub consumer to return some email->eid mappings?
+        String entityId = factCheckerRepo.findByEmail(email).map(ChainCodeEntity::getEntityId).orElse(null);
         // Not a member in any channel - anonymous user
         if (entityId == null) return anonymousAuthorities();
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         String userChannel = channelFromEntityId(entityId);
 
-        if (channelId.equals(userChannel)) {
+        if (channelName.equals(userChannel)) {
             authorities.add(new InformizGrantedAuthority(ROLE_MEMBER, entityId));
             // TODO: check if also admin
         }
@@ -79,22 +78,15 @@ public class AuthUtils {
             return anonymousAuthorities();
         }
 
-        // TODO: AuthorityAuthorizationManager not using defined role hierarchy, fixed in Spring 6.1.x
-        /**
-         * see https://github.com/spring-projects/spring-security/issues/12473
-         */
-        return roleHierarchy.getReachableGrantedAuthorities(authorities);
-        //return authorities;
+        return authorities;
     }
 
-    // TODO: Very inefficient!! Implement a user-details service to keep this info
     public static String getUserEntityId(Collection<? extends GrantedAuthority> authorities) {
-        String entityId =  authorities.stream()
+        return authorities.stream()
                 .filter(auth -> auth instanceof InformizGrantedAuthority)
                 .findFirst()
                 .map(auth -> ((InformizGrantedAuthority)auth).getEntityId())
                 .orElse(null);
-        return entityId;
     }
 
     // TODO: uploading media to channels - move to informi-controller, use config

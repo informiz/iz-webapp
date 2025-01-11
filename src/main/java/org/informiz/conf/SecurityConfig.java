@@ -110,11 +110,11 @@ public class SecurityConfig {
         @Autowired
         private CookieUtils cookieUtils;
 
-        public boolean isOwner(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
+        public boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
             return principal.getName().equals(entity.getOwnerId());
         }
 
-        public String getDisabled(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
+        public String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
             return isOwner(principal, entity) ? "false" : "true";
         }
 

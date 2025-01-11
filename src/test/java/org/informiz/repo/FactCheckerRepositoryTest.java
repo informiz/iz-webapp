@@ -69,7 +69,7 @@ public class FactCheckerRepositoryTest {
         FactCheckerBase found = factCheckerRepo.findByName(chuck.getName());
         validateChuck(found);
 
-        found = factCheckerRepo.findByEmail(chuck.getEmail());
+        found = factCheckerRepo.findByEmail(chuck.getEmail()).orElse(null);
         validateChuck(found);
 
         found = factCheckerRepo.findByEntityId(chuck.getEntityId());

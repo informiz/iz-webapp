@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Table(name="source_ref")
 @Entity
-public final class SourceRef extends InformizEntity<InformizEntity> implements Serializable {
+public final class SourceRef extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 

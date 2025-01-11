@@ -20,7 +20,7 @@ import static org.informiz.model.Score.CONFIDENCE_BOOST;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @JsonView(Utils.Views.EntityDefaultView.class)
 //@MappedSuperclass
-public abstract class ChainCodeEntity extends InformizEntity<InformizEntity> {
+public abstract class ChainCodeEntity extends InformizEntity {
 
     static final long serialVersionUID = 3L ;
 
@@ -72,8 +72,8 @@ public abstract class ChainCodeEntity extends InformizEntity<InformizEntity> {
     @Valid
     private Score score = new Score();
 
-    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
-        Consumer<InformizEntity<InformizEntity>> consumer = super.onCreateConsumer();
+    protected Consumer<InformizEntity> onCreateConsumer() {
+        Consumer<InformizEntity> consumer = super.onCreateConsumer();
         return entity -> {
             consumer.accept(entity);
             this.entityId = Utils.createEntityId(this);

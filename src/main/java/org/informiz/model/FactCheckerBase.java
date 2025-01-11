@@ -39,7 +39,7 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
     public interface FactCheckerFromUI {}
 
     @Email(message = "Please provide a valid email address", groups = {FactCheckerFromUI.class, Default.class})
-    private String email;
+    private String email; // TODO: encrypt in DB?
 
     @URL(message = "Please provide a valid profile-link", groups = {FactCheckerFromUI.class, Default.class})
     private String link;

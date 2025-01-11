@@ -39,8 +39,6 @@ spec:
           value: <CHANNEL_NAME>
         - name: iz.channel.id
           value: <CHANNEL_NAME>.informiz.org
-        - name: iz.channel.folder
-          value: <CHANNEL_NAME>.informiz.org
         - name: iz.channel.media.folder
           value: <CHANNEL_NAME>.informiz.org
         - name: iz.webapp.token.issuer

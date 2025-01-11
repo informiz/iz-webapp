@@ -16,7 +16,7 @@ import static org.informiz.model.InformizEntity.ExistingEntityFromUI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringJUnitConfig(IzEntityTestBase.Config.class)
-public abstract class IzEntityTestBase<T extends InformizEntity<InformizEntity>> {
+public abstract class IzEntityTestBase<T extends InformizEntity> {
     protected Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     static class Config {}
@@ -68,7 +68,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity<InformizEntity>>
     public void whenCreatorIdExceeds_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
-        entity.setCreatorId(RandomStringUtils.random(256));
+        entity.setCreatorId(RandomStringUtils.insecure().next(256)); // TODO: replace all random()
 
         Set<ConstraintViolation<T>> violations = validator.validate(entity);
         assertEquals(1, violations.size());
@@ -117,7 +117,7 @@ public abstract class IzEntityTestBase<T extends InformizEntity<InformizEntity>>
     }
 
     @Test
-    public void whenUpdtedTsIsNull_thenDefaultValidatorViolation() {
+    public void whenUpdatedTsIsNull_thenDefaultValidatorViolation() {
         T entity = getValidEntity();
 
         entity.setUpdatedTs(null);
