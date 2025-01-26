@@ -25,7 +25,6 @@
         <h2.version>2.2.220</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible. -->
 		<thymeleaf.version>3.1.3.RELEASE</thymeleaf.version>
-		<thymeleaf.sec.version>3.1.3.RELEASE</thymeleaf.sec.version>
 	</properties>
 
 	<profiles>
@@ -165,12 +164,12 @@
 		<dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-			<version>${thymeleaf.sec.version}</version>
+			<version>${thymeleaf.version}</version>
         </dependency>
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>3.2.0</version>
+            <version>3.3.0</version>
         </dependency>
 
 		<dependency>
