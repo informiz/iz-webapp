@@ -93,7 +93,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    static LayoutDialect layoutDialect() {
+    public LayoutDialect layoutDialect() {
         return new LayoutDialect();
     }
 
