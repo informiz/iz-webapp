@@ -81,7 +81,7 @@ public class CheckerControllerTest {
     }
 
     @Test
-    public void whenUnAuthAddChecker_thenForbid() throws Exception {
+    public void whenUnAuthAddChecker_thenForbidden() throws Exception {
 
 
         mockMvc.perform(post("/factchecker/add")

@@ -5,8 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
 import org.informiz.conf.SecurityConfig;
-import org.informiz.model.ChainCodeEntity;
-import org.informiz.model.Review;
+import org.informiz.model.*;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.informiz.repo.source.SourceRepository;
@@ -39,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public abstract class ControllerTest<T extends ChainCodeEntity> {
-    public static final String TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
+    public static final String  TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
 
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
@@ -97,6 +96,15 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     }
 
     @Test
+    @WithCustomAuth(role = {ROLE_CHECKER})
+    void whenCheckerViewsAllEntity_thenAllowed() throws Exception {
+
+        verifyGetApiCall("all",
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(allEntitiesTitle()))));
+    }
+
+    @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerViewsAllEntities_thenAllowed() throws Exception {
 
@@ -113,6 +121,8 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(newEntityTitle()))));
     }
+
+    //Todo: Test missing: Is checker allowed to add an entity?
 
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
@@ -156,6 +166,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
                         "ownerId", new String[]{DEFAULT_TEST_CHECKER_ID}),
                 Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
+    //Todo: Test missing: Member, not owner, Checker forbidden to delete entity?
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
@@ -173,8 +184,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
         verifyPostApiCall(getPopulatedEntity("some owner", null), "1/review/",  Map.of(
                         "rating", new String[]{("0.82")},
-                        "reviewedEntityId", new String[]{TEST_ENTITY_ID},
-                        "comment", new String[]{RandomStringUtils.random(255)}
+                        "reviewedEntityId", new String[]{TEST_ENTITY_ID}
                 ),
                 Arrays.asList(status().isForbidden()));
     }
@@ -194,7 +204,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
-    void whenReviewCommentExceeds_thenErrorMsg() throws Exception {
+    void whenAddReviewCommentExceeds_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity("some owner", null), "1/review/",  Map.of(
                         "rating", new String[]{"0.82"},

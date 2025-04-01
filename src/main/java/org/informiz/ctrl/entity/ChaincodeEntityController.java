@@ -127,12 +127,18 @@ public abstract class ChaincodeEntityController<T extends ChainCodeEntity> {
         }
 
         if (! result.hasErrors()) {
-            Reference toAdd = new Reference(reference); // TODO: update ref if exists
+            Reference toSave;
+            if (reference.getId() != null) {
+                toSave = entity.findReference(reference.getId(), authentication.getName());
+                toSave.setDegree(reference.getDegree());
+                toSave.setEntailment(reference.getEntailment());
+                toSave.setComment(reference.getComment());
+            }
+            else {
+                entity.addReference(reference);
+            }
 
-            if (reference.getId() != null)
-                entity.removeReference(reference.getId(), authentication.getName());
 
-            entity.addReference(toAdd);
             entityRepo.save((T)entity);
             return null;
         }
