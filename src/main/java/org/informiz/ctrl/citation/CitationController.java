@@ -8,7 +8,6 @@ import org.informiz.model.Review;
 import org.informiz.model.SourceRef;
 import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.source.SourceRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -53,7 +52,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @GetMapping("/details/{citationId}")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    @PreAuthorize("hasAuthority('ROLE_CHECKER')")
     public String getCitation(@PathVariable("citationId") Long id, Model model) {
         CitationBase citation = entityRepo.loadByLocalId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid citation id"));
@@ -155,7 +154,7 @@ public class CitationController extends ChaincodeEntityController<CitationBase> 
     }
 
     @Override
-    protected void modelForError(@NotNull Model model, CitationBase current) {
+    protected void modelForError(Model model, CitationBase current) {
         super.modelForError(model, current);
         model.addAttribute(CITATION_ATTR, current);
         if (! model.containsAttribute(SOURCE_ATTR)) model.addAttribute(SOURCE_ATTR, new SourceRef());

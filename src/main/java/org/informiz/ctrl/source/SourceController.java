@@ -6,7 +6,6 @@ import org.informiz.model.InformizEntity;
 import org.informiz.model.Review;
 import org.informiz.model.SourceBase;
 import org.informiz.repo.source.SourceRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -124,7 +123,7 @@ public class SourceController extends ChaincodeEntityController<SourceBase> {
         return deleteReview(id, review.getId(), result, model, authentication);
     }
 
-    protected void modelForError(@NotNull Model model, SourceBase current) {
+    protected void modelForError(Model model, SourceBase current) {
         super.modelForError(model, current);
         model.addAttribute(SOURCE_ATTR, current);
     }

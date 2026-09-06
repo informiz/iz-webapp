@@ -2,15 +2,21 @@ package org.informiz.model;
 
 import jakarta.validation.ConstraintViolation;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jetbrains.annotations.NotNull;
+import org.informiz.WithCustomAuth;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
+import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
+import static org.informiz.auth.InformizGrantedAuthority.ROLE_CHECKER;
 import static org.informiz.model.ModelTestUtils.getPopulatedSrcReference;
 import static org.informiz.model.ModelTestUtils.getValidUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class SourceRefTest extends IzEntityTestBase<SourceRef> {
 
@@ -140,7 +146,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
     }
 
 
-    //SrcEntityId {<255}  (Default, NewUsrRef, ExistingUsrRef, DeleteNTT)
+    //SrcEntityId {>255}  (Default, NewUsrRef, ExistingUsrRef, DeleteNTT)
     @Test
     public void whenSrcEntityIdExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
@@ -242,7 +248,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
         assertEquals(1, violations.size());
     }
 
-    //SourcedId {<255}  (Default, NewUsrRef, ExistingUsrRef, DeleteNTT)
+    //SourcedId {>255}  (Default, NewUsrRef, ExistingUsrRef, DeleteNTT)
     @Test
     public void whenSourcedIdExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
@@ -352,7 +358,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
         assertEquals(1, violations.size());
     }
 
-    //  Link {<255}   (Default, NewSrcRef, ExistingSrcRef, DeleteNTT)
+    //  Link {>255}   (Default, NewSrcRef, ExistingSrcRef, DeleteNTT)
     @Test
     public void whenLinkExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();
@@ -409,7 +415,7 @@ public class SourceRefTest extends IzEntityTestBase<SourceRef> {
         assertEquals(1, violations.size());
     }
 
-    //description {<255}   (Default, NewSrcRef, ExistingSrcRef)
+    //description {>255}   (Default, NewSrcRef, ExistingSrcRef)
     @Test
     public void whenDescriptionExceeds_thenDefaultValidatorViolation() {
         SourceRef sourceRef = getValidEntity();

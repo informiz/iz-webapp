@@ -7,10 +7,11 @@ import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
+import org.informiz.ctrl.ControllerTest;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.SourceBase;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
@@ -22,8 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SourceController.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, SourceController.class, ErrorHandlingAdvice.class})
-
-class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> {
+class SourceControllerTest extends ControllerTest<SourceBase> {
     public static final String ALL_SOURCES_TITLE = "Known sources, e.g NASA or CNN, ranked for reliability";
     public static final String NEW_SOURCE = "New Source";
     public static final String TEST_TYPE = "BLOG";
@@ -86,7 +86,6 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerViewsSourceInvalidId_thenErrorMsg() throws Exception {
-
         verifyGetApiCall("view/1",
                 Arrays.asList(status().isOk(),
                         content().string(new StringContains(EntityIllegalArgumentTitle()))));
@@ -94,50 +93,77 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenMemberAddSource_thenSucceeds() throws Exception {
-
+    void whenMemberAddValidSource_thenSucceeds() throws Exception {
         verifyPostApiCall("/add",  Map.of(
-
                         "srcType", new String[]{TEST_TYPE},
                         "name", new String[]{TEST_ENTITY_ID},
                         "link", new String[]{"http://server.com"},
-                        "description", new String[]{RandomStringUtils.random(500)},
-                        "reliability", new String[]{"0.9"},
-                        "confidence", new String[]{"0.5"}),
+                        "description", new String[]{RandomStringUtils.random(500)}),
+                      //  "reliability", new String[]{"0.9"},
+                //        "confidence", new String[]{"0.5"}),
                 Arrays.asList(status().isFound(), redirectedUrl(allEntitiesUrl())));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_VIEWER})
     void whenViewerAddsSource_thenForbidden() throws Exception {
-
         verifyPostApiCall("add",  Map.of(
                         "srcType", new String[]{TEST_TYPE},
                         "link", new String[]{"http://server.com"},
                         "Name", new String[]{TEST_ENTITY_ID},
-                        "description", new String[]{RandomStringUtils.random(500)},
-                        "reliability", new String[]{"0.9"},
-                        "confidence", new String[]{"0.5"}),
+                        "description", new String[]{RandomStringUtils.random(500)}),
+                     //   "reliability", new String[]{"0.9"},
+                     //   "confidence", new String[]{"0.5"}),
                 Arrays.asList(status().isForbidden()));
     }
 
     @Test
     @WithCustomAuth(role = {ROLE_CHECKER})
     void whenCheckerAddSource_thenForbidden() throws Exception {
-
         verifyPostApiCall("add",  Map.of(
                         "srcType", new String[]{TEST_TYPE},
+                        "name", new String[]{TEST_ENTITY_ID},
                         "link", new String[]{"http://server.com"},
-                        "Name", new String[]{TEST_ENTITY_ID},
                         "description", new String[]{RandomStringUtils.random(500)}),
+                //   "reliability", new String[]{"0.9"},
+                //   "confidence", new String[]{"0.5"}),
                 Arrays.asList(status().isForbidden()));
     }
 
     //Todo: Validation group doesn't include Id and OwnerId
+
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenOwnerUpdateSource_thenSucceeds() throws Exception {
+    void whenSourceURLisInvalid_thenErrorMsg() throws Exception {
 
+        verifyPostApiCall("add",  Map.of(
+                        "srcType", new String[]{TEST_TYPE},
+                        "name", new String[]{TEST_ENTITY_ID},
+                        "link", new String[]{"Invalid"},
+                        "description", new String[]{RandomStringUtils.random(500)}),
+                //   "reliability", new String[]{"0.9"},
+                //   "confidence", new String[]{"0.5"}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(invalidSourceLinkMsg()))));
+    }
+
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenAddSourceDescriptionExceeds_thenErrorMsg() throws Exception {
+
+        verifyPostApiCall("add",  Map.of(
+                        "srcType", new String[]{TEST_TYPE},
+                        "name", new String[]{TEST_ENTITY_ID},
+                        "link", new String[]{"http://server.com"},
+                        "description", new String[]{RandomStringUtils.random(501)}),
+                //   "reliability", new String[]{"0.9"},
+                //   "confidence", new String[]{"0.5"}),
+                Arrays.asList(status().isOk(),
+                        content().string(new StringContains(textExceedsMsg()))));
+    }
+    @Test
+    @WithCustomAuth(role = {ROLE_MEMBER})
+    void whenOwnerUpdateValidSource_thenSucceeds() throws Exception {
         SourceBase populatedEntity = getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null);
         populatedEntity.setDescription(RandomStringUtils.random(500));
         verifyPostApiCall(populatedEntity, "details/1",  Map.of(
@@ -154,7 +180,7 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenUpdateSourceNoType_thenErrorMsg() throws Exception {
+    void whenUpdateNullSourceType_thenErrorMsg() throws Exception {
 
         verifyPostApiCall(getPopulatedEntity(DEFAULT_TEST_CHECKER_ID, null), "details/1",  Map.of(
                         "id", new String[]{"1"},
@@ -162,35 +188,9 @@ class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> 
                         "srcType", new String[]{null},
                         "link", new String[]{"http://server.com"},
                         "name", new String[]{TEST_ENTITY_ID},
-                        "description", new String[]{RandomStringUtils.random(501)}),
-                Arrays.asList(status().isOk(),
-                        content().string(new StringContains(nullTypeMsg()))));
-    }
-
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenSourceURLisInvalid_thenErrorMsg() throws Exception {
-
-        verifyPostApiCall("add",  Map.of(
-                        "srcType", new String[]{TEST_TYPE},
-                        "link", new String[]{"Invalid"},
-                        "Name", new String[]{TEST_ENTITY_ID},
                         "description", new String[]{RandomStringUtils.random(500)}),
                 Arrays.asList(status().isOk(),
-                        content().string(new StringContains(invalidSourceLinkMsg()))));
-    }
-
-    @Test
-    @WithCustomAuth(role = {ROLE_MEMBER})
-    void whenAddSourceDescriptionExceeds_thenErrorMsg() throws Exception {
-
-        verifyPostApiCall("add",  Map.of(
-                        "type", new String[]{TEST_TYPE},
-                        "link", new String[]{"http://server.com"},
-                        "Name", new String[]{TEST_ENTITY_ID},
-                        "description", new String[]{RandomStringUtils.random(501)}),
-                Arrays.asList(status().isOk(),
-                        content().string(new StringContains(textExceedsMsg()))));
+                        content().string(new StringContains(nullTypeMsg()))));
     }
 
     @Test

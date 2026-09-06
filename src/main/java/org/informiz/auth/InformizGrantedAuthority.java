@@ -22,8 +22,7 @@ public class InformizGrantedAuthority implements GrantedAuthority {
     }
 
     public static RoleHierarchyImpl roleHierarchy() {
-        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        roleHierarchy.setHierarchy(String.format("%s > %s > %s > %s",
+        RoleHierarchyImpl roleHierarchy = RoleHierarchyImpl.fromHierarchy(String.format("%s > %s > %s > %s",
                 ROLE_ADMIN, ROLE_MEMBER, ROLE_CHECKER, ROLE_VIEWER));
         return roleHierarchy;
     }

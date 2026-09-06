@@ -1,5 +1,7 @@
 package org.informiz.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedAttributeNode;
@@ -9,10 +11,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.groups.Default;
 import org.hibernate.validator.constraints.URL;
-import org.informiz.auth.AuthUtils;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
 
 
 @Table(name="fact_checker")
@@ -39,7 +39,7 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
     public interface FactCheckerFromUI {}
 
     @Email(message = "Please provide a valid email address", groups = {FactCheckerFromUI.class, Default.class})
-    private String email;
+    private String email; // TODO: encrypt in DB?
 
     @URL(message = "Please provide a valid profile-link", groups = {FactCheckerFromUI.class, Default.class})
     private String link;
@@ -60,13 +60,15 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
         this.name = name;
     }
 
+    @JsonIgnore
     public String getEmail() {
         return email;
-    }
+    } // exclude when serializing to json
 
+    @JsonProperty
     public void setEmail(String email) {
         this.email = email;
-    }
+    } // require when deserializing
 
     public String getLink() {
         return link;
@@ -81,14 +83,5 @@ public final class FactCheckerBase extends ChainCodeEntity implements Serializab
         this.setEmail(other.getEmail());
         this.setLink(other.getLink());
         this.setName(other.getName());
-    }
-
-    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
-        Consumer<InformizEntity<InformizEntity>> consumer = super.onCreateConsumer();
-        return entity -> {
-            consumer.accept(entity);
-            // TODO: use entity-id instead
-            AuthUtils.generateCryptoMaterial(this.getEmail());
-        };
     }
 }

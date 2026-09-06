@@ -1,6 +1,5 @@
 package org.informiz.ctrl;
 
-import com.ibm.cloud.sdk.core.service.exception.InternalServerErrorException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +19,7 @@ public class ErrorHandlingAdvice {
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingAdvice.class);
 
     // TODO: implement handlers for custom exceptions
-    @ExceptionHandler({ServletException.class, InternalServerErrorException.class})
+    @ExceptionHandler({ServletException.class})
     public ModelAndView handleInternalException(ServletException ex, HttpServletRequest request, HttpServletResponse response) {
         logger.error(String.format("Handling error at %s:", request.getRequestURI()), ex);
         ModelAndView mv = new ModelAndView("error");

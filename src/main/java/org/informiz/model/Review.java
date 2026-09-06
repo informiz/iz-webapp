@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Table(name="review")
 @Entity
-public final class Review extends InformizEntity<InformizEntity> implements Serializable {
+public final class Review extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 

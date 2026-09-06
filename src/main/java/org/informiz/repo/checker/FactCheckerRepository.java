@@ -24,5 +24,10 @@ public interface FactCheckerRepository extends ChaincodeEntityRepo<FactCheckerBa
 
     FactCheckerBase findByName(String name);
 
-    FactCheckerBase findByEmail(String email);
+    Optional<FactCheckerBase> findByEmail(String email);
+
+    default boolean isMember(String entityId) {
+        return findByEntityId(entityId) != null;
+    }
+
 }
