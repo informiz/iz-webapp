@@ -37,13 +37,15 @@ public class AuthUtils {
         try {
             RestClient restClient = restClientBuilder.baseUrl(String.format("https://%s.informiz.org", channel)).build();
 
-            return restClient.get().uri("{prefix}/{eid}", CHECKER_API_PREFIX.substring(1), entityId)
-                    .retrieve().body(Boolean.class);
-        } catch (RuntimeException e) {
+            return Boolean.TRUE.equals(
+                    restClient.get().uri("{prefix}/{eid}", CHECKER_API_PREFIX.substring(1), entityId)
+                    .retrieve().body(Boolean.class));
+        } catch (NullPointerException e) {
             // TODO: log reason for failing
             return false;
         }
     }
+
 
     public static List<GrantedAuthority> anonymousAuthorities() {
         return List.of(

@@ -1,13 +1,12 @@
-# TODO: move to containerd
 FROM debian:11-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DEBCONF_NOWARNINGS="yes"
 
-# Install java-17
+# Install java-21
 RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends openjdk-17-jre
+RUN apt-get install -y --no-install-recommends openjdk-21-jre
 
 # Create group and user for spring
 # [equiv. command for Alpine] RUN addgroup --gid 22222 spring && adduser spring --gecos "" --disabled-password --ingroup spring

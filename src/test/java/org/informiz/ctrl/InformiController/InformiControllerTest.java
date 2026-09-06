@@ -4,28 +4,22 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.informiz.WithCustomAuth;
-import org.informiz.ctrl.informi.InformiController;
-import org.junit.jupiter.api.Disabled;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
+import org.informiz.ctrl.ControllerTest;
 import org.informiz.ctrl.ErrorHandlingAdvice;
-import org.informiz.ctrl.citation.CitationController;
-import org.informiz.model.CitationBase;
+import org.informiz.ctrl.informi.InformiController;
 import org.informiz.model.InformiBase;
-import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.informi.InformiRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,8 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(InformiControllerTest.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, InformiController.class, ErrorHandlingAdvice.class})
-
-class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase> {
+class InformiControllerTest extends ControllerTest<InformiBase> {
     public static final String ALL_INFORMI_TITLE = "Graphical snippets of information, ranked for reliability";
     public static final String NEW_INFORMI = "New Informi";
     public static final String UPDATE_INFORMI = "Update Informi";
@@ -104,6 +97,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
 
     @Test
     @WithCustomAuth(role = {ROLE_MEMBER})
+    @Disabled("Requires authenticating to storage service")
     void whenMemberAddInformi_thenSucceeds() throws Exception {
         URL url = Thread.currentThread().getContextClassLoader().getResource("JGimage001.jpeg");
         File file = new File(url.getPath());
@@ -113,7 +107,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
                 "image/jpeg",
                  new FileInputStream(file).readAllBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+        mockMvc.perform(MockMvcRequestBuilders.multipart(String.format(URI_TEMPLATE, prefix(), "add"))
                         .file(mockFile)
                         .param("name", new String[]{RandomStringUtils.random(50)})
                         .param("description", new String[]{RandomStringUtils.random(1400)})
@@ -134,7 +128,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
                 "image/jpeg",
                 new FileInputStream(file).readAllBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+        mockMvc.perform(MockMvcRequestBuilders.multipart(String.format(URI_TEMPLATE, prefix(), "add"))
                         .file(mockFile)
                         .param("name", new String[]{RandomStringUtils.random(50)})
                         .param("description", new String[]{RandomStringUtils.random(1400)})
@@ -154,7 +148,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
                 "image/jpeg",
                 new FileInputStream(file).readAllBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+        mockMvc.perform(MockMvcRequestBuilders.multipart(String.format(URI_TEMPLATE, prefix(), "add"))
                         .file(mockFile)
                         .param("name", new String[]{RandomStringUtils.random(50)})
                         .param("description", new String[]{RandomStringUtils.random(1400)})
@@ -174,7 +168,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
                 "image/jpeg",
                 new FileInputStream(file).readAllBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+        mockMvc.perform(MockMvcRequestBuilders.multipart(String.format(URI_TEMPLATE, prefix(), "add"))
                         .file(mockFile)
                         .param("name", new String[]{RandomStringUtils.random(50)})
                         .param("mediaPath", new String[]{"Invalid"})
@@ -197,7 +191,7 @@ class InformiControllerTest extends org.informiz.ctrl.ControllerTest<InformiBase
                 "image/jpeg",
                 new FileInputStream(file).readAllBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/informi/add")
+        mockMvc.perform(MockMvcRequestBuilders.multipart(String.format(URI_TEMPLATE, prefix(), "add"))
                         .file(mockFile)
                         .param("name", new String[]{RandomStringUtils.random(50)})
                         .param("description", new String[]{RandomStringUtils.random(1501)})

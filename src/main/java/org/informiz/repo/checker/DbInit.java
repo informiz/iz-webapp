@@ -1,5 +1,6 @@
 package org.informiz.repo.checker;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
@@ -8,11 +9,10 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.nio.charset.Charset;
 
-@Profile({"dev"})
+@Profile("dev")
 @Component
 public class DbInit {
 

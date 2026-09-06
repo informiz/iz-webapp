@@ -9,18 +9,13 @@ import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
 import org.informiz.ctrl.ControllerTest;
 import org.informiz.ctrl.ErrorHandlingAdvice;
-import org.informiz.ctrl.citation.CitationController;
 import org.informiz.ctrl.hypothesis.HypothesisController;
-import org.informiz.model.CitationBase;
 import org.informiz.model.HypothesisBase;
-import org.informiz.model.Reference;
-import org.informiz.repo.citation.CitationRepository;
 import org.informiz.repo.hypothesis.HypothesisRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -31,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(HypothesisController.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, HypothesisController.class, ErrorHandlingAdvice.class})
-//@Disabled("Validation doesn't work - FIX this")
 class HypothesisControllerTest extends ControllerTest<HypothesisBase> {
     public static final String ALL_HYPOTHESIS_TITLE = "Factual claims, ranked for reliability";
     public static final String NEW_HYPOTHESIS = "New Claim";

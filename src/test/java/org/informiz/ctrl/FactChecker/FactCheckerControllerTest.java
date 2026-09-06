@@ -5,36 +5,44 @@ import org.informiz.auth.AuthUtils;
 import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
+import org.informiz.conf.ThymeLeafConfig;
+import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.ctrl.checker.FactCheckerController;
 import org.informiz.model.FactCheckerBase;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_ADMIN;
 import static org.informiz.auth.InformizGrantedAuthority.ROLE_VIEWER;
+import static org.informiz.ctrl.ControllerTest.SERVER_URL;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, FactCheckerController.class})
+@ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, FactCheckerController.class, ErrorHandlingAdvice.class})
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(FactCheckerController.class)
 public class FactCheckerControllerTest {
 
@@ -44,8 +52,9 @@ public class FactCheckerControllerTest {
     @MockitoBean
     private SecurityConfig.ClientIdService googleOAuthService;
 
-    @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext wac;
 
 
     static private FactCheckerBase chuck;
@@ -63,7 +72,15 @@ public class FactCheckerControllerTest {
         cary.setEntityId("anotherTestEntityID");
         cary.setLocalId(2l);
         allCheckers = Arrays.asList(chuck, cary);
+    }
 
+    @BeforeEach
+    void mockMvcSetup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+                .apply(springSecurity()) // TODO: is this necessary?
+                .defaultRequest(get("/").secure(true)).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
+                .defaultRequest(post("/").secure(true)).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
+                .build();
     }
 
 
@@ -72,7 +89,7 @@ public class FactCheckerControllerTest {
 
         given(repo.findAll()).willReturn(allCheckers);
 
-        mockMvc.perform(get("/factchecker/")
+        mockMvc.perform(get(SERVER_URL + "/factchecker/")
                         .with(oauth2Login().authorities(AuthUtils.anonymousAuthorities()))
                         .secure(true)
                         .contentType(MediaType.TEXT_HTML))
@@ -85,7 +102,7 @@ public class FactCheckerControllerTest {
     public void whenUnAuthAddChecker_thenForbid() throws Exception {
 
 
-        mockMvc.perform(post("/factchecker/add")
+        mockMvc.perform(post(SERVER_URL + "/factchecker/add")
                         .with(oauth2Login().authorities(AuthUtils.anonymousAuthorities()))
                         .secure(true).with(csrf())
                         .param("name", cary.getName())
@@ -94,7 +111,7 @@ public class FactCheckerControllerTest {
                         .contentType("application/json"))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post("/factchecker/add")
+        mockMvc.perform(post(SERVER_URL + "/factchecker/add")
                         .with(oauth2Login().authorities(new InformizGrantedAuthority(ROLE_VIEWER, "entityId")))
                         .secure(true).with(csrf())
                         .param("name", cary.getName())
@@ -109,7 +126,7 @@ public class FactCheckerControllerTest {
     @WithCustomAuth(role = {ROLE_ADMIN})
     public void whenAdminAddChecker_thenAdd() throws Exception {
 
-        mockMvc.perform(post("/factchecker/add")
+        mockMvc.perform(post(SERVER_URL + "/factchecker/add")
                         .secure(true).with(csrf())
                         .param("name", cary.getName())
                         .param("email", cary.getEmail())

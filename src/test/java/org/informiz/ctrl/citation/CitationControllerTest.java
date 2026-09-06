@@ -7,13 +7,14 @@ import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
+import org.informiz.ctrl.ControllerTest;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.CitationBase;
 import org.informiz.repo.citation.CitationRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -24,8 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CitationController.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, CitationController.class, ErrorHandlingAdvice.class})
-
-class CitationControllerTest extends org.informiz.ctrl.ControllerTest<CitationBase> {
+class CitationControllerTest extends ControllerTest<CitationBase> {
     public static final String ALL_CITATIONS_TITLE = "Quotes from e.g people, books or articles, ranked for reliability";
     public static final String NEW_CITATION = "New Citation";
     public static final String UPDATE_CITATION = "Update Citation";

@@ -10,19 +10,24 @@ import org.informiz.model.Review;
 import org.informiz.repo.checker.FactCheckerRepository;
 import org.informiz.repo.entity.ChaincodeEntityRepo;
 import org.informiz.repo.source.SourceRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +37,21 @@ import static org.informiz.MockSecurityContextFactory.DEFAULT_TEST_CHECKER_ID;
 import static org.informiz.auth.InformizGrantedAuthority.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
+@WebMvcTest
+//@EnableConfigurationProperties
 public abstract class ControllerTest<T extends ChainCodeEntity> {
     public static final String TEST_ENTITY_ID = "Test_Entity_Id_Of_Reasonable_Length";
+    public static final String PATH_TEMPLATE = "/%s/%s";
 
+    public static final String SERVER_URL = "https://localhost:8083";
+    public static final String URI_TEMPLATE = SERVER_URL + PATH_TEMPLATE;
     @Autowired
     protected ChaincodeEntityRepo<T> repo;
     @MockitoBean
@@ -49,8 +60,10 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     private FactCheckerRepository checkerRepo;
     @MockitoBean
     protected SecurityConfig.ClientIdService googleOAuthService;
-    @Autowired
+    //@Autowired
     protected MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext wac;
 
     protected abstract String prefix();
 
@@ -72,19 +85,28 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     }
 
     protected String updateEntityUrl() {
-        return String.format("/%s/%s", prefix(), "details/1");
+        return String.format(PATH_TEMPLATE, prefix(), "details/1");
     }
 
     protected String deleteEntityUrl() {
-        return String.format("/%s/%s",prefix(), "delete/1");
+        return String.format(PATH_TEMPLATE,prefix(), "delete/1");
     }
 
     protected String allEntitiesUrl() {
-        return String.format("/%s/%s",prefix(), "all");
+        return String.format(PATH_TEMPLATE,prefix(), "all");
     }
 
     protected  String entityReviewUrl() {
-        return String.format("/%s/%s",prefix(), "1/review/");
+        return String.format(PATH_TEMPLATE,prefix(), "1/review/");
+    }
+
+    @BeforeEach
+    void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
+                .apply(springSecurity()) // TODO: is this necessary?
+                .defaultRequest(get("/").secure(true)).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
+                .defaultRequest(post("/").secure(true)).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
+                .build();
     }
 
     @Test
@@ -331,7 +353,7 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
     }
 
     protected void verifyGetApiCall(String path, List<ResultMatcher> matchers) throws Exception {
-        performRequest(get(String.format("/%s/%s", prefix(), path)), Map.of(),
+        performRequest(get(String.format(URI_TEMPLATE, prefix(), path)), Map.of(),
                 matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
@@ -339,12 +361,12 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
         if (entity != null) {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
         }
-        performRequest(get(String.format("/%s/%s", prefix(), path)), Map.of(),
+        performRequest(get(String.format(URI_TEMPLATE, prefix(), path)), Map.of(),
                 matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
     protected void verifyPostApiCall(String path, Map<String, String[]> params, List<ResultMatcher> matchers) throws Exception {
-        performRequest(post(String.format("/%s/%s", prefix(), path)), params,
+        performRequest(post(String.format(URI_TEMPLATE, prefix(), path)), params,
                 matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
 
@@ -353,20 +375,21 @@ public abstract class ControllerTest<T extends ChainCodeEntity> {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
             given(repo.findById(1l)).willReturn(Optional.of(entity));
         }
-        performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers, MediaType.APPLICATION_FORM_URLENCODED);
+        performRequest(post(String.format(URI_TEMPLATE, prefix(), path)), params, matchers, MediaType.APPLICATION_FORM_URLENCODED);
     }
     protected void verifyPostApiCall(T entity, String path, Map<String, String[]> params, List<ResultMatcher> matchers, MediaType contentType) throws Exception {
         if (entity != null) {
             given(repo.loadByLocalId(1l)).willReturn(Optional.of(entity));
             given(repo.findById(1l)).willReturn(Optional.of(entity));
         }
-        performRequest(post(String.format("/%s/%s", prefix(), path)), params, matchers, contentType);
+        performRequest(post(String.format(URI_TEMPLATE, prefix(), path)), params, matchers, contentType);
     }
 
     protected void performRequest(@NotNull MockHttpServletRequestBuilder request, Map<String, String[]> params, List<ResultMatcher> matchers, MediaType contentType) throws Exception {
         if (params != null && !params.isEmpty())
             params.entrySet().forEach(entry -> request.param(entry.getKey(), entry.getValue()));
 
+        //request.
         ResultActions resultActions = mockMvc.perform(request
                 .secure(true).with(csrf())
                 .contentType(contentType));

@@ -99,11 +99,11 @@ public class CookieUtils {
         CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
         repo.setCookieName(csrfCookieName());
         repo.setParameterName(csrfCookieName());
-        repo.setSecure(true);
-        repo.setCookieHttpOnly(true);
         repo.setCookieCustomizer(responseCookieBuilder ->
-                responseCookieBuilder.domain(channelId));
-        repo.setCookieCustomizer(responseCookieBuilder -> responseCookieBuilder.sameSite("strict"));
+                responseCookieBuilder.domain(channelId)
+                        .secure(true)
+                        .httpOnly(true)
+                        .sameSite("strict"));
         return repo;
     }
 

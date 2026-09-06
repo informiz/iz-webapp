@@ -7,10 +7,11 @@ import org.informiz.WithCustomAuth;
 import org.informiz.conf.MethodSecurityConfig;
 import org.informiz.conf.SecurityConfig;
 import org.informiz.conf.ThymeLeafConfig;
+import org.informiz.ctrl.ControllerTest;
 import org.informiz.ctrl.ErrorHandlingAdvice;
 import org.informiz.model.SourceBase;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
@@ -22,8 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SourceController.class)
 @ContextConfiguration(classes = {SecurityConfig.class, MethodSecurityConfig.class, ThymeLeafConfig.class, SourceController.class, ErrorHandlingAdvice.class})
-
-class SourceControllerTest extends org.informiz.ctrl.ControllerTest<SourceBase> {
+class SourceControllerTest extends ControllerTest<SourceBase> {
     public static final String ALL_SOURCES_TITLE = "Known sources, e.g NASA or CNN, ranked for reliability";
     public static final String NEW_SOURCE = "New Source";
     public static final String TEST_TYPE = "BLOG";

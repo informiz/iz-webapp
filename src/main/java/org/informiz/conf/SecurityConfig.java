@@ -6,33 +6,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
-import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.auth.TokenSecurityContextRepository;
 import org.informiz.model.InformizEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 
 @Configuration
@@ -58,6 +54,7 @@ public class SecurityConfig {
         RequestCache nullRequestCache = new NullRequestCache();
         CookieCsrfTokenRepository repo = cookieUtils.csrfTokenRepo();
         List<GrantedAuthority> minAuth = AuthUtils.anonymousAuthorities();
+        PathPatternRequestMatcher.Builder patternBuilder = PathPatternRequestMatcher.withDefaults();
 
         http
                 .sessionManagement((session) -> session
@@ -66,21 +63,16 @@ public class SecurityConfig {
                         .requestCache(nullRequestCache))
                 .securityContext((context) -> context.requireExplicitSave(true)
                         .securityContextRepository(securityContextRepo))
-                .requiresChannel(registry ->
-                        registry.anyRequest().requiresSecure())
+                .redirectToHttps(configurer -> {})
                 .anonymous(configurer ->
                         configurer.principal("viewer").authorities(minAuth))
                 .csrf(configurer -> configurer
-                        .ignoringRequestMatchers(antMatcher("/oauth/login")) // csrf token sent in Google cookie/param
+                        .ignoringRequestMatchers(patternBuilder.matcher("/oauth/login")) // csrf token sent in Google cookie/param
                         .csrfTokenRepository(repo))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(antMatcher("/oauth/login"),
-                            antMatcher("/oauth/logout")).permitAll();
-                    auth.requestMatchers(antMatcher(HttpMethod.GET)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.HEAD)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.TRACE)).hasRole("VIEWER");
-                    auth.anyRequest().authenticated();
+                    auth.requestMatchers(patternBuilder.matcher("/oauth/login"),
+                            patternBuilder.matcher("/oauth/logout")).permitAll();
+                    auth.anyRequest().hasRole("VIEWER");
                 })
 
         ;
@@ -134,9 +126,10 @@ public class SecurityConfig {
         return new SecUtils();
     }
 
-    // TODO: can't expose as bean, overriding is disabled. Check how to best provide role-hierarchy to spring web-sec
-    private static DefaultWebSecurityExpressionHandler webSecurityExpressionHandler() {
-        DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+    // TODO: best-practice way to allow h2-console access locally?
+/*
+    private static DefaultHttpSecurityExpressionHandler webSecurityExpressionHandler() {
+        DefaultHttpSecurityExpressionHandler handler = new DefaultHttpSecurityExpressionHandler();
         handler.setRoleHierarchy(InformizGrantedAuthority.roleHierarchy());
         return handler;
     }
@@ -156,6 +149,7 @@ public class SecurityConfig {
         return (web) -> web
                 .expressionHandler(webSecurityExpressionHandler())
                 .ignoring()
-                .requestMatchers(antMatcher("/h2-console/**"));
+                .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/h2-console/**"));
     }
+*/
 }
