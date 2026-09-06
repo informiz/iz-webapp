@@ -44,28 +44,6 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return String.format("%s/add-hypothesis.html", PREFIX);
     }
 
-    @PostMapping("/add")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
-    public String addHypothesis(@Validated(HypothesisBase.NewHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
-                                 BindingResult result) {
-        if (result.hasErrors()) {
-            return "hypothesis/add-hypothesis.html";
-        }
-        // TODO: Add to ledger
-        entityRepo.save(hypothesis);
-        return String.format("redirect:%s/all", PREFIX);
-    }
-//Group validation missing?
-    @PostMapping("/delete/{hypothesisId}")
-    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
-    public String deleteHypothesis(@PathVariable("hypothesisId") @Valid Long id, @RequestParam String ownerId) {
-        HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
-        // TODO: set inactive
-        entityRepo.delete(hypothesis);
-        return String.format("redirect:%s/all", PREFIX);
-    }
-
     @GetMapping("/view/{hypothesisId}")
     public String viewHypothesis(@PathVariable("hypothesisId") @Valid Long id, Model model) {
         HypothesisBase hypothesis = entityRepo.loadByLocalId(id)
@@ -87,11 +65,23 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         return getEditPageTemplate();
     }
 
+    @PostMapping("/add")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER')")
+    public String addHypothesis(@Validated(HypothesisBase.NewHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+                                 BindingResult result) {
+        if (result.hasErrors()) {
+            return "hypothesis/add-hypothesis.html";
+        }
+        // TODO: Add to ledger
+        entityRepo.save(hypothesis);
+        return String.format("redirect:%s/all", PREFIX);
+    }
+
     @PostMapping("/details/{hypothesisId}")
     @PreAuthorize("hasAuthority('ROLE_MEMBER') and #hypothesis.ownerId == authentication.principal.name")
     public String updateHypothesis(@PathVariable("hypothesisId") @Valid Long id,
-                                    @Validated(HypothesisBase.ExistingHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
-                                    BindingResult result, Model model) {
+                                   @Validated(HypothesisBase.ExistingHypothesisFromUI.class) @ModelAttribute(HYPOTHESIS_ATTR) HypothesisBase hypothesis,
+                                   BindingResult result, Model model) {
         if (result.hasErrors()) {
             return failedEdit(model, result, hypothesis, hypothesis);
         }
@@ -101,6 +91,16 @@ public class HypothesisController extends ChaincodeEntityController<HypothesisBa
         current.edit(hypothesis);
         entityRepo.save(current);
         return getRedirectToEditPage( id);
+    }
+//Group validation missing?
+    @PostMapping("/delete/{hypothesisId}")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') and #ownerId == authentication.principal.name")
+    public String deleteHypothesis(@PathVariable("hypothesisId") @Valid Long id, @RequestParam String ownerId) {
+        HypothesisBase hypothesis = entityRepo.findById(Long.valueOf(id))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid hypothesis id"));
+        // TODO: set inactive
+        entityRepo.delete(hypothesis);
+        return String.format("redirect:%s/all", PREFIX);
     }
 
     @PostMapping("/{hypothesisId}/review/")
