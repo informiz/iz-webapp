@@ -23,7 +23,7 @@
                 <th data-field="date" data-sortable="true" data-searchable="false" data-formatter="tsToString">Last
                     Updated
                 </th>
-                <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
+                <th th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}"
                     data-sortable="false" data-searchable="false">Edit
                 </th>
                 <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}"
@@ -44,7 +44,7 @@
                 </td>
                 <td th:text="${citation.ownerId}"></td>
                 <td th:text="${citation.updatedTs}"></td>
-                <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'')')}">
+                <td th:if="${#authorization.expression('hasRole(''ROLE_CHECKER'')')}">
                     <a th:href="@{/citation/details/{id}(id=${citation.id.toString()})}"
                        class="btn btn-outline-primary btn-sm m-0 waves-effect fas fa-pencil-alt"/>
                 </td>

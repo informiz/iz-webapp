@@ -6,34 +6,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.informiz.auth.AuthUtils;
 import org.informiz.auth.CookieUtils;
-import org.informiz.auth.InformizGrantedAuthority;
 import org.informiz.auth.TokenSecurityContextRepository;
 import org.informiz.model.InformizEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.web.util.WebUtils;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.informiz.auth.CookieUtils.*;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+import static org.informiz.auth.CookieUtils.TOKEN_MAX_AGE;
 
 
 @Configuration
@@ -46,15 +41,20 @@ public class SecurityConfig {
 
     private final TokenSecurityContextRepository securityContextRepo;
 
-    public SecurityConfig(TokenSecurityContextRepository securityContextRepo) {
+    private final CookieUtils cookieUtils;
+
+    @Autowired
+    public SecurityConfig(TokenSecurityContextRepository securityContextRepo, CookieUtils cookieUtils) {
         this.securityContextRepo = securityContextRepo;
+        this.cookieUtils = cookieUtils;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         RequestCache nullRequestCache = new NullRequestCache();
-        CookieCsrfTokenRepository repo = csrfTokenRepo();
+        CookieCsrfTokenRepository repo = cookieUtils.csrfTokenRepo();
         List<GrantedAuthority> minAuth = AuthUtils.anonymousAuthorities();
+        PathPatternRequestMatcher.Builder patternBuilder = PathPatternRequestMatcher.withDefaults();
 
         http
                 .sessionManagement((session) -> session
@@ -63,35 +63,20 @@ public class SecurityConfig {
                         .requestCache(nullRequestCache))
                 .securityContext((context) -> context.requireExplicitSave(true)
                         .securityContextRepository(securityContextRepo))
-                .requiresChannel(registry ->
-                        registry.anyRequest().requiresSecure())
+                .redirectToHttps(configurer -> {})
                 .anonymous(configurer ->
                         configurer.principal("viewer").authorities(minAuth))
                 .csrf(configurer -> configurer
-                        .ignoringRequestMatchers(antMatcher("/oauth/login")) // csrf token sent in Google cookie/param
+                        .ignoringRequestMatchers(patternBuilder.matcher("/oauth/login")) // csrf token sent in Google cookie/param
                         .csrfTokenRepository(repo))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(antMatcher("/oauth/login"),
-                            antMatcher("/oauth/logout")).permitAll();
-                    auth.requestMatchers(antMatcher(HttpMethod.GET)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.HEAD)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.OPTIONS)).hasRole("VIEWER");
-                    auth.requestMatchers(antMatcher(HttpMethod.TRACE)).hasRole("VIEWER");
-                    auth.anyRequest().authenticated();
+                    auth.requestMatchers(patternBuilder.matcher("/oauth/login"),
+                            patternBuilder.matcher("/oauth/logout")).permitAll();
+                    auth.anyRequest().hasRole("VIEWER");
                 })
 
         ;
         return http.build();
-    }
-
-    private static CookieCsrfTokenRepository csrfTokenRepo() {
-        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
-        // repo.setCookieDomain(cookieDomain); // TODO: add spring property
-        repo.setCookieName(CSRF_COOKIE_NAME);
-        repo.setParameterName(CSRF_COOKIE_NAME);
-        repo.setSecure(true);
-        repo.setCookieHttpOnly(true);
-        return repo;
     }
 
     @Bean(name = "googleOAuthService")
@@ -100,7 +85,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    static LayoutDialect layoutDialect() {
+    public LayoutDialect layoutDialect() {
         return new LayoutDialect();
     }
 
@@ -114,18 +99,21 @@ public class SecurityConfig {
         @Autowired
         private HttpServletResponse response;
 
-        public boolean isOwner(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
+        @Autowired
+        private CookieUtils cookieUtils;
+
+        public boolean isOwner(DefaultOAuth2User principal, InformizEntity entity) {
             return principal.getName().equals(entity.getOwnerId());
         }
 
-        public String getDisabled(DefaultOAuth2User principal, InformizEntity<InformizEntity> entity) {
+        public String getDisabled(DefaultOAuth2User principal, InformizEntity entity) {
             return isOwner(principal, entity) ? "false" : "true";
         }
 
         public String getNonce() {
-            Cookie cookie =  WebUtils.getCookie(request, NONCE_COOKIE_NAME);
+            Cookie cookie =  cookieUtils.getCookie(request, cookieUtils.nonceCookieName());
             if (cookie == null) {
-                cookie = CookieUtils.setCookie(response, NONCE_COOKIE_NAME, TOKEN_MAX_AGE,
+                cookie = cookieUtils.setNonceCookie(response, TOKEN_MAX_AGE,
                         UUID.randomUUID().toString().substring(0, 16));
             }
 
@@ -138,9 +126,10 @@ public class SecurityConfig {
         return new SecUtils();
     }
 
-    // TODO: can't expose as bean, overriding is disabled. Check how to best provide role-hierarchy to spring web-sec
-    private static DefaultWebSecurityExpressionHandler webSecurityExpressionHandler() {
-        DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+    // TODO: best-practice way to allow h2-console access locally?
+/*
+    private static DefaultHttpSecurityExpressionHandler webSecurityExpressionHandler() {
+        DefaultHttpSecurityExpressionHandler handler = new DefaultHttpSecurityExpressionHandler();
         handler.setRoleHierarchy(InformizGrantedAuthority.roleHierarchy());
         return handler;
     }
@@ -160,6 +149,7 @@ public class SecurityConfig {
         return (web) -> web
                 .expressionHandler(webSecurityExpressionHandler())
                 .ignoring()
-                .requestMatchers(antMatcher("/h2-console/**"));
+                .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/h2-console/**"));
     }
+*/
 }

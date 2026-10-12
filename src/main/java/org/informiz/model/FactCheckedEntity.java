@@ -35,15 +35,21 @@ public abstract class FactCheckedEntity extends ChainCodeEntity {
     }
 
     public boolean removeReference(@NotNull Long referenceId, @NotNull String owner) {
-        List<Reference> snapshot = new ArrayList(references);
-        Reference ref = snapshot.stream().filter(reference ->
-                referenceId.equals(reference.getId()) && owner.equals(reference.getOwnerId()))
-                .findFirst().orElse(null);
+       Reference ref = findReference(referenceId, owner);
 
         if (ref != null)
             return removeReference(ref);
 
         return false;
+    }
+
+    public Reference findReference(@NotNull Long referenceId, @NotNull String owner) {
+        List<Reference> snapshot = new ArrayList(references);
+        Reference ref = snapshot.stream().filter(reference ->
+                        referenceId.equals(reference.getId()) && owner.equals(reference.getOwnerId()))
+                .findFirst().orElse(null);
+
+        return ref;
     }
 
 }

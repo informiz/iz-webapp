@@ -1,4 +1,4 @@
-package org.informiz.repo;
+package hlf;
 
 public class ChaincodeDAO {
 }

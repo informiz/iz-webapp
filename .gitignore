@@ -1,5 +1,6 @@
 HELP.md
 target/
+src/main/resources/static/images/
 
 .mvn
 mvnw
