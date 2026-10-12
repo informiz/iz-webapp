@@ -24,6 +24,7 @@
         <h2.version>2.2.220</h2.version>
         <!-- Spring and Thymeleaf versions must be compatible. -->
 		<thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+		<thymeleaf.sec.version>3.1.1.RELEASE</thymeleaf.sec.version>
 	</properties>
 
 	<profiles>
