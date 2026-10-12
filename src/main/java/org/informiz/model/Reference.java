@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 @Table(name="reference")
 @Entity
-public final class Reference extends InformizEntity<InformizEntity> implements Serializable {
+public final class Reference extends InformizEntity implements Serializable {
 
     static final long serialVersionUID = 3L ;
 
@@ -55,7 +55,6 @@ public final class Reference extends InformizEntity<InformizEntity> implements S
         this.id = id;
         return this;
     }
-
 
     // TODO: Allow null in db - Hibernate sets to null on remove from parent's references, then deletes the reference
     @Column(name = "fact_checked_entity_id")
@@ -101,6 +100,10 @@ public final class Reference extends InformizEntity<InformizEntity> implements S
         this.entailment = other.getEntailment();
         this.degree = other.getDegree();
         this.comment = other.getComment();
+        this.ownerId = other.getOwnerId();
+        this.createdTs = other.getCreatedTs();
+        this.updatedTs = other.getUpdatedTs();
+
     }
 
     public String getFactCheckedEntityId() {

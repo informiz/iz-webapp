@@ -3,12 +3,17 @@ package org.informiz.model;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Service
 public class Utils {
 
+    public static final String ID_PATTERN = "%s_%s_%s";
     private static String CHANNEL_NAME;
 
     @Value("${iz.channel.name}")
@@ -33,7 +38,14 @@ public class Utils {
         public String getDisplayValue() {
             return displayValue;
         }
+
+        public static String entityTypeOptionsPattern() {
+            return EnumSet.allOf(EntityType.class).stream().map(Enum::toString).collect(Collectors.joining("|"));
+        }
     }
+
+    public static Pattern EID_PREFIX_PATTERN = Pattern.compile(String.format("^(%s)_([^_]+)_(.*)",
+            EntityType.entityTypeOptionsPattern()));
     public static String createEntityId(ChainCodeEntity entity) {
         EntityType entityType;
 
@@ -52,8 +64,19 @@ public class Utils {
         }
 
         // TODO: check uniqueness
-        return String.format("%s_%s_%s",
+        return String.format(ID_PATTERN,
                 entityType, CHANNEL_NAME, UUID.randomUUID().toString().substring(0, 16));
+    }
+
+    public static String channelFromEntityId(String entityId) {
+        try {
+            Matcher m = EID_PREFIX_PATTERN.matcher(entityId);
+            if (m.find())
+                return m.group(2);
+            return null;
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     public static class Views {

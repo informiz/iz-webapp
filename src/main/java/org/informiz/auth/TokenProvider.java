@@ -1,8 +1,11 @@
 package org.informiz.auth;
+// TODO: best JWT library?
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +16,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -24,29 +25,35 @@ public class TokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
 
-    @Value("${iz.webapp.token.secret}")
+
     private String tokenSecret;
 
-    @Value("${iz.webapp.token.issuer}")
+
     private String tokenIssuer;
 
-    @Value("${iz.webapp.token.audience}")
+
     private String tokenAudience;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
-    private static JWTVerifier instance;
+    private final JWTVerifier verifier; // A thread-safe JWT verifier
 
-    public JWTVerifier getVerifier() {
-        // Lazy init to make sure @Values are available, doesn't matter if initialized more than once
-        if (instance == null) {
-            instance  = JWT.require(HMAC512(tokenSecret))
-                    .withIssuer(tokenIssuer)
-                    .withAudience(tokenAudience)
-                    .build(); // Automatically verifies expiration
-        }
-        return instance;
+    public TokenProvider(@Value("${iz.webapp.token.secret}") String tokenSecret,
+                         @Value("${iz.webapp.token.issuer}") String tokenIssuer,
+                         @Value("${iz.webapp.token.audience}") String tokenAudience) {
+        this.tokenSecret = tokenSecret;
+        this.tokenIssuer = tokenIssuer;
+        this.tokenAudience = tokenAudience;
+
+        this.verifier = JWT.require(HMAC512(tokenSecret))
+                .withIssuer(tokenIssuer)
+                .withAudience(tokenAudience)
+                .build(); // Automatically verifies expiration
+    }
+
+    private JWTVerifier getVerifier() {
+        return verifier;
     }
 
     public String createToken(@NotNull Authentication authentication) {
@@ -81,7 +88,12 @@ public class TokenProvider {
         }
 
     public DecodedJWT validateToken(String token) {
-        return getVerifier().verify(token);
+        DecodedJWT jwt = null;
+        try {
+            jwt = getVerifier().verify(token);
+        } finally {
+            return jwt;
+        }
     }
 
     public OAuth2AuthenticationToken authFromToken(String token) {

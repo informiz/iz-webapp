@@ -1,6 +1,7 @@
 package org.informiz;
 
 import org.informiz.auth.InformizGrantedAuthority;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -10,12 +11,16 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomAuth> {
 
     public static final String DEFAULT_TEST_CHECKER_ID = "Test_Checker_Id";
 
+    @NotNull
     @Override
     public SecurityContext createSecurityContext(WithCustomAuth withCustomAuth) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -35,4 +40,5 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Wi
         context.setAuthentication(auth);
         return context;
     }
+
 }

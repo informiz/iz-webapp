@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 @MappedSuperclass
 @JsonView(Utils.Views.EntityDefaultView.class)
-public abstract class InformizEntity<T extends InformizEntity> implements Serializable {
+public abstract class InformizEntity implements Serializable { // TODO: verify no db issues when deploying test-channel
 
     static final long serialVersionUID = 3L;
 
@@ -56,7 +56,7 @@ public abstract class InformizEntity<T extends InformizEntity> implements Serial
     @Column(name = "removed")
     protected Long removedTs;
 
-    protected Consumer<InformizEntity<InformizEntity>> onCreateConsumer() {
+    protected Consumer<InformizEntity> onCreateConsumer() {
             return entity -> {
                 entity.createdTs = entity.updatedTs = new Date().getTime();
                 try {
@@ -74,7 +74,7 @@ public abstract class InformizEntity<T extends InformizEntity> implements Serial
 
     @PrePersist
     protected void onCreate() {
-        onCreateConsumer().accept((InformizEntity<InformizEntity>) this);
+        onCreateConsumer().accept(this);
     }
 
     @PreUpdate
@@ -134,6 +134,6 @@ public abstract class InformizEntity<T extends InformizEntity> implements Serial
     public abstract Long getId();
 
     @Positive(groups = {ExistingEntityFromUI.class, DeleteEntity.class, Default.class})
-    public abstract InformizEntity<InformizEntity> setId(Long id);
+    public abstract InformizEntity setId(Long id);
 
 }
